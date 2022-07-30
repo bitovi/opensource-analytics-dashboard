@@ -1,0 +1,3 @@
+{
+    "*.{js,ts,html}": ["npx ng lint npm-registry-analytics --fix=true --lint-file-patterns"]
+}
