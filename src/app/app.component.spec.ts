@@ -1,16 +1,30 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { MatAutocomplete } from '@angular/material/autocomplete';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppComponent } from './app.component';
+import { ToObservablePipe } from './pipes';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule
+        HttpClientTestingModule
       ],
       declarations: [
-        AppComponent
+        // MockMatComponent,
+        AppComponent,
+        ToObservablePipe,
+        MatAutocomplete// Required for #auto="matAutocomplete" directive
       ],
+      providers: [
+        {
+          provide: MatSnackBar,
+          useValue: {
+            open: () => {/** stub */},
+          }
+        }
+      ]
     }).compileComponents();
   });
 
@@ -18,18 +32,5 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
-  });
-
-  it(`should have as title 'npm-registry-analytics'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('npm-registry-analytics');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('npm-registry-analytics app is running!');
   });
 });

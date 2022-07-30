@@ -1,0 +1,3 @@
+{
+    "*": ["npx ng lint leaderboard-of-nonsense --fix=true --lint-file-patterns"]
+}
