@@ -8,7 +8,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint --fix"
+    "lint": "ng lint --fix",
+    "deploy": "ng deploy --base-href=/npm-registry-analytics/"
   },
   "private": true,
   "dependencies": {
@@ -43,6 +44,7 @@
     "@types/number-to-words": "^1.2.1",
     "@typescript-eslint/eslint-plugin": "5.29.0",
     "@typescript-eslint/parser": "5.29.0",
+    "angular-cli-ghpages": "^1.0.3",
     "eslint": "^8.18.0",
     "husky": "^8.0.1",
     "jasmine-core": "~4.1.0",
