@@ -11,17 +11,21 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatRippleModule } from '@angular/material/core';
+
 import { GoogleChartsModule } from 'angular-google-charts';
 
 import { ToObservablePipe } from './pipes';
 import { ErrorHandlerDirective } from './directives';
 import { AppComponent } from './app.component';
+import { CowComponent } from './components/cow/cow.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ToObservablePipe,
     ErrorHandlerDirective,
+    CowComponent,
   ],
   imports: [
     BrowserModule,
@@ -36,6 +40,7 @@ import { AppComponent } from './app.component';
     MatListModule,
     MatIconModule,
     MatSnackBarModule,
+    MatRippleModule,
     GoogleChartsModule.forRoot({ version: '51' }),
   ],
   providers: [],

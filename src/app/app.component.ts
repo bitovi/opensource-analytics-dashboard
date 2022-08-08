@@ -13,6 +13,7 @@ import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
   catchError,
   combineLatest,
+  debounceTime,
   filter,
   forkJoin,
   fromEvent,
@@ -23,6 +24,7 @@ import {
   shareReplay,
   startWith,
   Subject,
+  switchMap,
   takeUntil,
   tap,
   withLatestFrom,
@@ -38,6 +40,14 @@ import { ArrayObservable } from './classes';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
+
+enum SelectKeydown {
+  SPACE = 'Space',
+  SPACE_2 = ' ',
+  ENTER = 'Enter',
+}
+
+const POSSIBLE_KEYDOWNS = [SelectKeydown.ENTER, SelectKeydown.SPACE, SelectKeydown.SPACE_2];
 
 interface ChartData {
   columns: Column[];
@@ -106,7 +116,10 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor() {
     this.packageNames.observable$
       .pipe(
-        tap((packageNames) => this.onPackageNamesChanged(packageNames)),
+        tap((packageNames) => {
+          this.onPackageNamesChanged(packageNames);
+          this.setPackageNamesInParams(packageNames);
+        }),
         takeUntil(this.unsubscribe$)
       )
       .subscribe();
@@ -131,19 +144,34 @@ export class AppComponent implements OnInit, OnDestroy {
       filter((dates) => isEqual(dates.end, dates.start) || isAfter(dates.end, dates.start))
     );
 
+    const suggestions$ = this.addPackage.valueChanges.pipe(
+      debounceTime(200),
+      switchMap(query => {
+        if (!query) {
+          return of([]);
+        }
+
+        return this.npmRegistryService.getSuggestions(query);
+      }),
+      withLatestFrom(this.packageNames.observable$),
+      map(([suggestions, existingPackageNames]) => suggestions.filter(suggestion => !existingPackageNames.includes(suggestion)))
+    );
+
     this.autocompleteOptions$ = combineLatest([
-      // All possible npm package names
+      // All possible npm package names (based on local storage)
       this.autocompletePackageNames.observable$,
+      // All suggestions
+      suggestions$,
       // Already selected package names
       this.packageNames.observable$,
       // Partial npm package name to filter options
-      this.addPackage.valueChanges,
+      this.addPackage.valueChanges.pipe(startWith('')),
     ]).pipe(
-      map(([autocompletePackageNames, packageNames, partialPackageName]) =>
+      map(([autocompletePackageNames, suggestions, packageNames, query]) =>
         this.getAutocompleteOptions(
-          autocompletePackageNames,
+          [...new Set([...autocompletePackageNames, ...suggestions])],
           packageNames,
-          partialPackageName
+          query
         )
       )
     );
@@ -218,19 +246,32 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  getDefaultPackageNames(): string[] {
+    const packageNames = this.getPackageNamesFromParams().filter(packageName => !!packageName);
+    
+    return (packageNames.length ? packageNames : [
+      '@bitovi/eslint-config', 
+      '@bitovi/react-numerics',
+      '@bitovi/use-simple-reducer',
+      'ngx-feature-flag-router', 
+      'react-to-webcomponent', 
+    ]).sort();
+  }
+
   getCachedPackageNames(key: string): string[] {
+    const packageNames = this.getDefaultPackageNames();
+
     try {
-      const cache = JSON.parse(this.storageService.getItem(key) ?? '');
+      const cache = JSON.parse(this.storageService.getItem(key) ?? '[]');
 
       if (cache?.length) {
-        return cache;
+        return [...new Set([...packageNames, ...cache])].sort();
       }
     } catch (error) {
       console.error(error);
     }
 
-    // Default to the known npm packages for the Angular team
-    return ['@bitovi/eslint-config', 'ngx-feature-flag-router'];
+    return packageNames;
   }
 
   removePackageName(packageName: string): void {
@@ -253,13 +294,9 @@ export class AppComponent implements OnInit, OnDestroy {
   getAutocompleteOptions(
     source: string[],
     skip: string[],
-    partialPackageName: string
+    query: string
   ): string[] {
-    if (!partialPackageName) {
-      return [];
-    }
-
-    const particalPackageNameSlug = partialPackageName.toLowerCase();
+    const particalPackageNameSlug = query.toLowerCase();
     const packageNameSlugs = skip.map((packageName) =>
       packageName.toLowerCase()
     );
@@ -364,6 +401,41 @@ export class AppComponent implements OnInit, OnDestroy {
 
   clearCache(): void {
     this.storageService.clearAllStorage();
+    this.setPackageNamesInParams([]);
+  }
+
+  getPackageNamesFromParams(): string[] {
+    try {
+      const params = new URLSearchParams(window.location.search);
+
+      return params.get('p')?.split(',') ?? [];
+    } catch(error) {
+      console.error(error);
+      return [];
+    }
+  }
+
+  setPackageNamesInParams(packageNames: string[]): void {
+    let url = window.location.href.split("?")[0];
+    url += `?p=${packageNames}`;
+    window.history.replaceState({}, document.title, url);
+  }
+
+  handleSelectAsClick(event: KeyboardEvent): void {
+    // Check if KeyboardEvent is a selection
+    if (!this.keydownIsSelect(event)) {
+      return;
+    }
+
+    // Prevent normal accessibility
+    event.preventDefault();
+    event.stopPropagation();
+    // Call click function instead
+    (event.target as HTMLButtonElement).click();
+  }
+
+  keydownIsSelect(event: KeyboardEvent): boolean {
+    return POSSIBLE_KEYDOWNS.includes((event.key ?? event.code) as SelectKeydown);
   }
 
   ngOnDestroy(): void {

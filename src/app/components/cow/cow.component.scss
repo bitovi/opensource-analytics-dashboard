@@ -1,0 +1,28 @@
+@import 'variables.scss';
+
+:host {
+    @extend %reset-button;
+
+    height: 36px;
+    width: 36px;
+    display: block;
+    color: #f2f2f2;
+    fill: currentColor;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+svg {
+    display: block;
+    transition: all 200ms linear;
+
+    border: 2px solid currentColor;
+    border-radius: 4px;
+}
+
+:host:hover, :host:focus {
+    color: rgb(255, 222, 173);
+}
+:host:active {
+    color: tan;
+}

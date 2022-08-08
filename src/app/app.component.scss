@@ -1,40 +1,84 @@
-$padding: 24px;
+@import 'variables.scss';
 
 :host {
-    display: block;
-    padding: $padding * .5 ($padding * .125) $padding;
-    max-width: 1200px - 2 * $padding;
-    margin: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    background-color: white;
 }
 
-%reset-button {
-    text-align: inherit;
-    border: none;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    overflow: visible;
+.margin-row {
+    width: 100%;
+    width: -webkit-fill-available;
+    max-width: 1080px - $padding * .125;
+    box-sizing: border-box;
 
-    background: transparent;
+    margin: 0 auto;
+    padding: $padding * .5 $padding * .125;
+}
 
-    /* inherit font & color from ancestor */
-    color: inherit;
-    font: inherit;
+.flex-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $padding * .25;
+}
 
-    /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
-    line-height: normal;
+.container {
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: 4px;
+    padding: $padding * .25 $padding * .25 $padding * .25 $padding * .5;
+}
 
-    /* Corrects font smoothing for webkit */
-    -webkit-font-smoothing: inherit;
-    -moz-osx-font-smoothing: inherit;
+footer {
+    a {
+        color: $blue;
+        fill: $blue;
+        text-decoration: none;
+        
+        span {
+            display: flex;
+            gap: $padding * .125;
+            align-items: center;
+            justify-content: center;
+        }
+    }
 
-    /* Corrects inability to style clickable `input` types in iOS */
-    -webkit-appearance: none;
+    .flex-row, .margin-row {
+        padding-top: $padding * .25;
+        padding-bottom: $padding * .25;
+    }
+    background: $footer-background-color;
+    margin-top: auto;
+}
 
-    /* Remove excess padding and border in Firefox 4+ */
-    &::-moz-focus-inner {
-        border: 0;
-        padding: 0;
+google-chart {
+    width: 100%;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $padding * .25;
+
+    button {
+        // button doesn't naturally align with input because of its mat-hint/mat-error
+        margin-bottom: 3px;
+    }
+}
+
+mat-form-field {
+    max-width: 320px;
+    width: 100%;
+}
+
+.clear-cache-button:not(:focus):not(:hover) {
+    transition: color 200ms cubic-bezier(0.35, 0, 0.25, 1);
+
+    &:not(:focus):not(:hover) {
+        color: rgba(0,0,0,.12);
     }
 }
 
@@ -44,6 +88,10 @@ $padding: 24px;
 
     .button-wrapper {
         @extend %reset-button;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
         height: 48px;
         
         &:hover, &:focus {
@@ -61,37 +109,20 @@ $padding: 24px;
         // moving it up a little
         margin-bottom: 3px;
     }
+
+    mat-icon.new-tab-icon {
+        // delete icon looks a little off
+        // moving it up a little
+        margin-bottom: 1px;
+    }
+}
+
+p {
+    margin-top: $padding * .5;
 }
 
 .package-list-option {
     display: flex;
     justify-content: space-between;
-}
-
-google-chart {
-    width: 100%;
-}
-
-.container {
-    border: 1px solid rgba(0,0,0,.2);
-    border-radius: 4px;
-    margin: $padding 0;
-    padding: $padding * .25 $padding * .25 $padding * .25 $padding * .5;
-}
-
-mat-form-field + button {
-    margin-left: $padding * .5;
-}
-
-.flex-row {
-    display: flex;
-    justify-content: space-between;
-}
-
-.clear-cache-button:not(:focus):not(:hover) {
-    transition: color 200ms cubic-bezier(0.35, 0, 0.25, 1);
-
-    &:not(:focus):not(:hover) {
-        color: rgba(0,0,0,.12);
-    }
+    gap: $padding * .25;
 }

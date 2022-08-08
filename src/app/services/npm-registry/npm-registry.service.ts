@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin, map, Observable, of, tap } from 'rxjs';
 import { StorageService, StorageType } from '../storage';
 import { format } from 'date-fns';
-import { RegistryData } from './npm-registry.model';
+import { DownloadsPoint, DownloadsRange, RegistryData, Suggestion } from './npm-registry.model';
 
 @Injectable({
   providedIn: 'root'
@@ -69,17 +69,25 @@ export class NpmRegistryService {
     );
   }
 
+  getSuggestions(query: string): Observable<string[]> {
+    const url = 'https://api.npms.io/v2/search/suggestions';
+
+    return this.httpClient.get<Suggestion[]>(url, { params: { q: query }}).pipe(
+      map(suggestions => suggestions.map(suggestion => suggestion.package.name ))
+    );
+  }
+
   /**
    * source: https://github.com/npm/registry/blob/master/docs/download-counts.md#point-values
    */
   protected getDownloadsPoint(packageName: string, start: string, end: string): Observable<number> {
-    return this.httpClient.get<{ downloads: number }>(`${this.base}/downloads/point/${start}:${end}/${packageName}`).pipe(
+    return this.httpClient.get<DownloadsPoint>(`${this.base}/downloads/point/${start}:${end}/${packageName}`).pipe(
       map(res => res.downloads),
     );
   }
 
   protected getDownloadsRange(packageName: string, start: string, end: string): Observable<number[]> {
-    return this.httpClient.get<{ downloads: { day: string; downloads: number}[] }>(`${this.base}/downloads/range/${start}:${end}/${packageName}`).pipe(
+    return this.httpClient.get<DownloadsRange>(`${this.base}/downloads/range/${start}:${end}/${packageName}`).pipe(
       map(res => res.downloads.map(({ downloads }) => downloads)),
     );
   }

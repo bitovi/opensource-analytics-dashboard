@@ -30,8 +30,6 @@ export class ErrorHandlerDirective implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getErrorsObservable(this.errors$).pipe(
       map(errorsArray => {
-        console.log(errorsArray);
-
         for (let i = 0; i < errorsArray.length; i++) {
           const errors = errorsArray[i];
 
