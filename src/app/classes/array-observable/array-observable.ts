@@ -24,7 +24,7 @@ export class ArrayObservable<T> {
         (array: T[], reducer: (array: T[]) => T[]) => reducer(array),
         source
       ),
-      tap((array) => { this.value = array}),
+      tap((array) => { this.value = array }),
       startWith(source),
       shareReplay({ refCount: false, bufferSize: 0 }),
     );

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, map, Observable, of, tap } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, tap } from 'rxjs';
 import { StorageService, StorageType } from '../storage';
 import { format } from 'date-fns';
 import { DownloadsPoint, DownloadsRange, RegistryData, Suggestion } from './npm-registry.model';
@@ -73,7 +73,12 @@ export class NpmRegistryService {
     const url = 'https://api.npms.io/v2/search/suggestions';
 
     return this.httpClient.get<Suggestion[]>(url, { params: { q: query }}).pipe(
-      map(suggestions => suggestions.map(suggestion => suggestion.package.name ))
+      map(suggestions => suggestions.map(suggestion => suggestion.package.name )),
+      catchError((error: unknown) => {
+        console.error(error);
+
+        return of([]);
+      })
     );
   }
 
