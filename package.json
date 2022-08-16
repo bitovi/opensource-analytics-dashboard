@@ -9,7 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint --fix",
-    "deploy": "ng deploy --base-href=/opensource-analytics-dashboard/"
+    "deploy": "ng deploy --repo=https://github.com/bitovi/opensource-analytics-dashboard.git --base-href=https://bitovi.github.io/opensource-analytics-dashboard/"
   },
   "private": true,
   "dependencies": {
