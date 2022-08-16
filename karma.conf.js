@@ -25,7 +25,7 @@ module.exports = function (config) {
       suppressAll: true // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/npm-registry-analytics'),
+      dir: require('path').join(__dirname, './coverage/opensource-analytics-dashboard'),
       subdir: '.',
       reporters: [
         { type: 'html' },

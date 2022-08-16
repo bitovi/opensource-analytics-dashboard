@@ -1,5 +1,5 @@
 {
-  "name": "npm-registry-analytics",
+  "name": "opensource-analytics-dashboard",
   "version": "0.0.0",
   "scripts": {
     "prepare": "husky install",
@@ -9,7 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint --fix",
-    "deploy": "ng deploy --base-href=/npm-registry-analytics/"
+    "deploy": "ng deploy --base-href=/opensource-analytics-dashboard/"
   },
   "private": true,
   "dependencies": {
