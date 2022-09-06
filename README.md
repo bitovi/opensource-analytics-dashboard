@@ -16,6 +16,19 @@ Open source analytical tool to see NPM package downloads
    2. Be permanently removed
    3. Redirect the user to the NPM registry for that package
 
+## ArrayObservable
+
+A generic value storage class similar to `BehaviourSubject` however, it is based on the redux pattern. Every exposed method/action (`push`, `removeValue`, ...) triggers a corresponding subject's value change that modifies the class state, as reducers work in the redux pattern.
+
+## Query param persistance
+
+On application reload, `getCachedPackageNames()` runs to collect NPM package names saved in the URL query params and merges with ones persisted in localstorage. \
+When a new package name is added into `packageNames.observable$` it is persisted into localstorage (`onPackageNamesChanged()`) and also added to query params (`setPackageNamesInParams()`)
+
+## Error handling
+
+Thrown errors, for example, like fetching daily and total NPM downloads for a specific package, are handled in `displayErrorMessage(error: unknown)` method. The received error message is then shown in [MatSnackBar](https://material.angular.io/components/snack-bar/examples).
+
 # How to Use Services / API
 
 Service `NpmRegistryService` is used to fetch data about npm packages from the following methods:
