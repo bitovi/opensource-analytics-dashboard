@@ -1,0 +1,24 @@
+@import 'variables.scss';
+
+footer {
+	a {
+		color: $blue;
+		fill: $blue;
+		text-decoration: none;
+
+		span {
+			display: flex;
+			gap: $padding * 0.125;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+
+	.flex-row,
+	.margin-row {
+		padding-top: $padding * 0.25;
+		padding-bottom: $padding * 0.25;
+	}
+	background: $footer-background-color;
+	margin-top: auto;
+}

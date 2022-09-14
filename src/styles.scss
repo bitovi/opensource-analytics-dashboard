@@ -1,11 +1,39 @@
 /* You can add global styles to this file, and also import other style files */
+@import 'variables.scss';
 
-html, body { height: 100%; }
+html,
 body {
-    margin: 0;
-    padding: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
-    color: #424242;
-    background-color: #f2f2f2;
-    background-image: linear-gradient(white, #f2f2f2);
+	height: 100%;
+}
+body {
+	margin: 0;
+	padding: 0;
+	font-family: Roboto, 'Helvetica Neue', sans-serif;
+	color: #424242;
+	background-color: #f2f2f2;
+	background-image: linear-gradient(white, #f2f2f2);
+}
+
+.margin-row {
+	width: 100%;
+	width: -webkit-fill-available;
+	max-width: 1080px - $padding * 0.125;
+	box-sizing: border-box;
+
+	margin: 0 auto;
+	padding: $padding * 0.5 $padding * 0.125;
+}
+
+.flex-row {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: $padding * 0.25;
+}
+
+.container {
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	border-radius: 4px;
+	padding: $padding * 0.25 $padding * 0.25 $padding * 0.25 $padding * 0.5;
 }
