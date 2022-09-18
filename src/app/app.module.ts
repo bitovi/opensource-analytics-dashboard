@@ -19,6 +19,7 @@ import { ToObservablePipe } from './pipes';
 import { ErrorHandlerDirective } from './directives';
 import { AppComponent } from './app.component';
 import { CowComponent } from './components/cow/cow.component';
+import { DateRangePickerComponent } from './components/date-range-picker/date-range-picker.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { CowComponent } from './components/cow/cow.component';
     ToObservablePipe,
     ErrorHandlerDirective,
     CowComponent,
+    DateRangePickerComponent,
   ],
   imports: [
     BrowserModule,

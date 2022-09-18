@@ -7,7 +7,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 import { ChartType, Column, Row } from 'angular-google-charts';
 import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
@@ -40,6 +40,7 @@ import { ArrayObservable } from './classes';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Value } from './components/date-range-picker/date-range-picker.component';
 
 enum SelectKeydown {
   SPACE = 'Space',
@@ -47,7 +48,11 @@ enum SelectKeydown {
   ENTER = 'Enter',
 }
 
-const POSSIBLE_KEYDOWNS = [SelectKeydown.ENTER, SelectKeydown.SPACE, SelectKeydown.SPACE_2];
+const POSSIBLE_KEYDOWNS = [
+  SelectKeydown.ENTER,
+  SelectKeydown.SPACE,
+  SelectKeydown.SPACE_2,
+];
 
 interface ChartData {
   columns: Column[];
@@ -55,7 +60,7 @@ interface ChartData {
   options: object;
 }
 
-type RegistryError = { error?: { error?: string }, message?: string};
+type RegistryError = { error?: { error?: string }; message?: string };
 
 @Component({
   selector: 'app-root',
@@ -73,27 +78,26 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly matSnackBar = inject(MatSnackBar);
   private readonly locale = inject(LOCALE_ID);
 
-  readonly autocompleteOptions$!: Observable<string[]>;
-
-  readonly minDate = new Date(2015, 0, 1);
-  readonly maxDate = new Date();
-
-  private readonly unsubscribe$ = new Subject<void>();
-
-  readonly startDateErrorsHandler =
-    this.errorHandlerService.getDatepickerErrorsHandler('Start Date');
-  readonly endDateErrorsHandler =
-    this.errorHandlerService.getDatepickerErrorsHandler('End Date');
   readonly packageErrorsHandler =
     this.errorHandlerService.getInputErrorsHandler('package name');
+  
+
 
   // Used to input bind ChartType enum in template
   readonly chartType = ChartType.Line;
 
+  // 1
+  readonly autocompleteOptions$!: Observable<string[]>;
+
+  private readonly unsubscribe$ = new Subject<void>();
+
+  // 2
   readonly apiDatas$: Observable<RegistryData[]>;
 
+  // 3
   readonly chartData$: Observable<ChartData>;
 
+  // 4
   readonly packageNames: ArrayObservable<string> = new ArrayObservable(
     this.getCachedPackageNames('package-names')
   );
@@ -102,6 +106,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.getCachedPackageNames('autocomplete-package-names')
     );
 
+  // TODO: Rename to dateRangeFormControl, etc
   readonly dateRangeFormGroup = this.getDateRangeFormGroup();
   readonly addPackage: FormControl<string> = new FormControl('', {
     asyncValidators: this.errorHandlerService.noDuplicatesValidator(
@@ -109,9 +114,12 @@ export class AppComponent implements OnInit, OnDestroy {
     ),
     nonNullable: true,
   });
-  readonly selectedPackageNames = new FormControl<string[]>(this.packageNames.getValue(), {
-    nonNullable: true,
-  });
+  readonly selectedPackageNames = new FormControl<string[]>(
+    this.packageNames.getValue(),
+    {
+      nonNullable: true,
+    }
+  );
 
   constructor() {
     this.packageNames.observable$
@@ -139,14 +147,19 @@ export class AppComponent implements OnInit, OnDestroy {
     const selectedDates$ = this.dateRangeFormGroup.valueChanges.pipe(
       startWith(this.dateRangeFormGroup.value),
       // Only emit selected dates from form if they're valid
-      filter((dates): dates is { start: Date; end: Date } => !!dates.start && !!dates.end),
+      filter(
+        (dates): dates is [Date, Date] => !!dates[0] && !!dates[1]
+      ),
       // Ignore any values where the end is before the start
-      filter((dates) => isEqual(dates.end, dates.start) || isAfter(dates.end, dates.start))
+      filter(
+        ([start, end]) =>
+          isEqual(end, start) || isAfter(end, start)
+      )
     );
 
     const suggestions$ = this.addPackage.valueChanges.pipe(
       debounceTime(200),
-      switchMap(query => {
+      switchMap((query) => {
         if (!query) {
           return of([]);
         }
@@ -154,7 +167,11 @@ export class AppComponent implements OnInit, OnDestroy {
         return this.npmRegistryService.getSuggestions(query);
       }),
       withLatestFrom(this.packageNames.observable$),
-      map(([suggestions, existingPackageNames]) => suggestions.filter(suggestion => !existingPackageNames.includes(suggestion)))
+      map(([suggestions, existingPackageNames]) =>
+        suggestions.filter(
+          (suggestion) => !existingPackageNames.includes(suggestion)
+        )
+      )
     );
 
     this.autocompleteOptions$ = combineLatest([
@@ -180,7 +197,9 @@ export class AppComponent implements OnInit, OnDestroy {
       this.packageNames.observable$,
       selectedDates$,
     ]).pipe(
-      mergeMap(([packageNames, dates]) => this.getApiDates(packageNames, dates.start, dates.end)),
+      mergeMap(([packageNames, [start, end]]) =>
+        this.getApiDates(packageNames, start, end)
+      ),
       shareReplay({ refCount: false, bufferSize: 0 })
     );
 
@@ -194,14 +213,18 @@ export class AppComponent implements OnInit, OnDestroy {
     ]).pipe(
       map(([apiDatas, selectedPackageNames]) =>
         // Filter displaying analytics of any npm package that is not selected
-        apiDatas.filter((apiData) => selectedPackageNames.includes(apiData.packageName))
+        apiDatas.filter((apiData) =>
+          selectedPackageNames.includes(apiData.packageName)
+        )
       )
     );
 
     // Populate chart
     this.chartData$ = selectedApiDatas$.pipe(
       withLatestFrom(selectedDates$),
-      map(([apiDatas, formValues]) => this.getChartData(apiDatas, formValues.start, formValues.end))
+      map(([apiDatas, [start, end]]) =>
+        this.getChartData(apiDatas, start, end)
+      )
     );
   }
 
@@ -230,32 +253,51 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  getDateRangeFormGroup(): FormGroup<{
-    start: FormControl<Date | null>;
-    end: FormControl<Date | null>;
-  }> {
+  // getDateRangeFormGroup(): FormGroup<{
+  //   start: FormControl<Date | null>;
+  //   end: FormControl<Date | null>;
+  // }> {
+  //   const currentDate = startOfDay(new Date());
+
+  //   return new FormGroup({
+  //     start: new FormControl<Date | null>(subDays(currentDate, 8), {
+  //       validators: Validators.required,
+  //     }),
+  //     end: new FormControl<Date | null>(subDays(currentDate, 1), {
+  //       validators: Validators.required,
+  //     }),
+  //   });
+  // }
+
+  getDateRangeFormGroup(): FormControl<Value> {
     const currentDate = startOfDay(new Date());
 
-    return new FormGroup({
-      start: new FormControl<Date | null>(subDays(currentDate, 8), {
-        validators: Validators.required,
-      }),
-      end: new FormControl<Date | null>(subDays(currentDate, 1), {
-        validators: Validators.required,
-      }),
-    });
+    return new FormControl<Value>(
+      [subDays(currentDate, 8), subDays(currentDate, 1)],
+      {
+        validators: [Validators.required],
+        // validators: [validateDateRangePicker, Validators.required],
+        nonNullable: true,
+      }
+    );
   }
 
   getDefaultPackageNames(): string[] {
-    const packageNames = this.getPackageNamesFromParams().filter(packageName => !!packageName);
-    
-    return (packageNames.length ? packageNames : [
-      '@bitovi/eslint-config', 
-      '@bitovi/react-numerics',
-      '@bitovi/use-simple-reducer',
-      'ngx-feature-flag-router', 
-      'react-to-webcomponent', 
-    ]).sort();
+    const packageNames = this.getPackageNamesFromParams().filter(
+      (packageName) => !!packageName
+    );
+
+    return (
+      packageNames.length
+        ? packageNames
+        : [
+            '@bitovi/eslint-config',
+            '@bitovi/react-numerics',
+            '@bitovi/use-simple-reducer',
+            'ngx-feature-flag-router',
+            'react-to-webcomponent',
+          ]
+    ).sort();
   }
 
   getCachedPackageNames(key: string): string[] {
@@ -283,7 +325,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Update autocomplete values with any package name ever added
     this.autocompletePackageNames.set([
-      ...new Set([...packageNames, ...this.autocompletePackageNames.getValue()]),
+      ...new Set([
+        ...packageNames,
+        ...this.autocompletePackageNames.getValue(),
+      ]),
     ]);
     this.autocompletePackageNames.sort();
 
@@ -312,34 +357,45 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  getApiDates(packageNames: string[], start: Date, end: Date): Observable<RegistryData[]> {
+  getApiDates(
+    packageNames: string[],
+    start: Date,
+    end: Date
+  ): Observable<RegistryData[]> {
     if (!packageNames.length) {
       return of([]);
     }
 
     return forkJoin(
-      packageNames.map((packageName) => this.npmRegistryService.getRegistry(
-        packageName,
-        this.dateService.getFormattedDateString(start),
-        this.dateService.getFormattedDateString(end)
-      ).pipe(
-        catchError((error: unknown) => {
-          // Display error
-          this.displayErrorMessage(error);
-          // Remove package name
-          this.removePackageName(packageName);
-          return of(null);
-        }),
-      ))
+      packageNames.map((packageName) =>
+        this.npmRegistryService
+          .getRegistry(
+            packageName,
+            this.dateService.getFormattedDateString(start),
+            this.dateService.getFormattedDateString(end)
+          )
+          .pipe(
+            catchError((error: unknown) => {
+              // Display error
+              this.displayErrorMessage(error);
+              // Remove package name
+              this.removePackageName(packageName);
+              return of(null);
+            })
+          )
+      )
       // Filter out errors
-    ).pipe(map(datas => datas.filter((data): data is RegistryData => !!data)));
+    ).pipe(
+      map((datas) => datas.filter((data): data is RegistryData => !!data))
+    );
   }
 
   getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
     const columns: Column[] = [
       { type: 'string', label: 'Date' },
       ...apiDatas.map(({ packageName, total }) => ({
-        type: 'number', label: `${packageName} (${formatNumber(total, this.locale)})`,
+        type: 'number',
+        label: `${packageName} (${formatNumber(total, this.locale)})`,
       })),
     ];
 
@@ -387,14 +443,14 @@ export class AppComponent implements OnInit, OnDestroy {
       return error.message;
     }
 
-    return "Unexpected error";
+    return 'Unexpected error';
   }
 
   displayErrorMessage(error: unknown) {
     const message = this.getErrorMessage(error as RegistryError);
     const estimatedDuration = 2000 + message.length * 100;
 
-    this.matSnackBar.open(message, "Dismiss", {
+    this.matSnackBar.open(message, 'Dismiss', {
       duration: Math.min(Math.max(estimatedDuration, 5000), 15000),
     });
   }
@@ -409,14 +465,14 @@ export class AppComponent implements OnInit, OnDestroy {
       const params = new URLSearchParams(window.location.search);
 
       return params.get('p')?.split(',') ?? [];
-    } catch(error) {
+    } catch (error) {
       console.error(error);
       return [];
     }
   }
 
   setPackageNamesInParams(packageNames: string[]): void {
-    let url = window.location.href.split("?")[0];
+    let url = window.location.href.split('?')[0];
     url += `?p=${packageNames}`;
     window.history.replaceState({}, document.title, url);
   }
@@ -435,7 +491,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   keydownIsSelect(event: KeyboardEvent): boolean {
-    return POSSIBLE_KEYDOWNS.includes((event.key ?? event.code) as SelectKeydown);
+    return POSSIBLE_KEYDOWNS.includes(
+      (event.key ?? event.code) as SelectKeydown
+    );
   }
 
   ngOnDestroy(): void {
