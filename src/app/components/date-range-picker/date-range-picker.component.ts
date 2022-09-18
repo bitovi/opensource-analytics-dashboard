@@ -4,6 +4,7 @@ import { startOfDay, subDays } from 'date-fns';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/services';
 
+// TODO: rename to DateRangePickerValue
 export type Value = [Date | null, Date | null];
 
 @Component({
@@ -72,18 +73,18 @@ readonly endDateErrorsHandler =
 
   onBlur(event?: Event): void {
     console.log(event);
+    this.onTouched();
   }
-
-  value: Value = [null, null];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onChange = (value: Value) => {/* empty */};
-  onTouched = () => {/* empty */console.log('touched')};
+  onTouched = () => {console.log('touched')};
 
   writeValue([start, end]: Value): void {
     this.formGroup.controls.start.setValue(start);
     this.formGroup.controls.end.setValue(end);
   }
+  // TODO: have abetter type for this than any
   registerOnChange(fn: any): void {
     this.onChange = fn;
   }

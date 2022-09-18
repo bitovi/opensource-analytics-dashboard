@@ -253,22 +253,6 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  // getDateRangeFormGroup(): FormGroup<{
-  //   start: FormControl<Date | null>;
-  //   end: FormControl<Date | null>;
-  // }> {
-  //   const currentDate = startOfDay(new Date());
-
-  //   return new FormGroup({
-  //     start: new FormControl<Date | null>(subDays(currentDate, 8), {
-  //       validators: Validators.required,
-  //     }),
-  //     end: new FormControl<Date | null>(subDays(currentDate, 1), {
-  //       validators: Validators.required,
-  //     }),
-  //   });
-  // }
-
   getDateRangeFormGroup(): FormControl<Value> {
     const currentDate = startOfDay(new Date());
 
