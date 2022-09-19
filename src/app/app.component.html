@@ -19,12 +19,17 @@
 	<!-- search libs -->
 	<div class="margin-row">
 		<div class="container">
-			<app-search-library formControlName="selectedLibrary"></app-search-library>
+			<app-search-library formControlName="selectedLibraries"></app-search-library>
 		</div>
 	</div>
 
 	<!-- selected libs -->
-	<app-selected-libraries (removePackageName)="removePackageName($event)" [apiDatas]="apiDatas$ | async"></app-selected-libraries>
+	<app-selected-libraries
+		*ngIf="apiDatas$ | async as apiDatas"
+		formControlName="hiddenLibraries"
+		(removePackageName)="removePackageName($event)"
+		[apiDatas]="apiDatas"
+	></app-selected-libraries>
 </ng-container>
 
 <!-- footer -->

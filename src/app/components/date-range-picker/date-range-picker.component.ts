@@ -58,8 +58,6 @@ export class DateRangePickerComponent implements OnInit, ControlValueAccessor, V
 		if (value && value.length == 2) {
 			this.formGroup.controls.start.setValue(value[0]);
 			this.formGroup.controls.end.setValue(value[1]);
-
-			// this.onChange([this.formGroup.controls.start.value, this.formGroup.controls.end.value]);
 		}
 	}
 	registerOnChange(fn: any): void {

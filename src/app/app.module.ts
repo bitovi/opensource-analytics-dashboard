@@ -23,13 +23,14 @@ import { FooterComponent } from './components/footer/footer.component';
 import { SearchLibraryComponent } from './components/search-library/search-library.component';
 import { SelectedLibrariesComponent } from './components/selected-libraries/selected-libraries.component';
 import { ErrorHandlerDirective } from './directives';
-import { ToObservablePipe } from './pipes';
+import { InArrayPipe, ToObservablePipe } from './pipes';
 import { ErrorInterceptorService } from './services/error-handler/error-interceptor.service';
 
 @NgModule({
 	declarations: [
 		AppComponent,
 		ToObservablePipe,
+		InArrayPipe,
 		ErrorHandlerDirective,
 		CowComponent,
 		DateRangePickerComponent,

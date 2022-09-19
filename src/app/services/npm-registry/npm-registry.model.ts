@@ -1,23 +1,23 @@
 export interface RegistryData {
-    packageName: string;
-    total: number;
-    range: number[];
+	packageName: string;
+	total: number;
+	range: number[];
 }
 
 export interface DownloadsPoint {
-    downloads: number;
+	downloads: number;
 }
 
 export interface DownloadsRange {
-    downloads: {
-        day: string;
-        downloads: number;
-    }[];
+	downloads: {
+		day: string;
+		downloads: number;
+	}[];
 }
 
 export interface Suggestion {
-    package: {
-        name: string;
-        version: string;
-    };
+	package: {
+		name: string;
+		version: string;
+	};
 }

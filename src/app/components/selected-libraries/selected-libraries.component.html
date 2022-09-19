@@ -12,6 +12,14 @@
 					{{ apiData.total | number }}
 				</span>
 
+				<!-- visibilit -->
+				<button class="button-wrapper" mat-icon-button (click)="toggleVisibility(apiData)">
+					<button mat-icon-button color="accent" aria-label="Hide npm package visibility" tabindex="-1">
+						<mat-icon *ngIf="!(hiddenPackageName | inArray: apiData.packageName)">visibility</mat-icon>
+						<mat-icon *ngIf="(hiddenPackageName | inArray: apiData.packageName)">visibility_off</mat-icon>
+					</button>
+				</button>
+
 				<!-- remove -->
 				<button class="button-wrapper" (click)="onRemovePackageName(apiData.packageName)" (keydown)="handleSelectAsClick($event)">
 					<button mat-icon-button color="accent" aria-label="Remove npm package" tabindex="-1">

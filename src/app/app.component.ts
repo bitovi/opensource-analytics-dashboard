@@ -1,19 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
 import { startOfDay, subDays } from 'date-fns';
-import {
-	catchError,
-	combineLatest,
-	first,
-	forkJoin,
-	map,
-	mergeMap,
-	Observable,
-	of,
-	shareReplay,
-	startWith,
-	withLatestFrom,
-} from 'rxjs';
+import { catchError, combineLatest, first, forkJoin, map, mergeMap, Observable, of, shareReplay, startWith } from 'rxjs';
 import { BitoviPackageNames, ChartData } from './models/chart.model';
 import { ChartDataService, DateService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
@@ -34,8 +22,12 @@ export class AppComponent implements OnInit {
 		return this.formGroup.get('dateRange') as AbstractControl;
 	}
 
-	get selectedLibrary(): AbstractControl {
-		return this.formGroup.get('selectedLibrary') as AbstractControl;
+	get selectedLibraries(): AbstractControl {
+		return this.formGroup.get('selectedLibraries') as AbstractControl;
+	}
+
+	get hiddenLibraries(): AbstractControl {
+		return this.formGroup.get('hiddenLibraries') as AbstractControl;
 	}
 
 	constructor(
@@ -51,7 +43,7 @@ export class AppComponent implements OnInit {
 		this.loadDataFromNpm();
 		this.loadChartData();
 		const cachedLibs = this.getCachedPackageNames('autocomplete-package-names');
-		this.selectedLibrary.patchValue(cachedLibs);
+		this.selectedLibraries.patchValue(cachedLibs);
 	}
 
 	getDefaultPackageNames(): string[] {
@@ -77,9 +69,9 @@ export class AppComponent implements OnInit {
 	}
 
 	removePackageName(packageName: string): void {
-		const selectedLibrary = this.selectedLibrary.value as string[];
-		const newValue = selectedLibrary.filter((value) => value !== packageName);
-		this.selectedLibrary.patchValue(newValue);
+		const selectedLibraries = this.selectedLibraries.value as string[];
+		const newValue = selectedLibraries.filter((value) => value !== packageName);
+		this.selectedLibraries.patchValue(newValue);
 	}
 
 	getApiDates(packageNames: string[], start: Date, end: Date): Observable<RegistryData[]> {
@@ -114,13 +106,15 @@ export class AppComponent implements OnInit {
 		return this.fb.group({
 			// range to display data [start, end]
 			dateRange: [[subDays(currentDate, 8), subDays(currentDate, 1)]],
-			// libraries that is displayed on the chart
-			selectedLibrary: [],
+			// libraries which are available to displayed on the chart
+			selectedLibraries: [],
+			// libraries that should be hidden on the chart
+			hiddenLibraries: [],
 		});
 	}
 
 	private persistDataOnPackageNameChange(): void {
-		this.selectedLibrary.valueChanges.subscribe((libraries) => this.setPackageNamesInParams(libraries));
+		this.selectedLibraries.valueChanges.subscribe((libraries) => this.setPackageNamesInParams(libraries));
 	}
 
 	private getPackageNamesFromParams(): string[] {
@@ -143,7 +137,7 @@ export class AppComponent implements OnInit {
 	private loadDataFromNpm(): void {
 		this.apiDatas$ = combineLatest([
 			this.dateRange.valueChanges.pipe(startWith(this.dateRange.value)),
-			this.selectedLibrary.valueChanges,
+			this.selectedLibraries.valueChanges,
 		]).pipe(
 			mergeMap(([dateRange, packageNames]: [Date[], string[]]) => this.getApiDates(packageNames, dateRange[0], dateRange[1])),
 			shareReplay({ refCount: false, bufferSize: 0 })
@@ -154,9 +148,14 @@ export class AppComponent implements OnInit {
 	}
 
 	private loadChartData(): void {
-		this.chartData$ = this.apiDatas$.pipe(
-			withLatestFrom(this.dateRange.valueChanges.pipe(startWith(this.dateRange.value))),
-			map(([registryData, dateRange]) => this.chartDataService.getChartData(registryData, dateRange[0], dateRange[1]))
+		this.chartData$ = combineLatest([
+			this.apiDatas$,
+			this.dateRange.valueChanges.pipe(startWith(this.dateRange.value)),
+			this.hiddenLibraries.valueChanges.pipe(startWith([])),
+		]).pipe(
+			map(([registryData, dateRange, hiddenLibs]) =>
+				this.chartDataService.getChartData(registryData, dateRange[0], dateRange[1], hiddenLibs)
+			)
 		);
 	}
 }

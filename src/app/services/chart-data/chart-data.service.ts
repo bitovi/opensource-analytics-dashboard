@@ -14,10 +14,13 @@ export class ChartDataService {
 
 	constructor(private dateService: DateService) {}
 
-	getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
+	getChartData(apiDatas: RegistryData[], start: Date, end: Date, hiddenLibraries: string[] = []): ChartData {
+		// filter out libraries we dont want to show
+		const libraries = apiDatas.filter((data) => !hiddenLibraries.includes(data.packageName));
+
 		const columns: Column[] = [
 			{ type: 'string', label: 'Date' },
-			...apiDatas.map(({ packageName, total }) => ({
+			...libraries.map(({ packageName, total }) => ({
 				type: 'number',
 				label: `${packageName} (${formatNumber(total, this.locale)})`,
 			})),
@@ -28,7 +31,7 @@ export class ChartDataService {
 		// TODO: get formatter given range
 		// MM/dd vs MM/dd/yy
 		const rows = dates.map((date, i) => {
-			return [format(date, 'MM/dd/yy'), ...apiDatas.map((data) => data.range[i])];
+			return [format(date, 'MM/dd/yy'), ...libraries.map((data) => data.range[i])];
 		});
 
 		const options = {
