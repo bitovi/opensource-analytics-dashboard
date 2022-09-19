@@ -1,15 +1,20 @@
 <ng-container [formGroup]="formGroup">
-	<!-- date range picker -->
 	<div class="flex-row margin-row">
+		<!-- date range picker -->
 		<app-date-range-picker formControlName="dateRange"></app-date-range-picker>
 
+		<!-- clear button -->
 		<div>
 			<button class="clear-cache-button" mat-stroked-button (click)="clearCache()">Clear cache</button>
 		</div>
 	</div>
 
 	<!-- chart display -->
-	<app-data-chart [registryData]="apiDatas$ | async"></app-data-chart>
+	<div class="margin-row" *ngIf="chartData$ | async as chartData">
+		<div class="container">
+			<app-data-chart [chartData]="chartData"></app-data-chart>
+		</div>
+	</div>
 
 	<!-- search libs -->
 	<div class="margin-row">

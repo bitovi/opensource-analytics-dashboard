@@ -42,7 +42,7 @@ export class SearchLibraryComponent implements OnInit, ControlValueAccessor {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	writeValue(value: any): void {
+	writeValue(value: string): void {
 		// this.addPackage.setValue(value);
 	}
 	registerOnChange(fn: any): void {

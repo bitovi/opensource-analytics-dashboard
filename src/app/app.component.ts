@@ -1,21 +1,22 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
-import { catchError, combineLatest, forkJoin, map, mergeMap, Observable, of, shareReplay } from 'rxjs';
-import { BitoviPackageNames } from './models/chart.model';
-import { DateService, NpmRegistryService, StorageService } from './services';
+import { catchError, combineLatest, forkJoin, map, mergeMap, Observable, of, shareReplay, withLatestFrom } from 'rxjs';
+import { BitoviPackageNames, ChartData } from './models/chart.model';
+import { ChartDataService, DateService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
 
 @Component({
 	selector: 'app-root',
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
 	private readonly storageService = inject(StorageService);
 	private readonly npmRegistryService = inject(NpmRegistryService);
 	apiDatas$!: Observable<RegistryData[]>;
+	chartData$!: Observable<ChartData>;
 
-	//selectedLibraries$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 	readonly formGroup = this.initForm();
 
 	get dateRange(): AbstractControl {
@@ -26,11 +27,12 @@ export class AppComponent implements OnInit {
 		return this.formGroup.get('selectedLibrary') as AbstractControl;
 	}
 
-	constructor(private fb: FormBuilder, private dateService: DateService) {}
+	constructor(private dateService: DateService, private chartDataService: ChartDataService, private fb: FormBuilder) {}
 
 	ngOnInit(): void {
 		this.persistDataOnPackageNameChange();
 		this.loadDataFromNpm();
+		this.loadChartData();
 		const cachedLibs = this.getCachedPackageNames('autocomplete-package-names');
 		console.log('cachedLibs', cachedLibs);
 		this.selectedLibrary.patchValue(cachedLibs);
@@ -123,6 +125,13 @@ export class AppComponent implements OnInit {
 		this.apiDatas$ = combineLatest([this.dateRange.valueChanges, this.selectedLibrary.valueChanges]).pipe(
 			mergeMap(([dateRange, packageNames]) => this.getApiDates(packageNames, dateRange[0], dateRange[1])),
 			shareReplay({ refCount: false, bufferSize: 0 })
+		);
+	}
+
+	private loadChartData(): void {
+		this.chartData$ = this.apiDatas$.pipe(
+			withLatestFrom(this.dateRange.valueChanges),
+			map(([registryData, dateRange]) => this.chartDataService.getChartData(registryData, dateRange[0], dateRange[1]))
 		);
 	}
 }

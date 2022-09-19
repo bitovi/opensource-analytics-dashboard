@@ -92,7 +92,6 @@ export class DateRangePickerComponent implements OnInit, ControlValueAccessor, V
 
 	validate(c: AbstractControl): ValidationErrors | null {
 		// How to compose multiple validators
-		// return Validators.compose([this.matDateRangePickerValidators]);
 		return this.matDateRangePickerValidators(c);
 	}
 

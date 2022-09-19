@@ -1,11 +1,7 @@
-<div class="margin-row" *ngIf="chartData && chartData.columns && chartData.columns.length > 1">
-	<div class="container">
-		<google-chart
-			[type]="chartType"
-			[data]="chartData.rows"
-			[options]="chartData.options"
-			[columns]="chartData.columns"
-			[dynamicResize]="true"
-		></google-chart>
-	</div>
-</div>
+<google-chart
+	[type]="chartType"
+	[data]="chartData.rows"
+	[options]="chartData.options"
+	[columns]="chartData.columns"
+	[dynamicResize]="true"
+></google-chart>
