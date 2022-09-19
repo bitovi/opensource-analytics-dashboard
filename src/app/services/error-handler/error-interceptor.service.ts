@@ -6,7 +6,7 @@ import { RegistryError } from 'src/app/directives';
 
 @Injectable()
 export class ErrorInterceptorService implements HttpInterceptor {
-	constructor(private matSnackBar: MatSnackBar) {}
+	constructor(private readonly matSnackBar: MatSnackBar) {}
 
 	intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 		return next.handle(request).pipe(

@@ -34,7 +34,7 @@ export class SearchLibraryComponent implements OnInit, ControlValueAccessor {
 		/* empty */
 	};
 
-	constructor(private npmRegistryService: NpmRegistryService) {}
+	constructor(private readonly npmRegistryService: NpmRegistryService) {}
 
 	ngOnInit(): void {
 		this.searchLibraryOnInputChange();

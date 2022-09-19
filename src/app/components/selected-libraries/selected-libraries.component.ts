@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { POSSIBLE_KEYDOWNS, SelectKeydown } from 'src/app/models/chart.model';
 import { RegistryData } from 'src/app/services/npm-registry/npm-registry.model';
@@ -16,7 +16,7 @@ import { RegistryData } from 'src/app/services/npm-registry/npm-registry.model';
 		},
 	],
 })
-export class SelectedLibrariesComponent implements OnInit, ControlValueAccessor {
+export class SelectedLibrariesComponent implements ControlValueAccessor {
 	@Output() removePackageName: EventEmitter<string> = new EventEmitter<string>();
 	@Input() apiDatas: RegistryData[] = [];
 
@@ -31,14 +31,12 @@ export class SelectedLibrariesComponent implements OnInit, ControlValueAccessor 
 
 	constructor() {}
 
-	ngOnInit(): void {}
-
 	toggleVisibility(registryData: RegistryData): void {
 		if (this.hiddenPackageName.includes(registryData.packageName)) {
 			// make library visible
 			this.hiddenPackageName = this.hiddenPackageName.filter((packageName) => packageName !== registryData.packageName);
 		} else {
-			// hdie library from chart
+			// hide library from chart
 			this.hiddenPackageName = [...this.hiddenPackageName, registryData.packageName];
 		}
 

@@ -21,7 +21,6 @@
         "@bitovi/eslint-config/rules/rxjs"
       ],
       "rules": {
-        "@angular-eslint/no-empty-lifecycle-method": "off",
         "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-unused-vars": "off",

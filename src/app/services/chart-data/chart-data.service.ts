@@ -12,7 +12,7 @@ import { RegistryData } from '../npm-registry/npm-registry.model';
 export class ChartDataService {
 	private readonly locale = inject(LOCALE_ID);
 
-	constructor(private dateService: DateService) {}
+	constructor(private readonly dateService: DateService) {}
 
 	getChartData(apiDatas: RegistryData[], start: Date, end: Date, hiddenLibraries: string[] = []): ChartData {
 		// filter out libraries we dont want to show

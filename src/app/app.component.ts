@@ -31,11 +31,11 @@ export class AppComponent implements OnInit {
 	}
 
 	constructor(
-		private dateService: DateService,
-		private chartDataService: ChartDataService,
-		private storageService: StorageService,
-		private npmRegistryService: NpmRegistryService,
-		private fb: FormBuilder
+		private readonly dateService: DateService,
+		private readonly chartDataService: ChartDataService,
+		private readonly storageService: StorageService,
+		private readonly npmRegistryService: NpmRegistryService,
+		private readonly fb: FormBuilder
 	) {}
 
 	ngOnInit(): void {

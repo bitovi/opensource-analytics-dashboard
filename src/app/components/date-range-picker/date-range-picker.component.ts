@@ -48,7 +48,7 @@ export class DateRangePickerComponent implements OnInit, ControlValueAccessor, V
 		/* empty */
 	};
 
-	constructor(private errorHandlerService: ErrorHandlerService, private fb: FormBuilder) {}
+	constructor(private readonly errorHandlerService: ErrorHandlerService, private readonly fb: FormBuilder) {}
 
 	ngOnInit(): void {
 		this.watchDateChange();

@@ -10,10 +10,9 @@ import { DownloadsPoint, DownloadsRange, RegistryData, Suggestion } from './npm-
 })
 export class NpmRegistryService {
 	private readonly base = `https://api.npmjs.org`;
-	// private readonly httpClient = inject(HttpClient);
 	private readonly storageService = inject(StorageService);
 
-	constructor(private readonly httpClient: HttpClient) {}
+	constructor(private httpClient: HttpClient) {}
 
 	isToday(date: string): boolean {
 		return date === format(new Date(), 'yyyy-MM-dd');
