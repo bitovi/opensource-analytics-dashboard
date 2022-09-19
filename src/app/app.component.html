@@ -1,5 +1,5 @@
-<!-- date range picker -->
 <ng-container [formGroup]="formGroup">
+	<!-- date range picker -->
 	<div class="flex-row margin-row">
 		<app-date-range-picker formControlName="dateRange"></app-date-range-picker>
 
@@ -7,20 +7,20 @@
 			<button class="clear-cache-button" mat-stroked-button (click)="clearCache()">Clear cache</button>
 		</div>
 	</div>
+
+	<!-- chart display -->
+	<app-data-chart [registryData]="apiDatas$ | async"></app-data-chart>
+
+	<!-- search libs -->
+	<div class="margin-row">
+		<div class="container">
+			<app-search-library formControlName="selectedLibrary"></app-search-library>
+		</div>
+	</div>
+
+	<!-- selected libs -->
+	<app-selected-libraries (removePackageName)="removePackageName($event)" [apiDatas]="apiDatas$ | async"></app-selected-libraries>
 </ng-container>
-
-<!-- chart display -->
-<app-data-chart
-	*ngIf="dateRangeForm$ | async as dateRangeForm"
-	[dateRangeForm]="dateRangeForm"
-	[registryData]="apiDatas$ | async"
-></app-data-chart>
-
-<!-- search libs -->
-<app-search-library (selectLibrary)="selectPackageName($event)"></app-search-library>
-
-<!-- selected libs -->
-<app-selected-libraries (removePackageName)="removePackageName($event)" [apiDatas]="apiDatas$ | async"></app-selected-libraries>
 
 <!-- footer -->
 <app-footer></app-footer>

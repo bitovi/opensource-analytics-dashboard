@@ -7,6 +7,14 @@
 	background-color: white;
 }
 
+.clear-cache-button:not(:focus):not(:hover) {
+	transition: color 200ms cubic-bezier(0.35, 0, 0.25, 1);
+
+	&:not(:focus):not(:hover) {
+		color: rgba(0, 0, 0, 0.12);
+	}
+}
+
 mat-form-field {
 	max-width: 320px;
 	width: 100%;

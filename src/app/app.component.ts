@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { BehaviorSubject, catchError, combineLatest, filter, forkJoin, map, mergeMap, Observable, of, shareReplay } from 'rxjs';
+import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
+import { catchError, combineLatest, forkJoin, map, mergeMap, Observable, of, shareReplay } from 'rxjs';
 import { BitoviPackageNames } from './models/chart.model';
 import { DateService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
@@ -14,9 +14,17 @@ export class AppComponent implements OnInit {
 	private readonly storageService = inject(StorageService);
 	private readonly npmRegistryService = inject(NpmRegistryService);
 	apiDatas$!: Observable<RegistryData[]>;
-	dateRangeForm$: BehaviorSubject<any | null> = new BehaviorSubject<any | null>(null);
-	selectedLibraries$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+
+	//selectedLibraries$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 	readonly formGroup = this.initForm();
+
+	get dateRange(): AbstractControl {
+		return this.formGroup.get('dateRange') as AbstractControl;
+	}
+
+	get selectedLibrary(): AbstractControl {
+		return this.formGroup.get('selectedLibrary') as AbstractControl;
+	}
 
 	constructor(private fb: FormBuilder, private dateService: DateService) {}
 
@@ -24,7 +32,8 @@ export class AppComponent implements OnInit {
 		this.persistDataOnPackageNameChange();
 		this.loadDataFromNpm();
 		const cachedLibs = this.getCachedPackageNames('autocomplete-package-names');
-		this.selectedLibraries$.next(cachedLibs);
+		console.log('cachedLibs', cachedLibs);
+		this.selectedLibrary.patchValue(cachedLibs);
 
 		this.formGroup.valueChanges.subscribe(console.log);
 	}
@@ -38,11 +47,8 @@ export class AppComponent implements OnInit {
 	private initForm(): FormGroup {
 		return this.fb.group({
 			dateRange: [],
+			selectedLibrary: [],
 		});
-	}
-
-	onDateRangeChange(dateRangeForm: any): void {
-		this.dateRangeForm$.next(dateRangeForm);
 	}
 
 	getCachedPackageNames(key: string): string[] {
@@ -61,15 +67,9 @@ export class AppComponent implements OnInit {
 		return packageNames;
 	}
 
-	selectPackageName(packageName: string): void {
-		// add only if not yet added
-		if (!this.selectedLibraries$.value.includes(packageName)) {
-			this.selectedLibraries$.next([packageName, ...this.selectedLibraries$.value]);
-		}
-	}
-
 	removePackageName(packageName: string): void {
-		this.selectedLibraries$.next(this.selectedLibraries$.value.filter((v) => v !== packageName));
+		console.log('removePackageName', packageName);
+		// this.selectedLibraries$.next(this.selectedLibraries$.value.filter((v) => v !== packageName));
 	}
 
 	getApiDates(packageNames: string[], start: Date, end: Date): Observable<RegistryData[]> {
@@ -99,7 +99,7 @@ export class AppComponent implements OnInit {
 	}
 
 	private persistDataOnPackageNameChange(): void {
-		this.selectedLibraries$.subscribe((libraries) => this.setPackageNamesInParams(libraries));
+		this.selectedLibrary.valueChanges.subscribe((libraries) => this.setPackageNamesInParams(libraries));
 	}
 
 	private getPackageNamesFromParams(): string[] {
@@ -120,9 +120,8 @@ export class AppComponent implements OnInit {
 	}
 
 	private loadDataFromNpm(): void {
-		this.apiDatas$ = combineLatest([this.dateRangeForm$.asObservable(), this.selectedLibraries$.asObservable()]).pipe(
-			filter(([dateRange]) => !!dateRange?.start && !!dateRange?.end),
-			mergeMap(([dateRange, packageNames]) => this.getApiDates(packageNames, dateRange!.start, dateRange!.end)),
+		this.apiDatas$ = combineLatest([this.dateRange.valueChanges, this.selectedLibrary.valueChanges]).pipe(
+			mergeMap(([dateRange, packageNames]) => this.getApiDates(packageNames, dateRange[0], dateRange[1])),
 			shareReplay({ refCount: false, bufferSize: 0 })
 		);
 	}

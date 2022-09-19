@@ -1,32 +1,3 @@
-<!-- <div class="flex-row margin-row">
-	<form onsubmit="return false">
-		<mat-form-field appearance="fill">
-			<mat-label>Enter a date range</mat-label>
-			<mat-date-range-input [formGroup]="dateRangeFormGroup" [rangePicker]="picker" [min]="minDate" [max]="maxDate" required>
-				<input matStartDate formControlName="start" placeholder="Start date" />
-				<input matEndDate formControlName="end" placeholder="End date" />
-			</mat-date-range-input>
-
-			<mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-			<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-			<mat-date-range-picker #picker></mat-date-range-picker>
-			<mat-error
-				appErrorHandler
-				[errors$]="[
-          dateRangeFormGroup.controls.start.errors | toObservable,
-          dateRangeFormGroup.controls.end.errors | toObservable
-        ]"
-				[handleErrors]="[startDateErrorsHandler, endDateErrorsHandler]"
-			>
-			</mat-error>
-		</mat-form-field>
-	</form>
-
-	<div>
-		<button type="button" class="clear-cache-button" mat-stroked-button (click)="onClearCache()">Clear cache</button>
-	</div>
-</div> -->
-
 <mat-form-field appearance="fill">
 	<mat-label>Enter a date range</mat-label>
 	<mat-date-range-input [formGroup]="formGroup" [rangePicker]="picker" [min]="minDate" [max]="maxDate" required>
