@@ -1,4 +1,1 @@
-export interface DateRangeForm {
-	start: Date;
-	end: Date;
-}
+export type DateRangeValue = [Date | null, Date | null];

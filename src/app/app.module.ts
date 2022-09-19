@@ -17,13 +17,14 @@ import { GoogleChartsModule } from 'angular-google-charts';
 import { AppComponent } from './app.component';
 import { CowComponent } from './components/cow/cow.component';
 import { DataChartComponent } from './components/data-chart/data-chart.component';
+
 import { DateRangePickerComponent } from './components/date-range-picker/date-range-picker.component';
+import { FooterComponent } from './components/footer/footer.component';
+import { SearchLibraryComponent } from './components/search-library/search-library.component';
+import { SelectedLibrariesComponent } from './components/selected-libraries/selected-libraries.component';
 import { ErrorHandlerDirective } from './directives';
 import { ToObservablePipe } from './pipes';
 import { ErrorInterceptorService } from './services/error-handler/error-interceptor.service';
-import { FooterComponent } from './components/footer/footer.component';
-import { SelectedLibrariesComponent } from './components/selected-libraries/selected-libraries.component';
-import { SearchLibraryComponent } from './components/search-library/search-library.component';
 
 @NgModule({
 	declarations: [
@@ -33,9 +34,9 @@ import { SearchLibraryComponent } from './components/search-library/search-libra
 		CowComponent,
 		DateRangePickerComponent,
 		DataChartComponent,
-  FooterComponent,
-  SelectedLibrariesComponent,
-  SearchLibraryComponent,
+		FooterComponent,
+		SelectedLibrariesComponent,
+		SearchLibraryComponent,
 	],
 	imports: [
 		BrowserModule,

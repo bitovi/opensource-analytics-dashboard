@@ -1,4 +1,4 @@
-<div class="flex-row margin-row">
+<!-- <div class="flex-row margin-row">
 	<form onsubmit="return false">
 		<mat-form-field appearance="fill">
 			<mat-label>Enter a date range</mat-label>
@@ -25,4 +25,22 @@
 	<div>
 		<button type="button" class="clear-cache-button" mat-stroked-button (click)="onClearCache()">Clear cache</button>
 	</div>
-</div>
+</div> -->
+
+<mat-form-field appearance="fill">
+	<mat-label>Enter a date range</mat-label>
+	<mat-date-range-input [formGroup]="formGroup" [rangePicker]="picker" [min]="minDate" [max]="maxDate" required>
+		<input matStartDate formControlName="start" placeholder="Start date" (blur)="onBlur($event)" />
+		<input matEndDate formControlName="end" placeholder="End date" (blur)="onBlur($event)" />
+	</mat-date-range-input>
+
+	<mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+	<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+	<mat-date-range-picker #picker (closed)="onBlur()"></mat-date-range-picker>
+	<mat-error
+		appErrorHandler
+		[errors$]="[formGroup.controls.start.errors | toObservable, formGroup.controls.end.errors | toObservable]"
+		[handleErrors]="[startDateErrorsHandler, endDateErrorsHandler]"
+	>
+	</mat-error>
+</mat-form-field>

@@ -1,5 +1,13 @@
 <!-- date range picker -->
-<app-date-range-picker (dateChange)="onDateRangeChange($event)" (clearCache)="clearCache()"></app-date-range-picker>
+<ng-container [formGroup]="formGroup">
+	<div class="flex-row margin-row">
+		<app-date-range-picker formControlName="dateRange"></app-date-range-picker>
+
+		<div>
+			<button class="clear-cache-button" mat-stroked-button (click)="clearCache()">Clear cache</button>
+		</div>
+	</div>
+</ng-container>
 
 <!-- chart display -->
 <app-data-chart

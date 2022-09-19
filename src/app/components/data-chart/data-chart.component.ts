@@ -3,7 +3,7 @@ import { Component, inject, Input, LOCALE_ID, OnChanges, OnInit, SimpleChanges }
 import { ChartType, Column } from 'angular-google-charts';
 import { format } from 'date-fns';
 import { ChartData } from 'src/app/models/chart.model';
-import { DateRangeForm } from 'src/app/models/data-range-picket.model';
+
 import { DateService } from 'src/app/services';
 import { RegistryData } from 'src/app/services/npm-registry/npm-registry.model';
 
@@ -14,7 +14,7 @@ import { RegistryData } from 'src/app/services/npm-registry/npm-registry.model';
 })
 export class DataChartComponent implements OnInit, OnChanges {
 	@Input() registryData?: RegistryData[] | null;
-	@Input() dateRangeForm!: DateRangeForm;
+	@Input() dateRangeForm!: any;
 
 	chartData?: ChartData;
 

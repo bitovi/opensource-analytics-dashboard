@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { BehaviorSubject, catchError, combineLatest, filter, forkJoin, map, mergeMap, Observable, of, shareReplay } from 'rxjs';
 import { BitoviPackageNames } from './models/chart.model';
-import { DateRangeForm } from './models/data-range-picket.model';
 import { DateService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
 
@@ -14,18 +14,19 @@ export class AppComponent implements OnInit {
 	private readonly storageService = inject(StorageService);
 	private readonly npmRegistryService = inject(NpmRegistryService);
 	apiDatas$!: Observable<RegistryData[]>;
-	dateRangeForm$: BehaviorSubject<DateRangeForm | null> = new BehaviorSubject<DateRangeForm | null>(null);
+	dateRangeForm$: BehaviorSubject<any | null> = new BehaviorSubject<any | null>(null);
 	selectedLibraries$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+	readonly formGroup = this.initForm();
 
-	private readonly dateService = inject(DateService);
-
-	constructor() {}
+	constructor(private fb: FormBuilder, private dateService: DateService) {}
 
 	ngOnInit(): void {
 		this.persistDataOnPackageNameChange();
 		this.loadDataFromNpm();
 		const cachedLibs = this.getCachedPackageNames('autocomplete-package-names');
 		this.selectedLibraries$.next(cachedLibs);
+
+		this.formGroup.valueChanges.subscribe(console.log);
 	}
 
 	getDefaultPackageNames(): string[] {
@@ -34,7 +35,13 @@ export class AppComponent implements OnInit {
 		return (packageNames.length ? packageNames : BitoviPackageNames).sort();
 	}
 
-	onDateRangeChange(dateRangeForm: DateRangeForm): void {
+	private initForm(): FormGroup {
+		return this.fb.group({
+			dateRange: [],
+		});
+	}
+
+	onDateRangeChange(dateRangeForm: any): void {
 		this.dateRangeForm$.next(dateRangeForm);
 	}
 
