@@ -41,7 +41,6 @@ export class DateRangePickerComponent implements OnInit, ControlValueAccessor, V
 	readonly startDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('Start Date');
 	readonly endDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('End Date');
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	onChange = (value: DateRangeValue) => {
 		/* empty */
 	};
@@ -55,9 +54,13 @@ export class DateRangePickerComponent implements OnInit, ControlValueAccessor, V
 		this.watchDateChange();
 	}
 
-	writeValue(value: any): void {
-		this.formGroup.controls.start.setValue(value);
-		this.formGroup.controls.end.setValue(value);
+	writeValue(value: Date[]): void {
+		if (value && value.length == 2) {
+			this.formGroup.controls.start.setValue(value[0]);
+			this.formGroup.controls.end.setValue(value[1]);
+
+			// this.onChange([this.formGroup.controls.start.value, this.formGroup.controls.end.value]);
+		}
 	}
 	registerOnChange(fn: any): void {
 		this.onChange = fn;

@@ -27,7 +27,6 @@ export class SearchLibraryComponent implements OnInit, ControlValueAccessor {
 	// keep track of selected libraries and send all of them to the parent
 	private selectedLibraries: string[] = [];
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	onChange = (value: string[]) => {
 		/* empty */
 	};
@@ -41,9 +40,8 @@ export class SearchLibraryComponent implements OnInit, ControlValueAccessor {
 		this.searchLibraryOnInputChange();
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	writeValue(value: string): void {
-		// this.addPackage.setValue(value);
+	writeValue(value: string[]): void {
+		this.selectedLibraries = value ?? [];
 	}
 	registerOnChange(fn: any): void {
 		this.onChange = fn;
@@ -58,13 +56,17 @@ export class SearchLibraryComponent implements OnInit, ControlValueAccessor {
 
 	onLibrarySelect(e: string) {
 		this.selectedLibraries = [...this.selectedLibraries, e];
+
+		// notify parent with list of packages
 		this.onChange(this.selectedLibraries);
+
+		// clear seach on package select
 		this.addPackage.patchValue('');
 	}
 
 	private searchLibraryOnInputChange(): void {
 		this.autocompleteOptions$ = this.addPackage.valueChanges.pipe(
-			debounceTime(200),
+			debounceTime(300),
 			switchMap((query) => {
 				if (!query) {
 					return of([]);

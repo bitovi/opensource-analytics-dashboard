@@ -1,6 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
-import { catchError, combineLatest, forkJoin, map, mergeMap, Observable, of, shareReplay, withLatestFrom } from 'rxjs';
+import { startOfDay, subDays } from 'date-fns';
+import {
+	catchError,
+	combineLatest,
+	first,
+	forkJoin,
+	map,
+	mergeMap,
+	Observable,
+	of,
+	shareReplay,
+	startWith,
+	withLatestFrom,
+} from 'rxjs';
 import { BitoviPackageNames, ChartData } from './models/chart.model';
 import { ChartDataService, DateService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
@@ -12,8 +25,6 @@ import { RegistryData } from './services/npm-registry/npm-registry.model';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-	private readonly storageService = inject(StorageService);
-	private readonly npmRegistryService = inject(NpmRegistryService);
 	apiDatas$!: Observable<RegistryData[]>;
 	chartData$!: Observable<ChartData>;
 
@@ -27,30 +38,26 @@ export class AppComponent implements OnInit {
 		return this.formGroup.get('selectedLibrary') as AbstractControl;
 	}
 
-	constructor(private dateService: DateService, private chartDataService: ChartDataService, private fb: FormBuilder) {}
+	constructor(
+		private dateService: DateService,
+		private chartDataService: ChartDataService,
+		private storageService: StorageService,
+		private npmRegistryService: NpmRegistryService,
+		private fb: FormBuilder
+	) {}
 
 	ngOnInit(): void {
 		this.persistDataOnPackageNameChange();
 		this.loadDataFromNpm();
 		this.loadChartData();
 		const cachedLibs = this.getCachedPackageNames('autocomplete-package-names');
-		console.log('cachedLibs', cachedLibs);
 		this.selectedLibrary.patchValue(cachedLibs);
-
-		this.formGroup.valueChanges.subscribe(console.log);
 	}
 
 	getDefaultPackageNames(): string[] {
 		const packageNames = this.getPackageNamesFromParams().filter((packageName) => !!packageName);
 
 		return (packageNames.length ? packageNames : BitoviPackageNames).sort();
-	}
-
-	private initForm(): FormGroup {
-		return this.fb.group({
-			dateRange: [],
-			selectedLibrary: [],
-		});
 	}
 
 	getCachedPackageNames(key: string): string[] {
@@ -70,8 +77,9 @@ export class AppComponent implements OnInit {
 	}
 
 	removePackageName(packageName: string): void {
-		console.log('removePackageName', packageName);
-		// this.selectedLibraries$.next(this.selectedLibraries$.value.filter((v) => v !== packageName));
+		const selectedLibrary = this.selectedLibrary.value as string[];
+		const newValue = selectedLibrary.filter((value) => value !== packageName);
+		this.selectedLibrary.patchValue(newValue);
 	}
 
 	getApiDates(packageNames: string[], start: Date, end: Date): Observable<RegistryData[]> {
@@ -100,6 +108,17 @@ export class AppComponent implements OnInit {
 		this.setPackageNamesInParams([]);
 	}
 
+	private initForm(): FormGroup {
+		const currentDate = startOfDay(new Date());
+
+		return this.fb.group({
+			// range to display data [start, end]
+			dateRange: [[subDays(currentDate, 8), subDays(currentDate, 1)]],
+			// libraries that is displayed on the chart
+			selectedLibrary: [],
+		});
+	}
+
 	private persistDataOnPackageNameChange(): void {
 		this.selectedLibrary.valueChanges.subscribe((libraries) => this.setPackageNamesInParams(libraries));
 	}
@@ -122,15 +141,21 @@ export class AppComponent implements OnInit {
 	}
 
 	private loadDataFromNpm(): void {
-		this.apiDatas$ = combineLatest([this.dateRange.valueChanges, this.selectedLibrary.valueChanges]).pipe(
-			mergeMap(([dateRange, packageNames]) => this.getApiDates(packageNames, dateRange[0], dateRange[1])),
+		this.apiDatas$ = combineLatest([
+			this.dateRange.valueChanges.pipe(startWith(this.dateRange.value)),
+			this.selectedLibrary.valueChanges,
+		]).pipe(
+			mergeMap(([dateRange, packageNames]: [Date[], string[]]) => this.getApiDates(packageNames, dateRange[0], dateRange[1])),
 			shareReplay({ refCount: false, bufferSize: 0 })
 		);
+
+		// used to trigger apiDatas$ for loadChartData()
+		this.apiDatas$.pipe(first()).subscribe();
 	}
 
 	private loadChartData(): void {
 		this.chartData$ = this.apiDatas$.pipe(
-			withLatestFrom(this.dateRange.valueChanges),
+			withLatestFrom(this.dateRange.valueChanges.pipe(startWith(this.dateRange.value))),
 			map(([registryData, dateRange]) => this.chartDataService.getChartData(registryData, dateRange[0], dateRange[1]))
 		);
 	}
