@@ -1,6 +1,6 @@
 # NpmRegistryAnalytics
 
-Open source analytical tool to see NPM package downloads
+[Open source analytical tool](https://bitovi.github.io/opensource-analytics-dashboard) to see NPM package downloads
 
 # How it works
 
