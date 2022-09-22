@@ -1,3 +1,5 @@
 {
-    "*.{js,ts,html}": ["npx ng lint opensource-analytics-dashboard --fix=true --lint-file-patterns"]
+	"*.{js,ts,html}": [
+		"npx ng lint opensource-analytics-dashboard --fix=true --lint-file-patterns pretty-quick  --staged"
+	]
 }
