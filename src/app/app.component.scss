@@ -7,51 +7,10 @@
 	background-color: white;
 }
 
-.margin-row {
-	width: 100%;
-	width: -webkit-fill-available;
-	max-width: 1080px - $padding * 0.125;
-	box-sizing: border-box;
-
-	margin: 0 auto;
-	padding: $padding * 0.5 $padding * 0.125;
-}
-
-.flex-row {
-	width: 100%;
-	display: flex;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: $padding * 0.25;
-}
-
 .container {
 	border: 1px solid rgba(0, 0, 0, 0.2);
 	border-radius: 4px;
 	padding: $padding * 0.25 $padding * 0.25 $padding * 0.25 $padding * 0.5;
-}
-
-footer {
-	a {
-		color: $blue;
-		fill: $blue;
-		text-decoration: none;
-
-		span {
-			display: flex;
-			gap: $padding * 0.125;
-			align-items: center;
-			justify-content: center;
-		}
-	}
-
-	.flex-row,
-	.margin-row {
-		padding-top: $padding * 0.25;
-		padding-bottom: $padding * 0.25;
-	}
-	background: $footer-background-color;
-	margin-top: auto;
 }
 
 google-chart {
