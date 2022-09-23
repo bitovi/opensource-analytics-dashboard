@@ -1,0 +1,40 @@
+<mat-selection-list *ngIf="registryData.length; else noPackageNames" [formControl]="selectedPackageNames">
+	<div class="option-wrapper" *ngFor="let apiData of registryData; trackBy: trackByPackageName">
+		<mat-list-option [value]="apiData.packageName">
+			<span class="package-list-option">
+				<span>{{ apiData.packageName }}</span>
+				<span>
+					<mat-icon>download</mat-icon>
+					{{ apiData.total | number }}
+				</span>
+			</span>
+		</mat-list-option>
+
+		<!-- delete package -->
+		<button
+			class="button-wrapper"
+			(click)="onRemovePackageName(apiData.packageName)"
+			(keydown)="handleSelectAsClick($event)"
+		>
+			<button mat-icon-button color="accent" aria-label="Remove npm package" tabindex="-1">
+				<mat-icon class="delete-icon">delete</mat-icon>
+			</button>
+		</button>
+
+		<!-- link to npm -->
+		<a
+			class="button-wrapper"
+			[href]="'https://www.npmjs.com/package/' + apiData.packageName"
+			target="_blank"
+			(keydown)="handleSelectAsClick($event)"
+		>
+			<button mat-icon-button color="accent" aria-label="Remove npm package" tabindex="-1">
+				<mat-icon class="new-tab-icon">open_in_new</mat-icon>
+			</button>
+		</a>
+	</div>
+</mat-selection-list>
+
+<ng-template #noPackageNames>
+	<p>Add npm packages using the input above. Then you can view download analytics over time.</p>
+</ng-template>

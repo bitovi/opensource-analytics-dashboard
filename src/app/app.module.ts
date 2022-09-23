@@ -18,9 +18,10 @@ import { AppComponent } from './app.component';
 import { CowComponent } from './components/cow/cow.component';
 import { ErrorHandlerDirective } from './directives';
 import { ToObservablePipe } from './pipes';
+import { PackageListComponent } from './components/package-list/package-list.component';
 
 @NgModule({
-	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, CowComponent],
+	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, CowComponent, PackageListComponent],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,
