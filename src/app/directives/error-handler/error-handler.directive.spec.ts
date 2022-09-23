@@ -6,34 +6,34 @@ import { ErrorHandlerDirective } from './error-handler.directive';
 import { NullishValidationErrors } from './error-handler.model';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'mat-error',
-  template: '',
+	// eslint-disable-next-line @angular-eslint/component-selector
+	selector: 'mat-error',
+	template: '',
 })
 class MockMatErrorComponent {}
 
 @Component({
-  template: `<mat-error appErrorHandler [errors$]="errors$"></mat-error>`
+	template: `<mat-error appErrorHandler [errors$]="errors$"></mat-error>`,
 })
 class HostComponent {
-  errors$: Observable<NullishValidationErrors> = of(null);
+	errors$: Observable<NullishValidationErrors> = of(null);
 }
 
 describe('ErrorHandlerDirective', () => {
-  let fixture: ComponentFixture<HostComponent>;
+	let fixture: ComponentFixture<HostComponent>;
 
-  beforeEach(async () => {
-    await  TestBed.configureTestingModule({
-      declarations: [MockMatErrorComponent, HostComponent, ErrorHandlerDirective]
-    }).compileComponents();
+	beforeEach(async () => {
+		await TestBed.configureTestingModule({
+			declarations: [MockMatErrorComponent, HostComponent, ErrorHandlerDirective],
+		}).compileComponents();
 
-    fixture = TestBed.createComponent(HostComponent);
+		fixture = TestBed.createComponent(HostComponent);
 
-    fixture.detectChanges(); // initial binding
-  });
+		fixture.detectChanges(); // initial binding
+	});
 
-  it('should create an instance', () => {
-    const directive = fixture.debugElement.query(By.directive(ErrorHandlerDirective));
-    expect(directive).toBeTruthy();
-  });
+	it('should create an instance', () => {
+		const directive = fixture.debugElement.query(By.directive(ErrorHandlerDirective));
+		expect(directive).toBeTruthy();
+	});
 });

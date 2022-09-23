@@ -4,161 +4,167 @@ import { Injectable } from '@angular/core';
 // We can't just depend on localStorage since it may not always be available
 
 export enum StorageType {
-  SERVICE_STORAGE = 'SERVICE_STORAGE',
-  LOCAL_STORAGE = 'LOCAL_STORAGE',
-  SESSION_STORAGE = 'SESSION_STORAGE',
+	SERVICE_STORAGE = 'SERVICE_STORAGE',
+	LOCAL_STORAGE = 'LOCAL_STORAGE',
+	SESSION_STORAGE = 'SESSION_STORAGE',
 }
 
 interface Storage {
-  [keys: string]: string;
+	[keys: string]: string;
 }
 
 @Injectable({
-  providedIn: 'root',
+	providedIn: 'root',
 })
 export class StorageService {
-  storage: Storage;
+	storage: Storage;
 
-  readonly defaultStorageType: StorageType;// = StorageType.SERVICE_STORAGE;
+	readonly defaultStorageType: StorageType; // = StorageType.SERVICE_STORAGE;
 
-  readonly canLocalStorage = this.localStorageIsWorking();
-  readonly canSessionStorage = this.sessionStorageIsWorking();
+	readonly canLocalStorage = this.localStorageIsWorking();
+	readonly canSessionStorage = this.sessionStorageIsWorking();
 
-  constructor() {
-    this.storage = {};
+	constructor() {
+		this.storage = {};
 
-    if (this.canLocalStorage) {
-      this.defaultStorageType = StorageType.LOCAL_STORAGE;
-    } else if (this.canSessionStorage) {
-      console.warn("localStorage doesn't seem to be working, using sessionStorage instead");
-      this.defaultStorageType = StorageType.SESSION_STORAGE;
-    } else {
-      console.warn("sessionStorage doesn't seem to be working, using storageService's storage instead");
-      this.defaultStorageType = StorageType.SERVICE_STORAGE;
-    }
-  }
+		if (this.canLocalStorage) {
+			this.defaultStorageType = StorageType.LOCAL_STORAGE;
+		} else if (this.canSessionStorage) {
+			console.warn("localStorage doesn't seem to be working, using sessionStorage instead");
+			this.defaultStorageType = StorageType.SESSION_STORAGE;
+		} else {
+			console.warn("sessionStorage doesn't seem to be working, using storageService's storage instead");
+			this.defaultStorageType = StorageType.SERVICE_STORAGE;
+		}
+	}
 
-  private localStorageIsWorking(): boolean {
-    if (!window.localStorage) {
-      return false;
-    }
+	private localStorageIsWorking(): boolean {
+		if (!window.localStorage) {
+			return false;
+		}
 
-    try {
-      window.localStorage.setItem("__test__", "__test__");
-      window.localStorage.removeItem("__test__");
+		try {
+			window.localStorage.setItem('__test__', '__test__');
+			window.localStorage.removeItem('__test__');
 
-      return true;
-    } catch(error) {
-      console.error(error);
+			return true;
+		} catch (error) {
+			console.error(error);
 
-      return false;
-    }
-  }
+			return false;
+		}
+	}
 
-  private sessionStorageIsWorking(): boolean {
-    if (!window.sessionStorage) {
-      return false;
-    }
+	private sessionStorageIsWorking(): boolean {
+		if (!window.sessionStorage) {
+			return false;
+		}
 
-    try {
-      window.sessionStorage.setItem("__test__", "__test__");
-      window.sessionStorage.removeItem("__test__");
+		try {
+			window.sessionStorage.setItem('__test__', '__test__');
+			window.sessionStorage.removeItem('__test__');
 
-      return true;
-    } catch(error) {
-      console.error(error);
-      return false;
-    }
-  }
+			return true;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	}
 
-  setItem(key: string, value: unknown, storageType?: StorageType): void {
-    if (!storageType) {
-      this.setItem(key, value, this.defaultStorageType);
-      return;
-    }
+	setItem(key: string, value: unknown, storageType?: StorageType): void {
+		if (!storageType) {
+			this.setItem(key, value, this.defaultStorageType);
+			return;
+		}
 
-    const stringifiedValue = JSON.stringify(value);
+		const stringifiedValue = JSON.stringify(value);
 
-    if (storageType === StorageType.LOCAL_STORAGE) {
-      window.localStorage.setItem(key, stringifiedValue);
-      return;
-    }
-    
-    if (storageType === StorageType.SESSION_STORAGE) {
-      window.sessionStorage.setItem(key, stringifiedValue);
-      return;
-    }
+		if (storageType === StorageType.LOCAL_STORAGE) {
+			window.localStorage.setItem(key, stringifiedValue);
+			return;
+		}
 
-    this.storage[key] = stringifiedValue;
-  }
+		if (storageType === StorageType.SESSION_STORAGE) {
+			window.sessionStorage.setItem(key, stringifiedValue);
+			return;
+		}
 
-  getItem(key: string, storageType?: StorageType): string | null {
-    if (!storageType) {
-      return this.getItem(key, this.defaultStorageType);
-    }
+		this.storage[key] = stringifiedValue;
+	}
 
-    if (storageType === StorageType.LOCAL_STORAGE) {
-      return window.localStorage.getItem(key);
-    }
-    
-    if (storageType === StorageType.SESSION_STORAGE) {
-      return window.sessionStorage.getItem(key);
-    }
+	getItem(key: string, storageType?: StorageType): string | null {
+		if (!storageType) {
+			return this.getItem(key, this.defaultStorageType);
+		}
 
-    return this.storage[key] ?? null;
-  }
+		if (storageType === StorageType.LOCAL_STORAGE) {
+			return window.localStorage.getItem(key);
+		}
 
-  removeItem(key: string, storageType?: StorageType): void {
-    if (!storageType) {
-      this.removeItem(key, this.defaultStorageType);
-      return;
-    }
+		if (storageType === StorageType.SESSION_STORAGE) {
+			return window.sessionStorage.getItem(key);
+		}
 
-    if (storageType === StorageType.LOCAL_STORAGE) {
-      window.localStorage.removeItem(key);
-      return;
-    }
-    
-    if (storageType === StorageType.SESSION_STORAGE) {
-      window.sessionStorage.removeItem(key);
-      return;
-    }
+		return this.storage[key] ?? null;
+	}
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.storage[key] = undefined as any;
-    delete this.storage[key];
-  }
+	removeItem(key: string, storageType?: StorageType): void {
+		if (!storageType) {
+			this.removeItem(key, this.defaultStorageType);
+			return;
+		}
 
-  clear(storageType?: StorageType): void {
-    if (!storageType) {
-      this.removeItem(this.defaultStorageType);
-      return;
-    }
+		if (storageType === StorageType.LOCAL_STORAGE) {
+			window.localStorage.removeItem(key);
+			return;
+		}
 
-    if (storageType === StorageType.LOCAL_STORAGE) {
-      window.localStorage.clear();
-      return;
-    }
-    
-    if (storageType === StorageType.SESSION_STORAGE) {
-      window.sessionStorage.clear();
-    }
+		if (storageType === StorageType.SESSION_STORAGE) {
+			window.sessionStorage.removeItem(key);
+			return;
+		}
 
-    this.storage = {};
-  }
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		this.storage[key] = undefined as any;
+		delete this.storage[key];
+	}
 
-  /**
-   * Clears all forms of storage
-   */
-  clearAllStorage(): void {
-    try {
-      this.clear(StorageType.LOCAL_STORAGE);
-    } catch(error) {/** pass */}
-    try {
-      this.clear(StorageType.SESSION_STORAGE);
-    } catch(error) {/** pass */}
-    try {
-      this.clear(StorageType.SERVICE_STORAGE);
-    } catch(error) {/** pass */}
-  }
+	clear(storageType?: StorageType): void {
+		if (!storageType) {
+			this.removeItem(this.defaultStorageType);
+			return;
+		}
+
+		if (storageType === StorageType.LOCAL_STORAGE) {
+			window.localStorage.clear();
+			return;
+		}
+
+		if (storageType === StorageType.SESSION_STORAGE) {
+			window.sessionStorage.clear();
+		}
+
+		this.storage = {};
+	}
+
+	/**
+	 * Clears all forms of storage
+	 */
+	clearAllStorage(): void {
+		try {
+			this.clear(StorageType.LOCAL_STORAGE);
+		} catch (error) {
+			/** pass */
+		}
+		try {
+			this.clear(StorageType.SESSION_STORAGE);
+		} catch (error) {
+			/** pass */
+		}
+		try {
+			this.clear(StorageType.SERVICE_STORAGE);
+		} catch (error) {
+			/** pass */
+		}
+	}
 }
