@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { takeUntilDestroy$ } from 'src/app/operators';
-import { RegistryData } from 'src/app/services/npm-registry/npm-registry.model';
+import { takeUntilDestroy } from '../../operators';
+import { RegistryData } from '../../services/npm-registry/npm-registry.model';
 
 enum SelectKeydown {
 	SPACE = 'Space',
@@ -32,7 +32,7 @@ export class PackageListComponent implements OnInit, ControlValueAccessor {
 		nonNullable: true,
 	});
 
-	private selectedPackageNames$ = this.selectedPackageNames.valueChanges.pipe(takeUntilDestroy$());
+	private selectedPackageNames$ = this.selectedPackageNames.valueChanges.pipe(takeUntilDestroy());
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	onChange = (value: string[]) => {
@@ -42,9 +42,6 @@ export class PackageListComponent implements OnInit, ControlValueAccessor {
 		/* empty */
 	};
 
-	constructor() {
-		/* empry */
-	}
 	ngOnInit(): void {
 		// notify parent that package visibility has been toggled
 		this.selectedPackageNames$.subscribe((packages) => {
@@ -61,10 +58,6 @@ export class PackageListComponent implements OnInit, ControlValueAccessor {
 
 	registerOnTouched(fn: (value: void) => void): void {
 		this.onTouched = fn;
-	}
-
-	setDisabledState?(): void {
-		throw new Error('Method not implemented.');
 	}
 
 	onRemovePackageName(packageName: string): void {
