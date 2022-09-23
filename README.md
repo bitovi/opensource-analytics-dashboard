@@ -1,4 +1,4 @@
-# NpmRegistryAnalytics
+# Open Source Analytics Dashboard
 
 [Open source analytical tool](https://bitovi.github.io/opensource-analytics-dashboard) to see NPM package downloads
 
