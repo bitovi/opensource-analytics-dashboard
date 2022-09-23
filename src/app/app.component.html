@@ -64,9 +64,8 @@
 
 		<!-- list of selected libraries -->
 		<app-package-list
-			*ngIf="apiDatas$ | async as apiDatas"
 			(removePackageName)="removePackageName($event)"
-			[registryData]="apiDatas"
+			[registryData]="apiDatas$ | async"
 			[formControl]="selectedPackageNames"
 		></app-package-list>
 	</div>

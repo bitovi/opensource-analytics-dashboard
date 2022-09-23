@@ -26,7 +26,7 @@ const POSSIBLE_KEYDOWNS = [SelectKeydown.ENTER, SelectKeydown.SPACE, SelectKeydo
 })
 export class PackageListComponent implements OnInit, ControlValueAccessor {
 	@Output() removePackageName: EventEmitter<string> = new EventEmitter<string>();
-	@Input() registryData: RegistryData[] = [];
+	@Input() registryData: RegistryData[] | null = [];
 
 	readonly selectedPackageNames = new FormControl<string[]>([], {
 		nonNullable: true,

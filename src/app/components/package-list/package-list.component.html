@@ -1,4 +1,7 @@
-<mat-selection-list *ngIf="registryData.length; else noPackageNames" [formControl]="selectedPackageNames">
+<mat-selection-list
+	*ngIf="registryData && registryData.length; else noPackageNames"
+	[formControl]="selectedPackageNames"
+>
 	<div class="option-wrapper" *ngFor="let apiData of registryData; trackBy: trackByPackageName">
 		<mat-list-option [value]="apiData.packageName">
 			<span class="package-list-option">
