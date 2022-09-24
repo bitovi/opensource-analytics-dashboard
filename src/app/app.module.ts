@@ -15,13 +15,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GoogleChartsModule } from 'angular-google-charts';
 
 import { AppComponent } from './app.component';
-import { CowComponent } from './components/cow/cow.component';
+import { FooterComponent } from './components/footer/footer.component';
+import { PackageListComponent } from './components/package-list/package-list.component';
 import { ErrorHandlerDirective } from './directives';
 import { ToObservablePipe } from './pipes';
-import { PackageListComponent } from './components/package-list/package-list.component';
 
 @NgModule({
-	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, CowComponent, PackageListComponent],
+	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, FooterComponent, PackageListComponent],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,
