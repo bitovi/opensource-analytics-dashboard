@@ -5,7 +5,10 @@ export const takeUntilDestroy = <T>(): UnaryFunction<Observable<T>, Observable<T
 	const viewRef = inject(ChangeDetectorRef) as ViewRef;
 	const destroyer$ = new Subject<void>();
 
-	viewRef.onDestroy(() => destroyer$.next());
+	viewRef.onDestroy(() => {
+		destroyer$.next();
+		destroyer$.complete();
+	});
 
 	return (observable: Observable<T>) => observable.pipe(takeUntil(destroyer$));
 };
