@@ -19,9 +19,17 @@ import { FooterComponent } from './components/footer/footer.component';
 import { PackageListComponent } from './components/package-list/package-list.component';
 import { ErrorHandlerDirective } from './directives';
 import { ToObservablePipe } from './pipes';
+import { ChartComponentComponent } from './components/chart-component/chart-component.component';
 
 @NgModule({
-	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, FooterComponent, PackageListComponent],
+	declarations: [
+		AppComponent,
+		ToObservablePipe,
+		ErrorHandlerDirective,
+		FooterComponent,
+		PackageListComponent,
+		ChartComponentComponent,
+	],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,
