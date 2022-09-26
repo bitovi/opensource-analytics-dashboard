@@ -9,6 +9,7 @@ import {
 	Validators,
 } from '@angular/forms';
 import { combineLatest, debounceTime, map, Observable, of, startWith, switchMap } from 'rxjs';
+import { ArrayObservable } from 'src/app/classes';
 import { ErrorHandlerService, NpmRegistryService } from '../../services';
 
 @Component({
@@ -40,14 +41,14 @@ export class AutocompleteComponent implements ControlValueAccessor, Validators {
     Pacakge names that are already loaded to prevent selecting same library
     multiple times
   */
-	private alreadyLoadedPackageName: string[] = [];
+	private alreadyLoadedPackageName: ArrayObservable<string> = new ArrayObservable();
 
 	/* Observale that will display loaded packages from NPM */
 	readonly autocompleteOptions$!: Observable<string[]>;
 
 	/* Form control to allow user search packages  */
 	readonly addPackage: FormControl<string> = new FormControl('', {
-		validators: this.errorHandlerService.noDuplicatesValidator(this.alreadyLoadedPackageName),
+		asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.alreadyLoadedPackageName.observable$),
 		nonNullable: true,
 	});
 
@@ -71,13 +72,15 @@ export class AutocompleteComponent implements ControlValueAccessor, Validators {
 		this.autocompleteOptions$ = combineLatest([
 			// All suggestions
 			suggestions$.pipe(startWith([])),
+			// packages that already have been loaded
+			this.alreadyLoadedPackageName.observable$,
 			// Partial npm package name to filter options
 			this.addPackage.valueChanges.pipe(startWith('')),
 		]).pipe(
-			map(([suggestions, query]) =>
+			map(([suggestions, alreadyLoadedPackageName, query]) =>
 				this.getAutocompleteOptions(
 					[...new Set([...(this.autocompletePackageNames ?? []), ...suggestions])],
-					this.alreadyLoadedPackageName,
+					alreadyLoadedPackageName,
 					query
 				)
 			)
@@ -85,7 +88,7 @@ export class AutocompleteComponent implements ControlValueAccessor, Validators {
 	}
 
 	writeValue(value?: string[]): void {
-		this.alreadyLoadedPackageName = [...(value ?? [])];
+		this.alreadyLoadedPackageName.set([...(value ?? [])]);
 	}
 	registerOnChange(fn: (value: string[]) => void): void {
 		this.onChange = fn;
@@ -99,8 +102,8 @@ export class AutocompleteComponent implements ControlValueAccessor, Validators {
 	}
 
 	onSubmit(): void {
-		this.alreadyLoadedPackageName = [...this.alreadyLoadedPackageName, this.addPackage.value];
-		this.onChange(this.alreadyLoadedPackageName);
+		this.alreadyLoadedPackageName.push(this.addPackage.value);
+		this.onChange(this.alreadyLoadedPackageName.getValue());
 
 		// Clear value
 		this.addPackage.setValue('');
@@ -117,7 +120,7 @@ export class AutocompleteComponent implements ControlValueAccessor, Validators {
 				return this.npmRegistryService.getSuggestions(query).pipe(
 					map((suggestions) =>
 						// prevent displaying already loaded packages
-						suggestions.filter((suggestion) => !this.alreadyLoadedPackageName.includes(suggestion))
+						suggestions.filter((suggestion) => !this.alreadyLoadedPackageName.getValue().includes(suggestion))
 					)
 				);
 			})

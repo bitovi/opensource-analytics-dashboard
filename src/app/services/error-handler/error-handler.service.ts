@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
+import { map, Observable, take } from 'rxjs';
 import { ErrorsHandler } from '../../directives';
 
 const DUPLICATE_VALIDATION_ERROR_KEY = 'duplicateExists';
@@ -37,9 +38,13 @@ export class ErrorHandlerService {
 		};
 	}
 
-	noDuplicatesValidator(values: string[]): ValidatorFn {
-		return (control: AbstractControl): ValidationErrors | null => {
-			return values.includes(control.value) ? { [DUPLICATE_VALIDATION_ERROR_KEY]: true } : null;
+	noDuplicatesValidator(values$: Observable<string[]>): AsyncValidatorFn {
+		return (control: AbstractControl): Observable<ValidationErrors | null> => {
+			return values$.pipe(
+				map((values) => values.includes(control.value)),
+				map((duplicateExists) => (duplicateExists ? { [DUPLICATE_VALIDATION_ERROR_KEY]: true } : null)),
+				take(1)
+			);
 		};
 	}
 }
