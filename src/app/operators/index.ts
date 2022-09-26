@@ -1,1 +1,1 @@
-export * from './takeUntilDestroy.operator';
+export * from './take-until-destroy.operator';
