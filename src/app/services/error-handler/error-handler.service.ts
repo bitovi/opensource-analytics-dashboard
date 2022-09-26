@@ -37,16 +37,6 @@ export class ErrorHandlerService {
 		};
 	}
 
-	// noDuplicatesValidator(values$: Observable<string[]>): AsyncValidatorFn {
-	// 	return (control: AbstractControl): Observable<ValidationErrors | null> => {
-	// 		return values$.pipe(
-	// 			map((values) => values.includes(control.value)),
-	// 			map((duplicateExists) => (duplicateExists ? { [DUPLICATE_VALIDATION_ERROR_KEY]: true } : null)),
-	// 			take(1)
-	// 		);
-	// 	};
-	// }
-
 	noDuplicatesValidator(values: string[]): ValidatorFn {
 		return (control: AbstractControl): ValidationErrors | null => {
 			return values.includes(control.value) ? { [DUPLICATE_VALIDATION_ERROR_KEY]: true } : null;
