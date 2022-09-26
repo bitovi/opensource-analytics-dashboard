@@ -9,7 +9,7 @@ import {
 	Validators,
 } from '@angular/forms';
 import { combineLatest, debounceTime, map, Observable, of, startWith, switchMap } from 'rxjs';
-import { ErrorHandlerService, NpmRegistryService } from 'src/app/services';
+import { ErrorHandlerService, NpmRegistryService } from '../../services';
 
 @Component({
 	selector: 'app-autocomplete',

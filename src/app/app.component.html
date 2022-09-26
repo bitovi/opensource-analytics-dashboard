@@ -47,10 +47,12 @@
 <div class="margin-row">
 	<div class="container">
 		<!-- auto complete -->
-		<app-autocomplete
-			[autocompletePackageNames]="autocompletePackageNames.observable$ | async"
-			[formControl]="packageNames"
-		></app-autocomplete>
+		<form onsubmit="return false">
+			<app-autocomplete
+				[autocompletePackageNames]="autocompletePackageNames.observable$ | async"
+				[formControl]="packageNames"
+			></app-autocomplete>
+		</form>
 
 		<!-- list of selected libraries -->
 		<app-package-list

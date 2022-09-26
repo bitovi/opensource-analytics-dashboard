@@ -1,25 +1,23 @@
-<form>
-	<mat-form-field appearance="outline" onsubmit="return false">
-		<mat-label>npm package name</mat-label>
-		<input matInput [formControl]="addPackage" [matAutocomplete]="auto" />
-		<mat-hint>Ex: 'canjs'</mat-hint>
-		<mat-error appErrorHandler [errors$]="addPackage.errors | toObservable" [handleErrors]="packageErrorsHandler">
-		</mat-error>
+<mat-form-field appearance="outline">
+	<mat-label>npm package name</mat-label>
+	<input matInput [formControl]="addPackage" [matAutocomplete]="auto" />
+	<mat-hint>Ex: 'canjs'</mat-hint>
+	<mat-error appErrorHandler [errors$]="addPackage.errors | toObservable" [handleErrors]="packageErrorsHandler">
+	</mat-error>
 
-		<!-- display options -->
-		<mat-autocomplete #auto="matAutocomplete">
-			<mat-option *ngFor="let option of autocompleteOptions$ | async" [value]="option"> {{ option }} </mat-option>
-		</mat-autocomplete>
-	</mat-form-field>
+	<!-- display options -->
+	<mat-autocomplete #auto="matAutocomplete">
+		<mat-option *ngFor="let option of autocompleteOptions$ | async" [value]="option"> {{ option }} </mat-option>
+	</mat-autocomplete>
+</mat-form-field>
 
-	<!-- add button -->
-	<button
-		mat-raised-button
-		type="button"
-		color="primary"
-		[disabled]="!addPackage.value || addPackage.invalid"
-		(click)="onSubmit()"
-	>
-		Add
-	</button>
-</form>
+<!-- add button -->
+<button
+	mat-raised-button
+	type="button"
+	color="primary"
+	[disabled]="!addPackage.value || addPackage.invalid"
+	(click)="onSubmit()"
+>
+	Add
+</button>
