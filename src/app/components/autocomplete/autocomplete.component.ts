@@ -98,7 +98,11 @@ export class AutocompleteComponent implements ControlValueAccessor, Validators {
 	}
 
 	validate(c: AbstractControl): ValidationErrors | null {
-		return c.validator;
+		if (!this.addPackage.validator) {
+			return null;
+		}
+
+		return this.addPackage.validator(c);
 	}
 
 	onSubmit(): void {
