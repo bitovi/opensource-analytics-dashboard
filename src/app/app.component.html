@@ -52,46 +52,12 @@
 			[formControl]="packageNames"
 		></app-autocomplete>
 
-		<ng-container *ngIf="apiDatas$ | async as apiDatas">
-			<mat-selection-list
-				*ngIf="apiDatas.length; else noPackageNames"
-				[formControl]="selectedPackageNames"
-				#selectionList
-			>
-				<div class="option-wrapper" *ngFor="let apiData of apiDatas; trackBy: trackByPackageName">
-					<mat-list-option [value]="apiData.packageName">
-						<span class="package-list-option">
-							<span>{{ apiData.packageName }}</span>
-							<span>
-								<mat-icon>download</mat-icon>
-								{{ apiData.total | number }}
-							</span>
-						</span>
-					</mat-list-option>
-
-					<button
-						class="button-wrapper"
-						(click)="removePackageName(apiData.packageName)"
-						(keydown)="handleSelectAsClick($event)"
-					>
-						<button mat-icon-button color="accent" aria-label="Remove npm package" tabindex="-1">
-							<mat-icon class="delete-icon">delete</mat-icon>
-						</button>
-					</button>
-
-					<a
-						class="button-wrapper"
-						[href]="'https://www.npmjs.com/package/' + apiData.packageName"
-						target="_blank"
-						(keydown)="handleSelectAsClick($event)"
-					>
-						<button mat-icon-button color="accent" aria-label="Remove npm package" tabindex="-1">
-							<mat-icon class="new-tab-icon">open_in_new</mat-icon>
-						</button>
-					</a>
-				</div>
-			</mat-selection-list>
-		</ng-container>
+		<!-- list of selected libraries -->
+		<app-package-list
+			(removePackageName)="removePackageName($event)"
+			[registryData]="apiDatas$ | async"
+			[formControl]="selectedPackageNames"
+		></app-package-list>
 	</div>
 </div>
 
