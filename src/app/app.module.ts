@@ -16,11 +16,12 @@ import { GoogleChartsModule } from 'angular-google-charts';
 
 import { AppComponent } from './app.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { PackageListComponent } from './components/package-list/package-list.component';
 import { ErrorHandlerDirective } from './directives';
 import { ToObservablePipe } from './pipes';
 
 @NgModule({
-	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, FooterComponent],
+	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, FooterComponent, PackageListComponent],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,

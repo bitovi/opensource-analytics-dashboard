@@ -28,14 +28,6 @@ import { ArrayObservable } from './classes';
 import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
 
-enum SelectKeydown {
-	SPACE = 'Space',
-	SPACE_2 = ' ',
-	ENTER = 'Enter',
-}
-
-const POSSIBLE_KEYDOWNS = [SelectKeydown.ENTER, SelectKeydown.SPACE, SelectKeydown.SPACE_2];
-
 interface ChartData {
 	columns: Column[];
 	rows: Row[];
@@ -332,13 +324,6 @@ export class AppComponent implements OnInit, OnDestroy {
 	}
 
 	/**
-	 * ngForOf trackBy for packageNames
-	 */
-	trackByPackageName(_index: number, hasPackageName: { packageName: string }): string {
-		return hasPackageName.packageName;
-	}
-
-	/**
 	 * Get message from error when using HttpClient and reaching npm registry
 	 */
 	getErrorMessage(error: RegistryError): string {
@@ -382,23 +367,6 @@ export class AppComponent implements OnInit, OnDestroy {
 		let url = window.location.href.split('?')[0];
 		url += `?p=${packageNames}`;
 		window.history.replaceState({}, document.title, url);
-	}
-
-	handleSelectAsClick(event: KeyboardEvent): void {
-		// Check if KeyboardEvent is a selection
-		if (!this.keydownIsSelect(event)) {
-			return;
-		}
-
-		// Prevent normal accessibility
-		event.preventDefault();
-		event.stopPropagation();
-		// Call click function instead
-		(event.target as HTMLButtonElement).click();
-	}
-
-	keydownIsSelect(event: KeyboardEvent): boolean {
-		return POSSIBLE_KEYDOWNS.includes((event.key ?? event.code) as SelectKeydown);
 	}
 
 	ngOnDestroy(): void {
