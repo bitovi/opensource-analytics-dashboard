@@ -15,12 +15,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GoogleChartsModule } from 'angular-google-charts';
 
 import { AppComponent } from './app.component';
+import { AutocompleteComponent } from './components/autocomplete/autocomplete.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { ErrorHandlerDirective } from './directives';
 import { ToObservablePipe } from './pipes';
 
 @NgModule({
-	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, FooterComponent],
+	declarations: [AppComponent, ToObservablePipe, ErrorHandlerDirective, FooterComponent, AutocompleteComponent],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,

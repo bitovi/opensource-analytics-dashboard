@@ -1,14 +1,12 @@
-import { Component, ElementRef, inject, LOCALE_ID, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, LOCALE_ID, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ChartType, Column, Row } from 'angular-google-charts';
 import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
 	catchError,
 	combineLatest,
-	debounceTime,
 	filter,
 	forkJoin,
-	fromEvent,
 	map,
 	mergeMap,
 	Observable,
@@ -16,10 +14,8 @@ import {
 	shareReplay,
 	startWith,
 	Subject,
-	switchMap,
 	takeUntil,
 	tap,
-	withLatestFrom,
 } from 'rxjs';
 
 import { formatNumber } from '@angular/common';
@@ -49,18 +45,13 @@ type RegistryError = { error?: { error?: string }; message?: string };
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit, OnDestroy {
-	@ViewChild('addPackageNameForm', { static: true })
-	private readonly addPackageNameForm!: ElementRef<HTMLFormElement>;
-
+export class AppComponent implements OnDestroy {
 	private readonly dateService = inject(DateService);
 	private readonly storageService = inject(StorageService);
 	private readonly errorHandlerService = inject(ErrorHandlerService);
 	private readonly npmRegistryService = inject(NpmRegistryService);
 	private readonly matSnackBar = inject(MatSnackBar);
 	private readonly locale = inject(LOCALE_ID);
-
-	readonly autocompleteOptions$!: Observable<string[]>;
 
 	readonly minDate = new Date(2015, 0, 1);
 	readonly maxDate = new Date();
@@ -78,22 +69,27 @@ export class AppComponent implements OnInit, OnDestroy {
 
 	readonly chartData$: Observable<ChartData>;
 
-	readonly packageNames: ArrayObservable<string> = new ArrayObservable(this.getCachedPackageNames('package-names'));
+	/* loaded package names  */
+	readonly packageNames = new FormControl<string[]>(this.getCachedPackageNames('package-names'), {
+		nonNullable: true,
+	});
+
+	/* keep track of loaded package names in localstorage and display them as suggestion
+     if they are not already loaded
+  */
 	readonly autocompletePackageNames: ArrayObservable<string> = new ArrayObservable(
 		this.getCachedPackageNames('autocomplete-package-names')
 	);
 
 	readonly dateRangeFormGroup = this.getDateRangeFormGroup();
-	readonly addPackage: FormControl<string> = new FormControl('', {
-		asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.packageNames.observable$),
-		nonNullable: true,
-	});
-	readonly selectedPackageNames = new FormControl<string[]>(this.packageNames.getValue(), {
+
+	/* visible package names */
+	readonly selectedPackageNames = new FormControl<string[]>(this.packageNames.value, {
 		nonNullable: true,
 	});
 
 	constructor() {
-		this.packageNames.observable$
+		this.packageNames.valueChanges
 			.pipe(
 				tap((packageNames) => {
 					this.onPackageNamesChanged(packageNames);
@@ -103,6 +99,7 @@ export class AppComponent implements OnInit, OnDestroy {
 			)
 			.subscribe();
 
+		// if user selects a package, save it into localstore as future suggestion
 		this.autocompletePackageNames.observable$
 			.pipe(
 				tap((autocompletePackageNames) => {
@@ -120,82 +117,23 @@ export class AppComponent implements OnInit, OnDestroy {
 			filter((dates) => isEqual(dates.end, dates.start) || isAfter(dates.end, dates.start))
 		);
 
-		const suggestions$ = this.addPackage.valueChanges.pipe(
-			debounceTime(200),
-			switchMap((query) => {
-				if (!query) {
-					return of([]);
-				}
-
-				return this.npmRegistryService.getSuggestions(query);
-			}),
-			withLatestFrom(this.packageNames.observable$),
-			map(([suggestions, existingPackageNames]) =>
-				suggestions.filter((suggestion) => !existingPackageNames.includes(suggestion))
-			)
-		);
-
-		this.autocompleteOptions$ = combineLatest([
-			// All possible npm package names (based on local storage)
-			this.autocompletePackageNames.observable$,
-			// All suggestions
-			suggestions$,
-			// Already selected package names
-			this.packageNames.observable$,
-			// Partial npm package name to filter options
-			this.addPackage.valueChanges.pipe(startWith('')),
+		this.apiDatas$ = combineLatest([
+			selectedDates$,
+			this.packageNames.valueChanges.pipe(startWith(this.packageNames.value)),
 		]).pipe(
-			map(([autocompletePackageNames, suggestions, packageNames, query]) =>
-				this.getAutocompleteOptions([...new Set([...autocompletePackageNames, ...suggestions])], packageNames, query)
-			)
-		);
-
-		this.apiDatas$ = combineLatest([this.packageNames.observable$, selectedDates$]).pipe(
-			mergeMap(([packageNames, dates]) => this.getApiDates(packageNames, dates.start, dates.end)),
+			mergeMap(([dateRange, packageNames]) => this.getApiDates(packageNames, dateRange.start, dateRange.end)),
 			shareReplay({ refCount: false, bufferSize: 0 })
 		);
 
-		const selectedPackageNames$ = this.selectedPackageNames.valueChanges.pipe(
-			startWith(this.selectedPackageNames.value)
-		);
-
-		const selectedApiDatas$ = combineLatest([this.apiDatas$, selectedPackageNames$]).pipe(
-			map(([apiDatas, selectedPackageNames]) =>
-				// Filter displaying analytics of any npm package that is not selected
-				apiDatas.filter((apiData) => selectedPackageNames.includes(apiData.packageName))
+		this.chartData$ = combineLatest([
+			this.apiDatas$,
+			selectedDates$,
+			this.selectedPackageNames.valueChanges.pipe(startWith(this.selectedPackageNames.value)),
+		]).pipe(
+			map(([registryData, dateRange, visibleLibraries]) =>
+				this.getChartData(registryData, dateRange.start, dateRange.end, visibleLibraries)
 			)
 		);
-
-		// Populate chart
-		this.chartData$ = selectedApiDatas$.pipe(
-			withLatestFrom(selectedDates$),
-			map(([apiDatas, formValues]) => this.getChartData(apiDatas, formValues.start, formValues.end))
-		);
-	}
-
-	ngOnInit(): void {
-		// Handle when add package name form submits
-		fromEvent(this.addPackageNameForm.nativeElement, 'submit')
-			.pipe(
-				withLatestFrom(this.packageNames.observable$),
-				tap(([, packageNames]) => {
-					const newPackageName = this.addPackage.value;
-
-					// Avoid duplicate npm package names
-					if (packageNames.includes(newPackageName)) {
-						return;
-					}
-
-					// Add to list of package names
-					this.packageNames.push(newPackageName);
-					this.packageNames.sort();
-
-					// Clear value
-					this.addPackage.setValue('');
-					this.addPackage.markAsUntouched();
-				})
-			)
-			.subscribe();
 	}
 
 	getDateRangeFormGroup(): FormGroup<{
@@ -213,7 +151,7 @@ export class AppComponent implements OnInit, OnDestroy {
 			}),
 		});
 	}
-
+	/* Return package names from URL, if empry return default names */
 	getDefaultPackageNames(): string[] {
 		const packageNames = this.getPackageNamesFromParams().filter((packageName) => !!packageName);
 
@@ -230,6 +168,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		).sort();
 	}
 
+	/* Return package names from URL combined with packaged names saved in local storage */
 	getCachedPackageNames(key: string): string[] {
 		const packageNames = this.getDefaultPackageNames();
 
@@ -247,7 +186,9 @@ export class AppComponent implements OnInit, OnDestroy {
 	}
 
 	removePackageName(packageName: string): void {
-		this.packageNames.removeValue(packageName);
+		const loadedPackageNames = this.packageNames.value;
+		const newValue = loadedPackageNames.filter((value) => value !== packageName);
+		this.packageNames.patchValue(newValue);
 	}
 
 	onPackageNamesChanged(packageNames: string[]) {
@@ -259,21 +200,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
 		// cache package names
 		this.storageService.setItem('package-names', packageNames);
-	}
-
-	getAutocompleteOptions(source: string[], skip: string[], query: string): string[] {
-		const particalPackageNameSlug = query.toLowerCase();
-		const packageNameSlugs = skip.map((packageName) => packageName.toLowerCase());
-
-		return source.filter((autocompletePackageName) => {
-			const autocompleteSlug = autocompletePackageName.toLowerCase();
-
-			if (packageNameSlugs.includes(autocompleteSlug)) {
-				return false;
-			}
-
-			return autocompleteSlug.includes(particalPackageNameSlug);
-		});
 	}
 
 	getApiDates(packageNames: string[], start: Date, end: Date): Observable<RegistryData[]> {
@@ -303,10 +229,13 @@ export class AppComponent implements OnInit, OnDestroy {
 		).pipe(map((datas) => datas.filter((data): data is RegistryData => !!data)));
 	}
 
-	getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
+	getChartData(apiDatas: RegistryData[], start: Date, end: Date, visibleLibraries: string[]): ChartData {
+		// filter out libraries we want to show
+		const libraries = apiDatas.filter((data) => visibleLibraries.includes(data.packageName));
+
 		const columns: Column[] = [
 			{ type: 'string', label: 'Date' },
-			...apiDatas.map(({ packageName, total }) => ({
+			...libraries.map(({ packageName, total }) => ({
 				type: 'number',
 				label: `${packageName} (${formatNumber(total, this.locale)})`,
 			})),
@@ -317,7 +246,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		// TODO: get formatter given range
 		// MM/dd vs MM/dd/yy
 		const rows = dates.map((date, i) => {
-			return [format(date, 'MM/dd/yy'), ...apiDatas.map((apiData) => apiData.range[i])];
+			return [format(date, 'MM/dd/yy'), ...libraries.map((apiData) => apiData.range[i])];
 		});
 
 		const options = {
@@ -367,6 +296,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		this.setPackageNamesInParams([]);
 	}
 
+	/* Return package names from URL */
 	getPackageNamesFromParams(): string[] {
 		try {
 			const params = new URLSearchParams(window.location.search);

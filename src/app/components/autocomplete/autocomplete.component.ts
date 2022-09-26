@@ -1,0 +1,132 @@
+import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
+import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { combineLatest, debounceTime, map, Observable, of, startWith, switchMap } from 'rxjs';
+import { ErrorHandlerService, NpmRegistryService } from 'src/app/services';
+
+@Component({
+	selector: 'app-autocomplete',
+	templateUrl: './autocomplete.component.html',
+	styleUrls: ['./autocomplete.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [
+		{
+			provide: NG_VALUE_ACCESSOR,
+			useExisting: forwardRef(() => AutocompleteComponent),
+			multi: true,
+		},
+	],
+})
+export class AutocompleteComponent implements ControlValueAccessor {
+	/*
+    keep track of package names that has been already loaded and show them
+    as suggestion for the user
+  */
+	@Input() autocompletePackageNames: string[] | null = [];
+
+	/*
+    Pacakge names that are already loaded to prevent selecting same library
+    multiple times
+  */
+	private alreadyLoadedPackageName: string[] = [];
+
+	/* Observale that will display loaded packages from NPM */
+	readonly autocompleteOptions$!: Observable<string[]>;
+
+	/* Form control to allow user search packages  */
+	readonly addPackage: FormControl<string> = new FormControl('', {
+		validators: this.errorHandlerService.noDuplicatesValidator(this.alreadyLoadedPackageName),
+		nonNullable: true,
+	});
+
+	/* errors that may occur when searching for a package name */
+	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	onChange = (value: string[]) => {
+		/* empty */
+	};
+	onTouched = () => {
+		/* empty */
+	};
+	constructor(
+		private readonly npmRegistryService: NpmRegistryService,
+		private readonly errorHandlerService: ErrorHandlerService
+	) {
+		// npm library suggestions on user input
+		const suggestions$ = this.searchLibraryOnInputChange();
+
+		this.autocompleteOptions$ = combineLatest([
+			// All suggestions
+			suggestions$.pipe(startWith([])),
+			// Partial npm package name to filter options
+			this.addPackage.valueChanges.pipe(startWith('')),
+		]).pipe(
+			map(([suggestions, query]) =>
+				this.getAutocompleteOptions(
+					[...new Set([...(this.autocompletePackageNames ?? []), ...suggestions])],
+					this.alreadyLoadedPackageName,
+					query
+				)
+			)
+		);
+	}
+
+	writeValue(value?: string[]): void {
+		this.alreadyLoadedPackageName = [...(value ?? [])];
+	}
+	registerOnChange(fn: (value: string[]) => void): void {
+		this.onChange = fn;
+	}
+	registerOnTouched(fn: (value: void) => void): void {
+		this.onTouched = fn;
+	}
+
+	onSubmit(): void {
+		this.alreadyLoadedPackageName = [...this.alreadyLoadedPackageName, this.addPackage.value];
+		this.onChange(this.alreadyLoadedPackageName);
+
+		// Clear value
+		this.addPackage.setValue('');
+		this.addPackage.markAsUntouched();
+	}
+
+	private searchLibraryOnInputChange(): Observable<string[]> {
+		return this.addPackage.valueChanges.pipe(
+			debounceTime(300),
+			switchMap((query) => {
+				if (!query) {
+					return of([]);
+				}
+				return this.npmRegistryService.getSuggestions(query).pipe(
+					map((suggestions) =>
+						// prevent displaying already loaded packages
+						suggestions.filter((suggestion) => !this.alreadyLoadedPackageName.includes(suggestion))
+					)
+				);
+			})
+		);
+	}
+
+	/**
+	 * @param source - npm packages that can be displayed in the select
+	 * @param skip - npm packages that are already loaded and we dont want to display them again
+	 * @param query - npm package prefix that we are looking for.
+	 *                Filters our from source only packages that match query
+	 * @returns npm packages that will be displayed on the select
+	 */
+
+	private getAutocompleteOptions(source: string[], skip: string[], query: string): string[] {
+		const particalPackageNameSlug = query.toLowerCase();
+		const packageNameSlugs = skip.map((packageName) => packageName.toLowerCase());
+
+		return source.filter((autocompletePackageName) => {
+			const autocompleteSlug = autocompletePackageName.toLowerCase();
+
+			if (packageNameSlugs.includes(autocompleteSlug)) {
+				return false;
+			}
+
+			return autocompleteSlug.includes(particalPackageNameSlug);
+		});
+	}
+}
