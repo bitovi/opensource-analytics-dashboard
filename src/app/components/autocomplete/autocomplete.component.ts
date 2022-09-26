@@ -1,5 +1,13 @@
 import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
-import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+	AbstractControl,
+	ControlValueAccessor,
+	FormControl,
+	NG_VALIDATORS,
+	NG_VALUE_ACCESSOR,
+	ValidationErrors,
+	Validators,
+} from '@angular/forms';
 import { combineLatest, debounceTime, map, Observable, of, startWith, switchMap } from 'rxjs';
 import { ErrorHandlerService, NpmRegistryService } from 'src/app/services';
 
@@ -14,9 +22,14 @@ import { ErrorHandlerService, NpmRegistryService } from 'src/app/services';
 			useExisting: forwardRef(() => AutocompleteComponent),
 			multi: true,
 		},
+		{
+			provide: NG_VALIDATORS,
+			useExisting: forwardRef(() => AutocompleteComponent),
+			multi: true,
+		},
 	],
 })
-export class AutocompleteComponent implements ControlValueAccessor {
+export class AutocompleteComponent implements ControlValueAccessor, Validators {
 	/*
     keep track of package names that has been already loaded and show them
     as suggestion for the user
@@ -79,6 +92,10 @@ export class AutocompleteComponent implements ControlValueAccessor {
 	}
 	registerOnTouched(fn: (value: void) => void): void {
 		this.onTouched = fn;
+	}
+
+	validate(c: AbstractControl): ValidationErrors | null {
+		return c.validator;
 	}
 
 	onSubmit(): void {
