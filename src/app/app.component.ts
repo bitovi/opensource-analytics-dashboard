@@ -24,10 +24,8 @@ import {
 
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData } from './models';
-import { RegistryData } from './models/npm-registry.model';
-import { DataService, DateService, ErrorHandlerService, StorageService } from './services';
-import { ApiService } from './services/api';
+import { ChartData, RegistryData } from './models';
+import { ApiService, DataService, DateService, ErrorHandlerService, StorageService } from './services';
 
 type RegistryError = { error?: { error?: string }; message?: string };
 
