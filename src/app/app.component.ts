@@ -25,8 +25,9 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
-import { RegistryData } from './services/npm-registry/npm-registry.model';
+import { RegistryData } from './models/npm-registry.model';
+import { DataService, DateService, ErrorHandlerService, StorageService } from './services';
+import { ApiService } from './services/api';
 
 interface ChartData {
 	columns: Column[];
@@ -48,7 +49,8 @@ export class AppComponent implements OnInit, OnDestroy {
 	private readonly dateService = inject(DateService);
 	private readonly storageService = inject(StorageService);
 	private readonly errorHandlerService = inject(ErrorHandlerService);
-	private readonly npmRegistryService = inject(NpmRegistryService);
+	private readonly dataService = inject(DataService);
+	private readonly apiService = inject(ApiService);
 	private readonly matSnackBar = inject(MatSnackBar);
 	private readonly locale = inject(LOCALE_ID);
 
@@ -119,7 +121,7 @@ export class AppComponent implements OnInit, OnDestroy {
 					return of([]);
 				}
 
-				return this.npmRegistryService.getSuggestions(query);
+				return this.apiService.getSuggestions(query);
 			}),
 			withLatestFrom(this.packageNames.observable$),
 			map(([suggestions, existingPackageNames]) =>
@@ -163,6 +165,9 @@ export class AppComponent implements OnInit, OnDestroy {
 			withLatestFrom(selectedDates$),
 			map(([apiDatas, formValues]) => this.getChartData(apiDatas, formValues.start, formValues.end))
 		);
+
+		// Testing API call
+		// this.dataService.getGithubRepositoryData('angular/angular-cli').subscribe(console.log);
 	}
 
 	ngOnInit(): void {
@@ -275,7 +280,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 		return forkJoin(
 			packageNames.map((packageName) =>
-				this.npmRegistryService
+				this.dataService
 					.getRegistry(
 						packageName,
 						this.dateService.getFormattedDateString(start),

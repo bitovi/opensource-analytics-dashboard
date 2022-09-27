@@ -19,5 +19,8 @@ export interface Suggestion {
 	package: {
 		name: string;
 		version: string;
+		links: {
+			repository: string;
+		};
 	};
 }
