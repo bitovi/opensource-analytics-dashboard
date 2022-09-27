@@ -1,7 +1,7 @@
-import { Component, ElementRef, inject, LOCALE_ID, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ChartType, Column, Row } from 'angular-google-charts';
-import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
+import { ChartType } from 'angular-google-charts';
+import { isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
 	catchError,
 	combineLatest,
@@ -22,18 +22,12 @@ import {
 	withLatestFrom,
 } from 'rxjs';
 
-import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
+import { ChartData } from './models';
 import { RegistryData } from './models/npm-registry.model';
 import { DataService, DateService, ErrorHandlerService, StorageService } from './services';
 import { ApiService } from './services/api';
-
-interface ChartData {
-	columns: Column[];
-	rows: Row[];
-	options: object;
-}
 
 type RegistryError = { error?: { error?: string }; message?: string };
 
@@ -52,7 +46,6 @@ export class AppComponent implements OnInit, OnDestroy {
 	private readonly dataService = inject(DataService);
 	private readonly apiService = inject(ApiService);
 	private readonly matSnackBar = inject(MatSnackBar);
-	private readonly locale = inject(LOCALE_ID);
 
 	readonly autocompleteOptions$!: Observable<string[]>;
 
@@ -163,7 +156,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		// Populate chart
 		this.chartData$ = selectedApiDatas$.pipe(
 			withLatestFrom(selectedDates$),
-			map(([apiDatas, formValues]) => this.getChartData(apiDatas, formValues.start, formValues.end))
+			map(([apiDatas, formValues]) => this.dateService.getChartData(apiDatas, formValues.start, formValues.end))
 		);
 
 		// Testing API call
@@ -298,34 +291,6 @@ export class AppComponent implements OnInit, OnDestroy {
 			)
 			// Filter out errors
 		).pipe(map((datas) => datas.filter((data): data is RegistryData => !!data)));
-	}
-
-	getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
-		const columns: Column[] = [
-			{ type: 'string', label: 'Date' },
-			...apiDatas.map(({ packageName, total }) => ({
-				type: 'number',
-				label: `${packageName} (${formatNumber(total, this.locale)})`,
-			})),
-		];
-
-		const dates = this.dateService.getDateRange(start, end);
-
-		// TODO: get formatter given range
-		// MM/dd vs MM/dd/yy
-		const rows = dates.map((date, i) => {
-			return [format(date, 'MM/dd/yy'), ...apiDatas.map((apiData) => apiData.range[i])];
-		});
-
-		const options = {
-			chart: {
-				title: 'Downloads',
-				subtitle: 'per day for a given period of specific package(s)',
-			},
-			height: 400,
-		};
-
-		return { columns, rows, options };
 	}
 
 	/**
