@@ -3,7 +3,7 @@ import { ChartType } from 'angular-google-charts';
 import { ChartData } from '../../models';
 
 @Component({
-	selector: 'app-chart-component',
+	selector: 'app-chart',
 	templateUrl: './chart-component.component.html',
 	styleUrls: ['./chart-component.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,

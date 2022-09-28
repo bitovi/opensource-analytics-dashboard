@@ -33,7 +33,7 @@
 <ng-container *ngIf="chartData$ | async as chartData">
 	<div class="margin-row" *ngIf="chartData.columns.length > 1">
 		<div class="container">
-			<app-chart-component [chartData]="chartData"></app-chart-component>
+			<app-chart [chartData]="chartData"></app-chart>
 		</div>
 	</div>
 </ng-container>
