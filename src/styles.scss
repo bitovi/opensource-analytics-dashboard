@@ -30,3 +30,8 @@ body {
 	flex-wrap: wrap;
 	gap: $padding * 0.25;
 }
+
+mat-form-field {
+	max-width: 320px;
+	width: 100%;
+}
