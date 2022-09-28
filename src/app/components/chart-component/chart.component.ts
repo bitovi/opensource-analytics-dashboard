@@ -4,8 +4,8 @@ import { ChartData } from '../../models';
 
 @Component({
 	selector: 'app-chart',
-	templateUrl: './chart-component.component.html',
-	styleUrls: ['./chart-component.component.scss'],
+	templateUrl: './chart.component.html',
+	styleUrls: ['./chart.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartComponent {
