@@ -1,6 +1,6 @@
 import { Component, inject, LOCALE_ID, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ChartType, Column, Row } from 'angular-google-charts';
+import { Column } from 'angular-google-charts';
 import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
 	catchError,
@@ -21,14 +21,9 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
+import { ChartData } from './models';
 import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
-
-interface ChartData {
-	columns: Column[];
-	rows: Row[];
-	options: object;
-}
 
 type RegistryError = { error?: { error?: string }; message?: string };
 
@@ -53,9 +48,6 @@ export class AppComponent implements OnDestroy {
 	readonly startDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('Start Date');
 	readonly endDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('End Date');
 	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
-
-	// Used to input bind ChartType enum in template
-	readonly chartType = ChartType.Line;
 
 	readonly apiDatas$: Observable<RegistryData[]>;
 
