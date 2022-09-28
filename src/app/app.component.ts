@@ -1,6 +1,5 @@
 import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ChartType } from 'angular-google-charts';
 import { isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
 	catchError,
@@ -55,9 +54,6 @@ export class AppComponent implements OnInit, OnDestroy {
 	readonly startDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('Start Date');
 	readonly endDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('End Date');
 	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
-
-	// Used to input bind ChartType enum in template
-	readonly chartType = ChartType.Line;
 
 	readonly apiDatas$: Observable<RegistryData[]>;
 

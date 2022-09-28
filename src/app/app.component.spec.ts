@@ -41,6 +41,11 @@ class MockMatDateRangePickerComponent {}
 })
 class MockMatDatepickerToggleComponent {}
 
+@Component({
+	selector: 'app-package-list',
+})
+class MockPackageListComponent {}
+
 describe('AppComponent', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
@@ -56,6 +61,7 @@ describe('AppComponent', () => {
 				MockMatDateRangeInputComponent,
 				MockMatDateRangePickerComponent,
 				MockMatDatepickerToggleComponent,
+				MockPackageListComponent,
 			],
 			providers: [
 				{
