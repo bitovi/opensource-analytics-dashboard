@@ -27,24 +27,14 @@ class MockMatErrorComponent {}
 class MockMatFormFieldComponent {}
 
 @Component({
-	selector: 'mat-date-range-input',
-})
-class MockMatDateRangeInputComponent {}
-
-@Component({
-	selector: 'mat-date-range-picker',
-})
-class MockMatDateRangePickerComponent {}
-
-@Component({
-	selector: 'mat-datepicker-toggle',
-})
-class MockMatDatepickerToggleComponent {}
-
-@Component({
 	selector: 'app-package-list',
 })
 class MockPackageListComponent {}
+
+@Component({
+	selector: 'app-date-range-picker',
+})
+class MockDateRangePickerComponent {}
 
 describe('AppComponent', () => {
 	beforeEach(async () => {
@@ -58,10 +48,8 @@ describe('AppComponent', () => {
 				MockMatHintComponent,
 				MockMatErrorComponent,
 				MockMatFormFieldComponent,
-				MockMatDateRangeInputComponent,
-				MockMatDateRangePickerComponent,
-				MockMatDatepickerToggleComponent,
 				MockPackageListComponent,
+				MockDateRangePickerComponent,
 			],
 			providers: [
 				{
