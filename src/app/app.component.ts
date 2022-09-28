@@ -25,10 +25,9 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData } from './models';
+import { ChartData, DateRange } from './models';
 import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
-import { DateRange } from './components/date-range-picker/date-range-picker.component';
 
 type RegistryError = { error?: { error?: string }; message?: string };
 

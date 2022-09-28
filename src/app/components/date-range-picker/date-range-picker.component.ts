@@ -9,9 +9,8 @@ import {
 	Validators,
 } from '@angular/forms';
 import { Subject, takeUntil, tap } from 'rxjs';
+import { DateRange } from '../../models';
 import { ErrorHandlerService } from '../../services';
-
-export type DateRange = [Date, Date];
 
 @Component({
 	selector: 'app-date-range-picker',
