@@ -8,7 +8,7 @@ import { ChartData } from '../../models';
 	styleUrls: ['./chart-component.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChartComponentComponent {
+export class ChartComponent {
 	@Input() chartData!: ChartData;
 
 	// Used to input bind ChartType enum in template

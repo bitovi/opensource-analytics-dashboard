@@ -15,11 +15,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GoogleChartsModule } from 'angular-google-charts';
 
 import { AppComponent } from './app.component';
+import { ChartComponent } from './components/chart-component/chart-component.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { PackageListComponent } from './components/package-list/package-list.component';
 import { ErrorHandlerDirective } from './directives';
 import { ToObservablePipe } from './pipes';
-import { ChartComponentComponent } from './components/chart-component/chart-component.component';
 
 @NgModule({
 	declarations: [
@@ -28,7 +28,7 @@ import { ChartComponentComponent } from './components/chart-component/chart-comp
 		ErrorHandlerDirective,
 		FooterComponent,
 		PackageListComponent,
-		ChartComponentComponent,
+		ChartComponent,
 	],
 	imports: [
 		BrowserModule,
