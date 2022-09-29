@@ -25,9 +25,10 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData, DateRange } from './models';
+import { ChartData, DateRange, StorageId, HARDCODED_PACKAGE_NAMES } from './models';
 import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
+import { ParamsService } from './services/params.service';
 
 type RegistryError = { error?: { error?: string }; message?: string };
 
@@ -44,6 +45,7 @@ export class AppComponent implements OnInit, OnDestroy {
 	private readonly storageService = inject(StorageService);
 	private readonly errorHandlerService = inject(ErrorHandlerService);
 	private readonly npmRegistryService = inject(NpmRegistryService);
+	private readonly paramsService = inject(ParamsService);
 	private readonly matSnackBar = inject(MatSnackBar);
 	private readonly locale = inject(LOCALE_ID);
 
@@ -57,9 +59,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
 	readonly chartData$: Observable<ChartData>;
 
-	readonly packageNames: ArrayObservable<string> = new ArrayObservable(this.getCachedPackageNames('package-names'));
+	readonly packageNames: ArrayObservable<string> = new ArrayObservable(this.getDefaultPackageNames());
 	readonly autocompletePackageNames: ArrayObservable<string> = new ArrayObservable(
-		this.getCachedPackageNames('autocomplete-package-names')
+		this.getCachedPackageNames(StorageId.PackageNames).sort()
 	);
 
 	readonly dateRangeFormControl: FormControl<DateRange> = new FormControl(this.getInitialDateRange(), {
@@ -80,7 +82,7 @@ export class AppComponent implements OnInit, OnDestroy {
 			.pipe(
 				tap((packageNames) => {
 					this.onPackageNamesChanged(packageNames);
-					this.setPackageNamesInParams(packageNames);
+					this.paramsService.setPackageNamesInParams(packageNames);
 				}),
 				takeUntil(this.unsubscribe$)
 			)
@@ -89,8 +91,8 @@ export class AppComponent implements OnInit, OnDestroy {
 		this.autocompletePackageNames.observable$
 			.pipe(
 				tap((autocompletePackageNames) => {
-					// cache autocomplete package names
-					this.storageService.setItem('autocomplete-package-names', autocompletePackageNames);
+					// Cache autocomplete package names
+					this.storageService.setItem(StorageId.PackageNames, autocompletePackageNames);
 				})
 			)
 			.subscribe();
@@ -179,36 +181,45 @@ export class AppComponent implements OnInit, OnDestroy {
 			.subscribe();
 	}
 
+	/**
+	 * Get initial list of active packages that should populate the chart
+	 *
+	 * List of packages should never be empty
+	 */
 	getDefaultPackageNames(): string[] {
-		const packageNames = this.getPackageNamesFromParams().filter((packageName) => !!packageName);
+		// Check query params for list of packages first
+		const packageNamesFromQueryParams = this.paramsService.getPackageNamesFromParams();
 
-		return (
-			packageNames.length
-				? packageNames
-				: [
-						'@bitovi/eslint-config',
-						'@bitovi/react-numerics',
-						'@bitovi/use-simple-reducer',
-						'ngx-feature-flag-router',
-						'react-to-webcomponent',
-				  ]
-		).sort();
+		if (packageNamesFromQueryParams.length) {
+			return packageNamesFromQueryParams.sort();
+		}
+
+		// Fallback to storage / cache
+		const cachedPackages = this.getCachedPackageNames(StorageId.ActivePackageNames);
+
+		if (cachedPackages.length) {
+			return cachedPackages.sort();
+		}
+
+		// Fallback to list of bitovi open source package names
+		return [...HARDCODED_PACKAGE_NAMES].sort();
 	}
 
-	getCachedPackageNames(key: string): string[] {
-		const packageNames = this.getDefaultPackageNames();
-
+	/**
+	 * Get list of packages for the autocomplete or for `app-package-list` from storage / cache
+	 */
+	getCachedPackageNames(storageId: StorageId): string[] {
 		try {
-			const cache = JSON.parse(this.storageService.getItem(key) ?? '[]');
+			const cache = JSON.parse(this.storageService.getItem(storageId) ?? '[]');
 
 			if (cache?.length) {
-				return [...new Set([...packageNames, ...cache])].sort();
+				return cache;
 			}
 		} catch (error) {
 			console.error(error);
 		}
 
-		return packageNames;
+		return [];
 	}
 
 	removePackageName(packageName: string): void {
@@ -222,8 +233,8 @@ export class AppComponent implements OnInit, OnDestroy {
 		this.autocompletePackageNames.set([...new Set([...packageNames, ...this.autocompletePackageNames.getValue()])]);
 		this.autocompletePackageNames.sort();
 
-		// cache package names
-		this.storageService.setItem('package-names', packageNames);
+		// Cache package names
+		this.storageService.setItem(StorageId.ActivePackageNames, packageNames);
 	}
 
 	getAutocompleteOptions(source: string[], skip: string[], query: string): string[] {
@@ -311,7 +322,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		return 'Unexpected error';
 	}
 
-	displayErrorMessage(error: unknown) {
+	displayErrorMessage(error: unknown): void {
 		const message = this.getErrorMessage(error as RegistryError);
 		const estimatedDuration = 2000 + message.length * 100;
 
@@ -322,24 +333,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 	clearCache(): void {
 		this.storageService.clearAllStorage();
-		this.setPackageNamesInParams([]);
-	}
-
-	getPackageNamesFromParams(): string[] {
-		try {
-			const params = new URLSearchParams(window.location.search);
-
-			return params.get('p')?.split(',') ?? [];
-		} catch (error) {
-			console.error(error);
-			return [];
-		}
-	}
-
-	setPackageNamesInParams(packageNames: string[]): void {
-		let url = window.location.href.split('?')[0];
-		url += `?p=${packageNames}`;
-		window.history.replaceState({}, document.title, url);
+		this.paramsService.setPackageNamesInParams([]);
 	}
 
 	/**
