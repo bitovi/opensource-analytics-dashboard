@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { DateFormat, DateRange } from '../models';
 import { QueryParams } from '../models/query-params.model';
+import { DateService } from './date';
 
 /**
  * Gets and sets params without changing navigation history.
@@ -9,6 +11,8 @@ import { QueryParams } from '../models/query-params.model';
 	providedIn: 'root',
 })
 export class ParamsService {
+	private readonly dateService = inject(DateService);
+
 	/**
 	 * Gets param value by name
 	 */
@@ -57,7 +61,38 @@ export class ParamsService {
 	/**
 	 * Set package names in params
 	 */
-	setPackageNames(packageNames: string[]): void {
-		this.setParam(QueryParams.PACKAGE_NAMES, packageNames.toString());
+	setPackageNames(dateRange: string[]): void {
+		this.setParam(QueryParams.PACKAGE_NAMES, dateRange.toString());
+	}
+
+	/**
+	 * Get package names in params
+	 */
+	getDateRange(): DateRange | null {
+		const dateRangeParams = this.getParam(QueryParams.DATE_RANGE)?.split(',') ?? [];
+
+		// Ensure that there's exactly 2 values for the date range
+		if (dateRangeParams.length !== 2) {
+			return null;
+		}
+
+		const [start, end] = dateRangeParams;
+
+		return [
+			this.dateService.getDate(start, DateFormat.YEAR_MONTH_DAY),
+			this.dateService.getDate(end, DateFormat.YEAR_MONTH_DAY),
+		];
+	}
+
+	/**
+	 * Set package names in params
+	 */
+	setDateRange([start, end]: DateRange): void {
+		const startString = this.dateService.getDateString(start, DateFormat.YEAR_MONTH_DAY);
+		const endString = this.dateService.getDateString(end, DateFormat.YEAR_MONTH_DAY);
+
+		const param = `${startString},${endString}`;
+
+		this.setParam(QueryParams.DATE_RANGE, param);
 	}
 }

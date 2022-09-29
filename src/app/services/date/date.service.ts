@@ -1,12 +1,23 @@
 import { Injectable } from '@angular/core';
-import { addDays, differenceInDays, format, isEqual } from 'date-fns';
+import { addDays, differenceInDays, format, isEqual, parse } from 'date-fns';
+import { DateFormat } from '../../models';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class DateService {
-	getFormattedDateString(date: Date): string {
-		return format(date, 'yyyy-MM-dd');
+	/**
+	 * Get a Date instance based on a string format
+	 */
+	getDate(date: string, dateFormat: DateFormat): Date {
+		return parse(date, dateFormat, new Date());
+	}
+
+	/**
+	 * Get a formatted date string based on a string format
+	 */
+	getDateString(date: Date, dateFormat: DateFormat): string {
+		return format(date, dateFormat);
 	}
 
 	getDateRange(start: Date, end: Date): Date[] {

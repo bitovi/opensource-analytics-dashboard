@@ -25,7 +25,7 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData, DateRange, StorageId, HARDCODED_PACKAGE_NAMES } from './models';
+import { ChartData, DateRange, StorageId, HARDCODED_PACKAGE_NAMES, DateFormat } from './models';
 import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
 import { ParamsService } from './services/params.service';
@@ -93,7 +93,8 @@ export class AppComponent implements OnInit, OnDestroy {
 				tap((autocompletePackageNames) => {
 					// Cache autocomplete package names
 					this.storageService.setItem(StorageId.PACKAGE_NAMES, autocompletePackageNames);
-				})
+				}),
+				takeUntil(this.unsubscribe$)
 			)
 			.subscribe();
 
@@ -102,6 +103,16 @@ export class AppComponent implements OnInit, OnDestroy {
 			// Ignore any values where the end is before the start
 			filter(([start, end]) => isEqual(end, start) || isAfter(end, start))
 		);
+
+		selectedDates$
+			.pipe(
+				tap((dateRange) => {
+					// Store the current date range in the query params
+					this.paramsService.setDateRange(dateRange);
+				}),
+				takeUntil(this.unsubscribe$)
+			)
+			.subscribe();
 
 		const suggestions$ = this.addPackage.valueChanges.pipe(
 			debounceTime(200),
@@ -262,8 +273,8 @@ export class AppComponent implements OnInit, OnDestroy {
 				this.npmRegistryService
 					.getRegistry(
 						packageName,
-						this.dateService.getFormattedDateString(start),
-						this.dateService.getFormattedDateString(end)
+						this.dateService.getDateString(start, DateFormat.YEAR_MONTH_DAY),
+						this.dateService.getDateString(end, DateFormat.YEAR_MONTH_DAY)
 					)
 					.pipe(
 						catchError((error: unknown) => {
@@ -341,6 +352,12 @@ export class AppComponent implements OnInit, OnDestroy {
 	 */
 	getInitialDateRange(): [Date, Date] {
 		const currentDate = startOfDay(new Date());
+
+		const dateRangeParams = this.paramsService.getDateRange();
+
+		if (dateRangeParams) {
+			return dateRangeParams;
+		}
 
 		return [subDays(currentDate, 8), subDays(currentDate, 1)];
 	}
