@@ -82,7 +82,7 @@ export class AppComponent implements OnInit, OnDestroy {
 			.pipe(
 				tap((packageNames) => {
 					this.onPackageNamesChanged(packageNames);
-					this.paramsService.setPackageNamesInParams(packageNames);
+					this.paramsService.setPackageNames(packageNames);
 				}),
 				takeUntil(this.unsubscribe$)
 			)
@@ -188,7 +188,7 @@ export class AppComponent implements OnInit, OnDestroy {
 	 */
 	getDefaultPackageNames(): string[] {
 		// Check query params for list of packages first
-		const packageNamesFromQueryParams = this.paramsService.getPackageNamesFromParams();
+		const packageNamesFromQueryParams = this.paramsService.getPackageNames();
 
 		if (packageNamesFromQueryParams.length) {
 			return packageNamesFromQueryParams.sort();
@@ -333,7 +333,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 	clearCache(): void {
 		this.storageService.clearAllStorage();
-		this.paramsService.setPackageNamesInParams([]);
+		this.paramsService.setPackageNames([]);
 	}
 
 	/**
