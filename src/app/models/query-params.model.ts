@@ -1,3 +1,3 @@
 export enum QueryParams {
-	PackageNames = 'p',
+	PACKAGE_NAMES = 'p',
 }

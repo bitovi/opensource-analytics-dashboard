@@ -61,7 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 	readonly packageNames: ArrayObservable<string> = new ArrayObservable(this.getDefaultPackageNames());
 	readonly autocompletePackageNames: ArrayObservable<string> = new ArrayObservable(
-		this.getCachedPackageNames(StorageId.PackageNames).sort()
+		this.getCachedPackageNames(StorageId.PACKAGE_NAMES).sort()
 	);
 
 	readonly dateRangeFormControl: FormControl<DateRange> = new FormControl(this.getInitialDateRange(), {
@@ -92,7 +92,7 @@ export class AppComponent implements OnInit, OnDestroy {
 			.pipe(
 				tap((autocompletePackageNames) => {
 					// Cache autocomplete package names
-					this.storageService.setItem(StorageId.PackageNames, autocompletePackageNames);
+					this.storageService.setItem(StorageId.PACKAGE_NAMES, autocompletePackageNames);
 				})
 			)
 			.subscribe();
@@ -195,7 +195,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		}
 
 		// Fallback to storage / cache
-		const cachedPackages = this.getCachedPackageNames(StorageId.ActivePackageNames);
+		const cachedPackages = this.getCachedPackageNames(StorageId.ACTIVE_PACKAGE_NAMES);
 
 		if (cachedPackages.length) {
 			return cachedPackages.sort();
@@ -234,7 +234,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		this.autocompletePackageNames.sort();
 
 		// Cache package names
-		this.storageService.setItem(StorageId.ActivePackageNames, packageNames);
+		this.storageService.setItem(StorageId.ACTIVE_PACKAGE_NAMES, packageNames);
 	}
 
 	getAutocompleteOptions(source: string[], skip: string[], query: string): string[] {
