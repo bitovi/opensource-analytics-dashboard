@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, LOCALE_ID, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
@@ -21,7 +21,9 @@ import {
 	withLatestFrom,
 } from 'rxjs';
 
+import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Column } from 'angular-google-charts';
 import { ArrayObservable } from './classes';
 import { ChartData, RegistryData } from './models';
 import { ApiService, DataService, DateService, ErrorHandlerService, StorageService } from './services';
@@ -43,6 +45,7 @@ export class AppComponent implements OnInit, OnDestroy {
 	private readonly dataService = inject(DataService);
 	private readonly apiService = inject(ApiService);
 	private readonly matSnackBar = inject(MatSnackBar);
+	private readonly locale = inject(LOCALE_ID);
 
 	readonly autocompleteOptions$!: Observable<string[]>;
 
@@ -150,7 +153,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		// Populate chart
 		this.chartData$ = selectedApiDatas$.pipe(
 			withLatestFrom(selectedDates$),
-			map(([apiDatas, formValues]) => this.dateService.getChartData(apiDatas, formValues.start, formValues.end))
+			map(([apiDatas, formValues]) => this.getChartData(apiDatas, formValues.start, formValues.end))
 		);
 
 		// Testing API call
@@ -258,6 +261,29 @@ export class AppComponent implements OnInit, OnDestroy {
 
 			return autocompleteSlug.includes(particalPackageNameSlug);
 		});
+	}
+
+	getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
+		const columns: Column[] = [
+			{ type: 'string', label: 'Date' },
+			...apiDatas.map(({ packageName, total }) => ({
+				type: 'number',
+				label: `${packageName} (${formatNumber(total, this.locale)})`,
+			})),
+		];
+
+		const dates = this.dateService.getDateRange(start, end);
+		const rows = this.dateService.getAggregatedReigstryData(apiDatas, dates);
+
+		const options = {
+			chart: {
+				title: 'Downloads',
+				subtitle: 'per day for a given period of specific package(s)',
+			},
+			height: 400,
+		};
+
+		return { columns, rows, options };
 	}
 
 	getApiDates(packageNames: string[], start: Date, end: Date): Observable<RegistryData[]> {

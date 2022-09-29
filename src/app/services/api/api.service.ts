@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, EMPTY, Observable, of } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
 	DownloadsPoint,
@@ -46,13 +46,7 @@ export class ApiService {
 	 * example: https://api.github.com/repos/vuejs/pinia/languages
 	 */
 	getGithubPackageLanguages(repositoryName: string): Observable<GithubRepositoryLanguages> {
-		return this.httpClient.get<GithubRepositoryLanguages>(`${this.GITHUB_ENDPOINT}/${repositoryName}/languages`).pipe(
-			catchError((error: unknown) => {
-				console.error(error);
-
-				return EMPTY;
-			})
-		);
+		return this.httpClient.get<GithubRepositoryLanguages>(`${this.GITHUB_ENDPOINT}/${repositoryName}/languages`);
 	}
 
 	/**
@@ -63,13 +57,7 @@ export class ApiService {
 	 * example: https://api.github.com/repos/angular/angular-cli
 	 */
 	getGithubPackageOverview(repositoryName: string): Observable<GithubRepositoryOverview> {
-		return this.httpClient.get<GithubRepositoryOverview>(`${this.GITHUB_ENDPOINT}/${repositoryName}`).pipe(
-			catchError((error: unknown) => {
-				console.error(error);
-
-				return EMPTY;
-			})
-		);
+		return this.httpClient.get<GithubRepositoryOverview>(`${this.GITHUB_ENDPOINT}/${repositoryName}`);
 	}
 
 	/**
