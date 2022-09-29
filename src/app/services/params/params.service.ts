@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { DateFormat, DateRange } from '../models';
-import { QueryParams } from '../models/query-params.model';
-import { DateService } from './date';
+import { DateFormat, DateRange, QueryParams } from '../../models';
+import { DateService } from '../date';
 
 /**
  * Gets and sets params without changing navigation history.

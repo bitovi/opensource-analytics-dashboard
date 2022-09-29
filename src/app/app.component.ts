@@ -26,9 +26,8 @@ import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
 import { ChartData, DateRange, StorageId, HARDCODED_PACKAGE_NAMES, DateFormat } from './models';
-import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
+import { DateService, ErrorHandlerService, NpmRegistryService, StorageService, ParamsService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
-import { ParamsService } from './services/params.service';
 
 type RegistryError = { error?: { error?: string }; message?: string };
 
