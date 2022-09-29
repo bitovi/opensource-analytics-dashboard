@@ -53,7 +53,7 @@ export class ParamsService {
 	getPackageNames(): string[] {
 		const packageNames = this.getParam(QueryParams.PACKAGE_NAMES)?.split(',') ?? [];
 
-		// Filter any empty strings since these those wouldn't be valid package names
+		// Filter any empty strings since those wouldn't be valid package names
 		return packageNames.filter((packageName) => !!packageName);
 	}
 
@@ -65,7 +65,7 @@ export class ParamsService {
 	}
 
 	/**
-	 * Get package names in params
+	 * Get date range in params
 	 */
 	getDateRange(): DateRange | null {
 		const dateRangeParams = this.getParam(QueryParams.DATE_RANGE)?.split(',') ?? [];
@@ -84,7 +84,7 @@ export class ParamsService {
 	}
 
 	/**
-	 * Set package names in params
+	 * Set date range in params
 	 */
 	setDateRange([start, end]: DateRange): void {
 		const startString = this.dateService.getDateString(start, DateFormat.YEAR_MONTH_DAY);
