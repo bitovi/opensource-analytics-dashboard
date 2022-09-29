@@ -35,7 +35,7 @@ export class ParamsService {
 		const params = new URLSearchParams(window.location.search);
 
 		// Clear any value if there is already one
-		// If you append a value, there will be duplicate name value pairs in the url
+		// If you append a value without deleting, there will be duplicate name value pairs in the url
 		params.delete(name);
 
 		params.append(name, value);
