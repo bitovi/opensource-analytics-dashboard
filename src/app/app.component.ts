@@ -1,5 +1,5 @@
 import { Component, inject, LOCALE_ID, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { Column } from 'angular-google-charts';
 import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
@@ -23,7 +23,7 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData } from './models';
+import { ChartData, DateRange } from './models';
 import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
 import { RegistryData } from './services/npm-registry/npm-registry.model';
 
@@ -47,8 +47,6 @@ export class AppComponent implements OnDestroy {
 
 	private readonly unsubscribe$ = new Subject<void>();
 
-	readonly startDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('Start Date');
-	readonly endDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('End Date');
 	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
 
 	readonly apiDatas$: Observable<RegistryData[]>;
@@ -67,9 +65,10 @@ export class AppComponent implements OnDestroy {
 		this.getCachedPackageNames('autocomplete-package-names')
 	);
 
-	readonly dateRangeFormGroup = this.getDateRangeFormGroup();
+	readonly dateRangeFormControl: FormControl<DateRange> = new FormControl(this.getInitialDateRange(), {
+		nonNullable: true,
+	});
 
-	/* Form control to allow user search packages  */
 	readonly addPackage: FormControl<string> = new FormControl('', {
 		asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.packageNames.valueChanges),
 		nonNullable: true,
@@ -104,19 +103,17 @@ export class AppComponent implements OnDestroy {
 			)
 			.subscribe();
 
-		const selectedDates$ = this.dateRangeFormGroup.valueChanges.pipe(
-			startWith(this.dateRangeFormGroup.value),
-			// Only emit selected dates from form if they're valid
-			filter((dates): dates is { start: Date; end: Date } => !!dates.start && !!dates.end),
+		const selectedDates$ = this.dateRangeFormControl.valueChanges.pipe(
+			startWith(this.dateRangeFormControl.value),
 			// Ignore any values where the end is before the start
-			filter((dates) => isEqual(dates.end, dates.start) || isAfter(dates.end, dates.start))
+			filter(([start, end]) => isEqual(end, start) || isAfter(end, start))
 		);
 
 		this.apiDatas$ = combineLatest([
 			selectedDates$,
 			this.packageNames.valueChanges.pipe(startWith(this.packageNames.value)),
 		]).pipe(
-			mergeMap(([dateRange, packageNames]) => this.getApiDates(packageNames, dateRange.start, dateRange.end)),
+			mergeMap(([[start, end], packageNames]) => this.getApiDates(packageNames, start, end)),
 			shareReplay({ refCount: false, bufferSize: 0 })
 		);
 
@@ -125,8 +122,8 @@ export class AppComponent implements OnDestroy {
 			selectedDates$,
 			this.selectedPackageNames.valueChanges.pipe(startWith(this.selectedPackageNames.value)),
 		]).pipe(
-			map(([registryData, dateRange, visibleLibraries]) =>
-				this.getChartData(registryData, dateRange.start, dateRange.end, visibleLibraries)
+			map(([registryData, [start, end], visibleLibraries]) =>
+				this.getChartData(registryData, start, end, visibleLibraries)
 			)
 		);
 
@@ -150,24 +147,10 @@ export class AppComponent implements OnDestroy {
 				)
 			)
 		);
+
+		this.autocompleteOptions$.subscribe(console.log);
 	}
 
-	getDateRangeFormGroup(): FormGroup<{
-		start: FormControl<Date | null>;
-		end: FormControl<Date | null>;
-	}> {
-		const currentDate = startOfDay(new Date());
-
-		return new FormGroup({
-			start: new FormControl<Date | null>(subDays(currentDate, 8), {
-				validators: Validators.required,
-			}),
-			end: new FormControl<Date | null>(subDays(currentDate, 1), {
-				validators: Validators.required,
-			}),
-		});
-	}
-	/* Return package names from URL, if empry return default names */
 	getDefaultPackageNames(): string[] {
 		const packageNames = this.getPackageNamesFromParams().filter((packageName) => !!packageName);
 
@@ -222,7 +205,7 @@ export class AppComponent implements OnDestroy {
 		const newPackage = this.addPackage.value;
 
 		// ignore repeated package names
-		if (!this.autocompletePackageNames.getValue().includes(newPackage)) {
+		if (!this.packageNames.value.includes(newPackage)) {
 			this.autocompletePackageNames.push(newPackage);
 			this.packageNames.patchValue([...this.packageNames.value, newPackage]);
 		}
@@ -375,6 +358,15 @@ export class AppComponent implements OnDestroy {
 
 			return autocompleteSlug.includes(particalPackageNameSlug);
 		});
+	}
+
+	/**
+	 * Initialze date range with a week before the current date
+	 */
+	getInitialDateRange(): [Date, Date] {
+		const currentDate = startOfDay(new Date());
+
+		return [subDays(currentDate, 8), subDays(currentDate, 1)];
 	}
 
 	ngOnDestroy(): void {
