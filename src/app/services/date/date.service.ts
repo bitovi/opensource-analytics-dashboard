@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { addDays, differenceInDays, format, isEqual, parse } from 'date-fns';
-import { DateFormat } from '../../models';
+import { DateFormat, RegistryData } from '../../models';
 
 @Injectable({
 	providedIn: 'root',
@@ -18,6 +18,16 @@ export class DateService {
 	 */
 	getDateString(date: Date, dateFormat: DateFormat): string {
 		return format(date, dateFormat);
+	}
+
+	// TODO: Implement agreegating apiDatas by: DAY, WEEK, MONTH
+	getAggregatedReigstryData(apiDatas: RegistryData[], dates: Date[]): (string | number)[][] {
+		// MM/dd vs MM/dd/yy
+		const rows = dates.map((date, i) => {
+			return [format(date, 'MM/dd/yy'), ...apiDatas.map((apiData) => apiData.range[i].downloads)];
+		});
+
+		return rows;
 	}
 
 	getDateRange(start: Date, end: Date): Date[] {

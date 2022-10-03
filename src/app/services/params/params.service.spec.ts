@@ -40,10 +40,14 @@ describe('ParamsService', () => {
 		});
 
 		it('should return null if URLSearchParams is NOT supported', () => {
+			const mockError = new Error('mock error');
+			// Silence console.error
+			const spy = jest.spyOn(console, 'error').mockReturnValueOnce();
 			jest.spyOn(URLSearchParams.prototype, 'get').mockImplementationOnce(() => {
-				throw new Error('mock error');
+				throw mockError;
 			});
 			expect(service.getParam('p')).toBeNull();
+			expect(spy).toBeCalledWith(mockError);
 		});
 	});
 

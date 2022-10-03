@@ -1,7 +1,8 @@
 import { Component, ElementRef, inject, LOCALE_ID, OnDestroy, OnInit, ViewChild } from '@angular/core';
+
 import { FormControl } from '@angular/forms';
 import { Column } from 'angular-google-charts';
-import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
+import { isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
 	catchError,
 	combineLatest,
@@ -25,9 +26,8 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData, DateRange, StorageId, HARDCODED_PACKAGE_NAMES, DateFormat } from './models';
-import { DateService, ErrorHandlerService, NpmRegistryService, StorageService, ParamsService } from './services';
-import { RegistryData } from './services/npm-registry/npm-registry.model';
+import { ChartData, DateFormat, DateRange, HARDCODED_PACKAGE_NAMES, RegistryData, StorageId } from './models';
+import { ApiService, DataService, DateService, ErrorHandlerService, ParamsService, StorageService } from './services';
 
 type RegistryError = { error?: { error?: string }; message?: string };
 
@@ -43,7 +43,8 @@ export class AppComponent implements OnInit, OnDestroy {
 	private readonly dateService = inject(DateService);
 	private readonly storageService = inject(StorageService);
 	private readonly errorHandlerService = inject(ErrorHandlerService);
-	private readonly npmRegistryService = inject(NpmRegistryService);
+	private readonly dataService = inject(DataService);
+	private readonly apiService = inject(ApiService);
 	private readonly paramsService = inject(ParamsService);
 	private readonly matSnackBar = inject(MatSnackBar);
 	private readonly locale = inject(LOCALE_ID);
@@ -120,7 +121,7 @@ export class AppComponent implements OnInit, OnDestroy {
 					return of([]);
 				}
 
-				return this.npmRegistryService.getSuggestions(query);
+				return this.apiService.getSuggestions(query);
 			}),
 			withLatestFrom(this.packageNames.observable$),
 			map(([suggestions, existingPackageNames]) =>
@@ -164,6 +165,9 @@ export class AppComponent implements OnInit, OnDestroy {
 			withLatestFrom(selectedDates$),
 			map(([apiDatas, [start, end]]) => this.getChartData(apiDatas, start, end))
 		);
+
+		// Testing API call
+		// this.dataService.getGithubRepositoryData('angular/angular-cli').subscribe(console.log);
 	}
 
 	ngOnInit(): void {
@@ -262,6 +266,29 @@ export class AppComponent implements OnInit, OnDestroy {
 		});
 	}
 
+	getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
+		const columns: Column[] = [
+			{ type: 'string', label: 'Date' },
+			...apiDatas.map(({ packageName, total }) => ({
+				type: 'number',
+				label: `${packageName} (${formatNumber(total, this.locale)})`,
+			})),
+		];
+
+		const dates = this.dateService.getDateRange(start, end);
+		const rows = this.dateService.getAggregatedReigstryData(apiDatas, dates);
+
+		const options = {
+			chart: {
+				title: 'Downloads',
+				subtitle: 'per day for a given period of specific package(s)',
+			},
+			height: 400,
+		};
+
+		return { columns, rows, options };
+	}
+
 	getApiDates(packageNames: string[], start: Date, end: Date): Observable<RegistryData[]> {
 		if (!packageNames.length) {
 			return of([]);
@@ -269,7 +296,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 		return forkJoin(
 			packageNames.map((packageName) =>
-				this.npmRegistryService
+				this.dataService
 					.getRegistry(
 						packageName,
 						this.dateService.getDateString(start, DateFormat.YEAR_MONTH_DAY),
@@ -287,34 +314,6 @@ export class AppComponent implements OnInit, OnDestroy {
 			)
 			// Filter out errors
 		).pipe(map((datas) => datas.filter((data): data is RegistryData => !!data)));
-	}
-
-	getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
-		const columns: Column[] = [
-			{ type: 'string', label: 'Date' },
-			...apiDatas.map(({ packageName, total }) => ({
-				type: 'number',
-				label: `${packageName} (${formatNumber(total, this.locale)})`,
-			})),
-		];
-
-		const dates = this.dateService.getDateRange(start, end);
-
-		// TODO: get formatter given range
-		// MM/dd vs MM/dd/yy
-		const rows = dates.map((date, i) => {
-			return [format(date, 'MM/dd/yy'), ...apiDatas.map((apiData) => apiData.range[i])];
-		});
-
-		const options = {
-			chart: {
-				title: 'Downloads',
-				subtitle: 'per day for a given period of specific package(s)',
-			},
-			height: 400,
-		};
-
-		return { columns, rows, options };
 	}
 
 	/**

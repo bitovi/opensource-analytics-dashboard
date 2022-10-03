@@ -4,3 +4,7 @@ export * from './date-range.model';
 export * from './hardcoded-package-names';
 export * from './query-params.model';
 export * from './storage-id.model';
+export * from './github-repository-contributors.model';
+export * from './github-repository-languages.model';
+export * from './github-repository.model';
+export * from './npm-registry.model';
