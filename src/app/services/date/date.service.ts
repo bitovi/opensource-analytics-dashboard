@@ -10,7 +10,7 @@ export class DateService {
 	getAggregatedReigstryData(apiDatas: RegistryData[], dates: Date[]): (string | number)[][] {
 		// MM/dd vs MM/dd/yy
 		const rows = dates.map((date, i) => {
-			return [format(date, 'MM/dd/yy'), ...apiDatas.map((apiData) => apiData.range[i])];
+			return [format(date, 'MM/dd/yy'), ...apiDatas.map((apiData) => apiData.range[i].downloads)];
 		});
 
 		return rows;

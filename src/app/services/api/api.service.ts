@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import {
 	DownloadsPoint,
 	DownloadsRange,
+	DownloadsRangeData,
 	GithubRepositoryContributor,
 	GithubRepositoryLanguages,
 	GithubRepositoryOverview,
@@ -70,10 +71,10 @@ export class ApiService {
 			.pipe(map((res) => res.downloads));
 	}
 
-	getDownloadsRange(packageName: string, start: string, end: string): Observable<number[]> {
+	getDownloadsRange(packageName: string, start: string, end: string): Observable<DownloadsRangeData[]> {
 		return this.httpClient
 			.get<DownloadsRange>(`${this.NPM_REGISTRY_ENDPOINT}/downloads/range/${start}:${end}/${packageName}`)
-			.pipe(map((res) => res.downloads.map(({ downloads }) => downloads)));
+			.pipe(map((res) => res.downloads));
 	}
 
 	getSuggestions(query: string): Observable<string[]> {

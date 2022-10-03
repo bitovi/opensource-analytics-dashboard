@@ -1,7 +1,7 @@
 export interface RegistryData {
 	packageName: string;
 	total: number;
-	range: number[];
+	range: DownloadsRangeData[];
 }
 
 export interface DownloadsPoint {
@@ -9,10 +9,12 @@ export interface DownloadsPoint {
 }
 
 export interface DownloadsRange {
-	downloads: {
-		day: string;
-		downloads: number;
-	}[];
+	downloads: DownloadsRangeData[];
+}
+
+export interface DownloadsRangeData {
+	day: string;
+	downloads: number;
 }
 
 export interface Suggestion {
