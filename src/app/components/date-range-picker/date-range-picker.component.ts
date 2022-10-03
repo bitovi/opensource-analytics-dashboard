@@ -43,11 +43,11 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 	readonly startDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('Start Date');
 	readonly endDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('End Date');
 
-	// onChange callback that will be overriden using `registerOnChange`
-	onChange: (dateRange: DateRange) => void = () => {
+	// onChange callback that will be overridden using `registerOnChange`
+	onChange: (dateRange?: DateRange | null) => void = () => {
 		/** empty */
 	};
-	// onTouched callback that will be overriden using `registerOnTouched`
+	// onTouched callback that will be overridden using `registerOnTouched`
 	onTouched = () => {
 		/** empty */
 	};
@@ -111,7 +111,21 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 	/**
 	 * Set Component's ControlValueAccessor value
 	 */
-	writeValue([start, end]: DateRange): void {
+	writeValue(dateRange?: DateRange | null): void {
+		// Clear start and end FormControl's value when trying to set
+		// date range to something that isn't iterable to avoid spreading
+		// values to `start` and `end` FormControls
+		if (!Array.isArray(dateRange)) {
+			this.dateRangeFormGroup.setValue({
+				start: null,
+				end: null,
+			});
+			return;
+		}
+
+		const [start, end] = dateRange;
+
+		// Validation on start and end themselves are handled by their FormControls.
 		this.dateRangeFormGroup.setValue({ start, end });
 	}
 
