@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, Input, OnInit } from '@angular/core';
 import {
-	AbstractControl,
 	ControlValueAccessor,
 	FormControl,
 	NG_VALIDATORS,
@@ -8,9 +7,7 @@ import {
 	ValidationErrors,
 	Validators,
 } from '@angular/forms';
-import { combineLatest, debounceTime, map, Observable, of, startWith, switchMap } from 'rxjs';
-import { ArrayObservable } from 'src/app/classes';
-import { ErrorHandlerService, NpmRegistryService } from '../../services';
+import { ErrorHandlerService } from '../../services';
 
 @Component({
 	selector: 'app-autocomplete',
@@ -30,25 +27,14 @@ import { ErrorHandlerService, NpmRegistryService } from '../../services';
 		},
 	],
 })
-export class AutocompleteComponent implements ControlValueAccessor, Validators {
+export class AutocompleteComponent implements OnInit, ControlValueAccessor, Validators {
 	/*
-    keep track of package names that has been already loaded and show them
-    as suggestion for the user
+    package names that should be displayed as options in the select
   */
-	@Input() autocompletePackageNames: string[] | null = [];
-
-	/*
-    Pacakge names that are already loaded to prevent selecting same library
-    multiple times
-  */
-	private alreadyLoadedPackageName: ArrayObservable<string> = new ArrayObservable();
-
-	/* Observale that will display loaded packages from NPM */
-	readonly autocompleteOptions$!: Observable<string[]>;
+	@Input() autocomplateOptions: string[] | null = [];
 
 	/* Form control to allow user search packages  */
 	readonly addPackage: FormControl<string> = new FormControl('', {
-		asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.alreadyLoadedPackageName.observable$),
 		nonNullable: true,
 	});
 
@@ -56,101 +42,35 @@ export class AutocompleteComponent implements ControlValueAccessor, Validators {
 	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	onChange = (value: string[]) => {
+	onChange = (value: string) => {
 		/* empty */
 	};
 	onTouched = () => {
 		/* empty */
 	};
-	constructor(
-		private readonly npmRegistryService: NpmRegistryService,
-		private readonly errorHandlerService: ErrorHandlerService
-	) {
-		// npm library suggestions on user input
-		const suggestions$ = this.searchLibraryOnInputChange();
-
-		this.autocompleteOptions$ = combineLatest([
-			// All suggestions
-			suggestions$.pipe(startWith([])),
-			// packages that already have been loaded
-			this.alreadyLoadedPackageName.observable$,
-			// Partial npm package name to filter options
-			this.addPackage.valueChanges.pipe(startWith('')),
-		]).pipe(
-			map(([suggestions, alreadyLoadedPackageName, query]) =>
-				this.getAutocompleteOptions(
-					[...new Set([...(this.autocompletePackageNames ?? []), ...suggestions])],
-					alreadyLoadedPackageName,
-					query
-				)
-			)
-		);
+	constructor(private readonly errorHandlerService: ErrorHandlerService) {}
+	ngOnInit(): void {
+		this.addPackage.valueChanges.subscribe((value) => this.onChange(value));
 	}
 
-	writeValue(value?: string[]): void {
-		this.alreadyLoadedPackageName.set([...(value ?? [])]);
+	writeValue(value?: string): void {
+		this.addPackage.setValue(value ?? '');
 	}
-	registerOnChange(fn: (value: string[]) => void): void {
+	registerOnChange(fn: (value: string) => void): void {
 		this.onChange = fn;
 	}
 	registerOnTouched(fn: (value: void) => void): void {
 		this.onTouched = fn;
 	}
 
-	validate(c: AbstractControl): ValidationErrors | null {
-		if (!this.addPackage.validator) {
-			return null;
+	onSelectionChange(value: string): void {
+		this.onChange(value);
+	}
+
+	validate(): ValidationErrors | null {
+		if (this.addPackage.errors) {
+			return this.addPackage.errors;
 		}
-
-		return this.addPackage.validator(c);
-	}
-
-	onSubmit(): void {
-		this.alreadyLoadedPackageName.push(this.addPackage.value);
-		this.onChange(this.alreadyLoadedPackageName.getValue());
-
-		// Clear value
-		this.addPackage.setValue('');
-		this.addPackage.markAsUntouched();
-	}
-
-	private searchLibraryOnInputChange(): Observable<string[]> {
-		return this.addPackage.valueChanges.pipe(
-			debounceTime(300),
-			switchMap((query) => {
-				if (!query) {
-					return of([]);
-				}
-				return this.npmRegistryService.getSuggestions(query).pipe(
-					map((suggestions) =>
-						// prevent displaying already loaded packages
-						suggestions.filter((suggestion) => !this.alreadyLoadedPackageName.getValue().includes(suggestion))
-					)
-				);
-			})
-		);
-	}
-
-	/**
-	 * @param source - npm packages that can be displayed in the select
-	 * @param skip - npm packages that are already loaded and we dont want to display them again
-	 * @param query - npm package prefix that we are looking for.
-	 *                Filters our from source only packages that match query
-	 * @returns npm packages that will be displayed on the select
-	 */
-
-	private getAutocompleteOptions(source: string[], skip: string[], query: string): string[] {
-		const particalPackageNameSlug = query.toLowerCase();
-		const packageNameSlugs = skip.map((packageName) => packageName.toLowerCase());
-
-		return source.filter((autocompletePackageName) => {
-			const autocompleteSlug = autocompletePackageName.toLowerCase();
-
-			if (packageNameSlugs.includes(autocompleteSlug)) {
-				return false;
-			}
-
-			return autocompleteSlug.includes(particalPackageNameSlug);
-		});
+		return null;
 	}
 }

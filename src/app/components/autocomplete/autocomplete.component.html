@@ -7,17 +7,12 @@
 
 	<!-- display options -->
 	<mat-autocomplete #auto="matAutocomplete">
-		<mat-option *ngFor="let option of autocompleteOptions$ | async" [value]="option"> {{ option }} </mat-option>
+		<mat-option
+			*ngFor="let option of autocomplateOptions"
+			[value]="option"
+			(onSelectionChange)="onSelectionChange(option)"
+		>
+			{{ option }}
+		</mat-option>
 	</mat-autocomplete>
 </mat-form-field>
-
-<!-- add button -->
-<button
-	mat-raised-button
-	type="button"
-	color="primary"
-	[disabled]="!addPackage.value || addPackage.invalid"
-	(click)="onSubmit()"
->
-	Add
-</button>

@@ -5,6 +5,7 @@ import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
 	catchError,
 	combineLatest,
+	debounceTime,
 	filter,
 	forkJoin,
 	map,
@@ -14,6 +15,7 @@ import {
 	shareReplay,
 	startWith,
 	Subject,
+	switchMap,
 	takeUntil,
 	tap,
 } from 'rxjs';
@@ -67,10 +69,19 @@ export class AppComponent implements OnDestroy {
 
 	readonly dateRangeFormGroup = this.getDateRangeFormGroup();
 
+	/* Form control to allow user search packages  */
+	readonly addPackage: FormControl<string> = new FormControl('', {
+		asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.packageNames.valueChanges),
+		nonNullable: true,
+	});
+
 	/* visible package names */
 	readonly selectedPackageNames = new FormControl<string[]>(this.packageNames.value, {
 		nonNullable: true,
 	});
+
+	/* Observale that will display loaded packages from NPM */
+	readonly autocompleteOptions$!: Observable<string[]>;
 
 	constructor() {
 		this.packageNames.valueChanges
@@ -116,6 +127,27 @@ export class AppComponent implements OnDestroy {
 		]).pipe(
 			map(([registryData, dateRange, visibleLibraries]) =>
 				this.getChartData(registryData, dateRange.start, dateRange.end, visibleLibraries)
+			)
+		);
+
+		// npm library suggestions on user input
+		const suggestions$ = this.searchLibraryOnInputChange();
+
+		// autocomplete options to show package names for the user
+		this.autocompleteOptions$ = combineLatest([
+			// All suggestions
+			suggestions$.pipe(startWith([])),
+			// packages that already have been loaded
+			this.packageNames.valueChanges.pipe(startWith([])),
+			// Partial npm package name to filter options
+			this.addPackage.valueChanges.pipe(startWith('')),
+		]).pipe(
+			map(([suggestions, alreadyLoadedPackageName, query]) =>
+				this.getAutocompleteOptions(
+					[...new Set([...(this.autocompletePackageNames.getValue() ?? []), ...suggestions])],
+					alreadyLoadedPackageName,
+					query
+				)
 			)
 		);
 	}
@@ -184,6 +216,20 @@ export class AppComponent implements OnDestroy {
 
 		// cache package names
 		this.storageService.setItem('package-names', packageNames);
+	}
+
+	onPackageNameSubmit(): void {
+		const newPackage = this.addPackage.value;
+
+		// ignore repeated package names
+		if (!this.autocompletePackageNames.getValue().includes(newPackage)) {
+			this.autocompletePackageNames.push(newPackage);
+			this.packageNames.patchValue([...this.packageNames.value, newPackage]);
+		}
+
+		// Clear value
+		this.addPackage.setValue('');
+		this.addPackage.markAsUntouched();
 	}
 
 	getApiDates(packageNames: string[], start: Date, end: Date): Observable<RegistryData[]> {
@@ -289,6 +335,46 @@ export class AppComponent implements OnDestroy {
 		let url = window.location.href.split('?')[0];
 		url += `?p=${packageNames}`;
 		window.history.replaceState({}, document.title, url);
+	}
+
+	private searchLibraryOnInputChange(): Observable<string[]> {
+		return this.addPackage.valueChanges.pipe(
+			debounceTime(300),
+			switchMap((query) => {
+				if (!query) {
+					return of([]);
+				}
+				return this.npmRegistryService.getSuggestions(query).pipe(
+					map((suggestions) =>
+						// prevent displaying already loaded packages
+						suggestions.filter((suggestion) => !this.packageNames.value.includes(suggestion))
+					)
+				);
+			})
+		);
+	}
+
+	/**
+	 * @param source - npm packages that can be displayed in the select
+	 * @param skip - npm packages that are already loaded and we dont want to display them again
+	 * @param query - npm package prefix that we are looking for.
+	 *                Filters our from source only packages that match query
+	 * @returns npm packages that will be displayed on the select
+	 */
+
+	private getAutocompleteOptions(source: string[], skip: string[], query: string): string[] {
+		const particalPackageNameSlug = query.toLowerCase();
+		const packageNameSlugs = skip.map((packageName) => packageName.toLowerCase());
+
+		return source.filter((autocompletePackageName) => {
+			const autocompleteSlug = autocompletePackageName.toLowerCase();
+
+			if (packageNameSlugs.includes(autocompleteSlug)) {
+				return false;
+			}
+
+			return autocompleteSlug.includes(particalPackageNameSlug);
+		});
 	}
 
 	ngOnDestroy(): void {

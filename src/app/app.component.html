@@ -40,12 +40,24 @@
 
 <div class="margin-row">
 	<div class="container">
-		<!-- auto complete -->
+		<!-- auto complete form -->
 		<form onsubmit="return false">
+			<!-- auto complete -->
 			<app-autocomplete
-				[autocompletePackageNames]="autocompletePackageNames.observable$ | async"
-				[formControl]="packageNames"
+				[autocomplateOptions]="autocompleteOptions$ | async"
+				[formControl]="addPackage"
 			></app-autocomplete>
+
+			<!-- add button -->
+			<button
+				mat-raised-button
+				type="submit"
+				color="primary"
+				[disabled]="!addPackage.value || addPackage.invalid"
+				(click)="onPackageNameSubmit()"
+			>
+				Add
+			</button>
 		</form>
 
 		<!-- list of selected libraries -->
