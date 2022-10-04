@@ -31,12 +31,19 @@ Thrown errors, for example, like fetching daily and total NPM downloads for a sp
 
 # How to Use Services / API
 
-Service `NpmRegistryService` is used to fetch data about npm packages from the following methods:
+Service `ApiService` is used to fetch data about npm packages from the following methods:
 
 - `getSuggestions(...)` - Fetch npm package names for suggestion by the provided `query` from endpoint: `https://api.npms.io/v2/search/suggestions?q=${query}`, [check out docs](https://api-docs.npms.io/#api-Search-SearchSuggestions)
+
 - `getDownloadsPoint(...)` - Fetch the total npm downloads for a `packageName` from `start` to `end` period using endpoint: `https://api.npmjs.org/downloads/point/${start}:${end}/${packageName}`, [check out docs](https://github.com/npm/registry/blob/master/docs/download-counts.md#point-values)
 
 - `getDownloadsRange(...)` - Fetch daily downloads for a `packageName` from `start` to `end` period using endpoint: `https://api.npmjs.org/downloads/range/${start}:${end}/${packageName}`, [check out docs](https://github.com/npm/registry/blob/master/docs/download-counts.md#ranges)
+
+- `getGithubPackageOverview(repositoryName: string)` - Fetch overview of a github package based on the repository name. Example of repository name is angular/angular-cli, vuejs/vuex. Example: `https://api.github.com/repos/angular/angular-cli`
+
+- `getGithubPackageLanguages(repositoryName: string)` - Fetch programing languages that a github repository is written. Example: `https://api.github.com/repos/vuejs/pinia/languages`
+
+- `getGithubPackageContributors(repositoryName: string)` - Fetch top contributors for a specific repository name. Example: `https://api.github.com/repos/vuejs/pinia/contributors`
 
 # Application dependency
 

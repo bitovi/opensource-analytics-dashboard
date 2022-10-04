@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { RegistryData } from '../../models';
 import { takeUntilDestroy } from '../../operators';
-import { RegistryData } from '../../services/npm-registry/npm-registry.model';
 
 enum SelectKeydown {
 	SPACE = 'Space',

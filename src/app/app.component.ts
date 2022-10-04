@@ -1,7 +1,8 @@
 import { Component, inject, LOCALE_ID, OnDestroy } from '@angular/core';
+
 import { FormControl } from '@angular/forms';
 import { Column } from 'angular-google-charts';
-import { format, isAfter, isEqual, startOfDay, subDays } from 'date-fns';
+import { isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
 	catchError,
 	combineLatest,
@@ -23,9 +24,8 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData, DateRange } from './models';
-import { DateService, ErrorHandlerService, NpmRegistryService, StorageService } from './services';
-import { RegistryData } from './services/npm-registry/npm-registry.model';
+import { ChartData, DateRange, RegistryData } from './models';
+import { ApiService, DataService, DateService, ErrorHandlerService, StorageService } from './services';
 
 type RegistryError = { error?: { error?: string }; message?: string };
 
@@ -38,7 +38,8 @@ export class AppComponent implements OnDestroy {
 	private readonly dateService = inject(DateService);
 	private readonly storageService = inject(StorageService);
 	private readonly errorHandlerService = inject(ErrorHandlerService);
-	private readonly npmRegistryService = inject(NpmRegistryService);
+	private readonly dataService = inject(DataService);
+	private readonly apiService = inject(ApiService);
 	private readonly matSnackBar = inject(MatSnackBar);
 	private readonly locale = inject(LOCALE_ID);
 
@@ -135,7 +136,7 @@ export class AppComponent implements OnDestroy {
 			// All suggestions
 			suggestions$.pipe(startWith([])),
 			// packages that already have been loaded
-			this.packageNames.valueChanges.pipe(startWith([])),
+			this.packageNames.valueChanges.pipe(startWith(this.packageNames.value)),
 			// Partial npm package name to filter options
 			this.addPackage.valueChanges.pipe(startWith('')),
 		]).pipe(
@@ -147,8 +148,6 @@ export class AppComponent implements OnDestroy {
 				)
 			)
 		);
-
-		this.autocompleteOptions$.subscribe(console.log);
 	}
 
 	getDefaultPackageNames(): string[] {
@@ -222,7 +221,7 @@ export class AppComponent implements OnDestroy {
 
 		return forkJoin(
 			packageNames.map((packageName) =>
-				this.npmRegistryService
+				this.dataService
 					.getRegistry(
 						packageName,
 						this.dateService.getFormattedDateString(start),
@@ -255,12 +254,7 @@ export class AppComponent implements OnDestroy {
 		];
 
 		const dates = this.dateService.getDateRange(start, end);
-
-		// TODO: get formatter given range
-		// MM/dd vs MM/dd/yy
-		const rows = dates.map((date, i) => {
-			return [format(date, 'MM/dd/yy'), ...libraries.map((apiData) => apiData.range[i])];
-		});
+		const rows = this.dateService.getAggregatedReigstryData(libraries, dates);
 
 		const options = {
 			chart: {
@@ -327,7 +321,7 @@ export class AppComponent implements OnDestroy {
 				if (!query) {
 					return of([]);
 				}
-				return this.npmRegistryService.getSuggestions(query).pipe(
+				return this.apiService.getSuggestions(query).pipe(
 					map((suggestions) =>
 						// prevent displaying already loaded packages
 						suggestions.filter((suggestion) => !this.packageNames.value.includes(suggestion))
@@ -341,7 +335,7 @@ export class AppComponent implements OnDestroy {
 	 * @param source - npm packages that can be displayed in the select
 	 * @param skip - npm packages that are already loaded and we dont want to display them again
 	 * @param query - npm package prefix that we are looking for.
-	 *                Filters our from source only packages that match query
+	 *                Filters out from source only packages that match query
 	 * @returns npm packages that will be displayed on the select
 	 */
 

@@ -1,18 +1,18 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { NpmRegistryService } from './npm-registry.service';
+import { DataService } from './data.service';
 
 describe('NpmRegistryService', () => {
-	let service: NpmRegistryService;
+	let service: DataService;
 
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
-			providers: [NpmRegistryService],
+			providers: [DataService],
 			imports: [HttpClientTestingModule],
 		}).compileComponents();
 
-		service = TestBed.inject(NpmRegistryService);
+		service = TestBed.inject(DataService);
 	});
 
 	it('should be created', () => {
