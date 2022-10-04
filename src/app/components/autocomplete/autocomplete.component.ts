@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, forwardRef, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import {
 	ControlValueAccessor,
 	FormControl,
@@ -7,6 +7,7 @@ import {
 	ValidationErrors,
 	Validators,
 } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { ErrorHandlerService } from '../../services';
 
 @Component({
@@ -27,11 +28,14 @@ import { ErrorHandlerService } from '../../services';
 		},
 	],
 })
-export class AutocompleteComponent implements OnInit, ControlValueAccessor, Validators {
+export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAccessor, Validators {
 	/*
     package names that should be displayed as options in the select
   */
 	@Input() autocomplateOptions: string[] | null = [];
+
+	private readonly errorHandlerService = inject(ErrorHandlerService);
+	private readonly unsubscribe$ = new Subject<void>();
 
 	/* Form control to allow user search packages  */
 	readonly addPackage: FormControl<string> = new FormControl('', {
@@ -48,9 +52,14 @@ export class AutocompleteComponent implements OnInit, ControlValueAccessor, Vali
 	onTouched = () => {
 		/* empty */
 	};
-	constructor(private readonly errorHandlerService: ErrorHandlerService) {}
+
 	ngOnInit(): void {
-		this.addPackage.valueChanges.subscribe((value) => this.onChange(value));
+		this.addPackage.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe((value) => this.onChange(value));
+	}
+
+	ngOnDestroy(): void {
+		this.unsubscribe$.next();
+		this.unsubscribe$.complete();
 	}
 
 	writeValue(value?: string): void {

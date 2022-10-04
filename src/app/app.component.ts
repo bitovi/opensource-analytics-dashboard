@@ -55,9 +55,7 @@ export class AppComponent implements OnDestroy {
 	readonly chartData$: Observable<ChartData>;
 
 	/* loaded package names  */
-	readonly packageNames = new FormControl<string[]>(this.getCachedPackageNames('package-names'), {
-		nonNullable: true,
-	});
+	readonly packageNames: ArrayObservable<string> = new ArrayObservable(this.getCachedPackageNames('package-names'));
 
 	/* keep track of loaded package names in localstorage and display them as suggestion
      if they are not already loaded
@@ -71,12 +69,12 @@ export class AppComponent implements OnDestroy {
 	});
 
 	readonly addPackage: FormControl<string> = new FormControl('', {
-		asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.packageNames.valueChanges),
+		asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.packageNames.observable$),
 		nonNullable: true,
 	});
 
 	/* visible package names */
-	readonly selectedPackageNames = new FormControl<string[]>(this.packageNames.value, {
+	readonly selectedPackageNames = new FormControl<string[]>(this.packageNames.getValue(), {
 		nonNullable: true,
 	});
 
@@ -84,7 +82,7 @@ export class AppComponent implements OnDestroy {
 	readonly autocompleteOptions$!: Observable<string[]>;
 
 	constructor() {
-		this.packageNames.valueChanges
+		this.packageNames.observable$
 			.pipe(
 				tap((packageNames) => {
 					this.onPackageNamesChanged(packageNames);
@@ -112,7 +110,7 @@ export class AppComponent implements OnDestroy {
 
 		this.apiDatas$ = combineLatest([
 			selectedDates$,
-			this.packageNames.valueChanges.pipe(startWith(this.packageNames.value)),
+			this.packageNames.observable$.pipe(startWith(this.packageNames.getValue())),
 		]).pipe(
 			mergeMap(([[start, end], packageNames]) => this.getApiDates(packageNames, start, end)),
 			shareReplay({ refCount: false, bufferSize: 0 })
@@ -136,7 +134,7 @@ export class AppComponent implements OnDestroy {
 			// All suggestions
 			suggestions$.pipe(startWith([])),
 			// packages that already have been loaded
-			this.packageNames.valueChanges.pipe(startWith(this.packageNames.value)),
+			this.packageNames.observable$.pipe(startWith(this.packageNames.getValue())),
 			// Partial npm package name to filter options
 			this.addPackage.valueChanges.pipe(startWith('')),
 		]).pipe(
@@ -184,9 +182,9 @@ export class AppComponent implements OnDestroy {
 	}
 
 	removePackageName(packageName: string): void {
-		const loadedPackageNames = this.packageNames.value;
+		const loadedPackageNames = this.packageNames.getValue();
 		const newValue = loadedPackageNames.filter((value) => value !== packageName);
-		this.packageNames.patchValue(newValue);
+		this.packageNames.set(newValue);
 	}
 
 	onPackageNamesChanged(packageNames: string[]) {
@@ -204,9 +202,9 @@ export class AppComponent implements OnDestroy {
 		const newPackage = this.addPackage.value;
 
 		// ignore repeated package names
-		if (!this.packageNames.value.includes(newPackage)) {
+		if (!this.packageNames.getValue().includes(newPackage)) {
 			this.autocompletePackageNames.push(newPackage);
-			this.packageNames.patchValue([...this.packageNames.value, newPackage]);
+			this.packageNames.push(newPackage);
 		}
 
 		// Clear value
@@ -324,7 +322,7 @@ export class AppComponent implements OnDestroy {
 				return this.apiService.getSuggestions(query).pipe(
 					map((suggestions) =>
 						// prevent displaying already loaded packages
-						suggestions.filter((suggestion) => !this.packageNames.value.includes(suggestion))
+						suggestions.filter((suggestion) => !this.packageNames.getValue().includes(suggestion))
 					)
 				);
 			})
