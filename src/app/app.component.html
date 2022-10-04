@@ -1,6 +1,23 @@
 <div class="flex-row margin-row">
-	<form onsubmit="return false">
-		<app-date-range-picker [formControl]="dateRangeFormControl"></app-date-range-picker>
+	<form class="flex-1" onsubmit="return false">
+		<div class="date-wrapper">
+			<!-- date picker -->
+			<app-date-range-picker [formControl]="dateRangeFormControl"></app-date-range-picker>
+
+			<span>or</span>
+
+			<!-- date dropdown -->
+			<app-date-range-dropdown appDateRangeDropdown [formControl]="dateRangeFormControl"></app-date-range-dropdown>
+			<!-- <div class="date-wrapper-dropdown">
+				<div><strong>Downloads</strong> in past</div>
+				<mat-form-field appearance="fill">
+					<mat-label>Select date range</mat-label>
+					<mat-select appDateRangeDropdown [formControl]="dateRangeFormControl">
+						<mat-option *ngFor="let date of DATE_RANGE_DROPDOWN_DATA" [value]="date"> {{date.name}} </mat-option>
+					</mat-select>
+				</mat-form-field>
+			</div> -->
+		</div>
 	</form>
 
 	<div>

@@ -14,13 +14,15 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { GoogleChartsModule } from 'angular-google-charts';
 
+import { MatSelectModule } from '@angular/material/select';
 import { AppComponent } from './app.component';
 import { ChartComponent } from './components/chart/chart.component';
+import { DateRangeDropdownComponent } from './components/date-range-dropdown/date-range-dropdown.component';
+import { DateRangePickerComponent } from './components/date-range-picker/date-range-picker.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { PackageListComponent } from './components/package-list/package-list.component';
-import { ErrorHandlerDirective } from './directives';
+import { DateRangeDropdownDirective, ErrorHandlerDirective } from './directives';
 import { ToObservablePipe } from './pipes';
-import { DateRangePickerComponent } from './components/date-range-picker/date-range-picker.component';
 
 @NgModule({
 	declarations: [
@@ -31,6 +33,8 @@ import { DateRangePickerComponent } from './components/date-range-picker/date-ra
 		PackageListComponent,
 		ChartComponent,
 		DateRangePickerComponent,
+		DateRangeDropdownComponent,
+		DateRangeDropdownDirective,
 	],
 	imports: [
 		BrowserModule,
@@ -46,6 +50,7 @@ import { DateRangePickerComponent } from './components/date-range-picker/date-ra
 		MatIconModule,
 		MatSnackBarModule,
 		MatRippleModule,
+		MatSelectModule,
 		GoogleChartsModule.forRoot({ version: '51' }),
 	],
 	providers: [],

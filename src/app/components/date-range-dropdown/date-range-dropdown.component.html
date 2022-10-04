@@ -1,0 +1,9 @@
+<div>
+	<div><strong>Downloads</strong> in past</div>
+	<mat-form-field appearance="fill">
+		<mat-label>Select date range</mat-label>
+		<mat-select [formControl]="dateRangeDropdownFormControl">
+			<mat-option *ngFor="let date of DATE_RANGE_DROPDOWN_DATA" [value]="date"> {{date.name}} </mat-option>
+		</mat-select>
+	</mat-form-field>
+</div>

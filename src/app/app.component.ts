@@ -26,7 +26,7 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData, DateRange, RegistryData } from './models';
+import { ChartData, DateRange, DATE_RANGE_DROPDOWN_DATA, RegistryData } from './models';
 import { ApiService, DataService, DateService, ErrorHandlerService, StorageService } from './services';
 
 type RegistryError = { error?: { error?: string }; message?: string };
@@ -75,6 +75,8 @@ export class AppComponent implements OnInit, OnDestroy {
 	readonly selectedPackageNames = new FormControl<string[]>(this.packageNames.getValue(), {
 		nonNullable: true,
 	});
+
+	DATE_RANGE_DROPDOWN_DATA = DATE_RANGE_DROPDOWN_DATA;
 
 	constructor() {
 		this.packageNames.observable$

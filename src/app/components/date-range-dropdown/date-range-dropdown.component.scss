@@ -1,0 +1,15 @@
+:host {
+	display: block;
+
+	div {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		div {
+			min-width: fit-content;
+			font-size: 18px;
+			margin-bottom: 6px;
+		}
+	}
+}
