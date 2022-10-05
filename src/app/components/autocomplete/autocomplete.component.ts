@@ -7,7 +7,7 @@ import {
 	ValidationErrors,
 	Validators,
 } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Observable, Subject, takeUntil } from 'rxjs';
 import { ErrorHandlerService } from '../../services';
 
 @Component({
@@ -34,13 +34,16 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
   */
 	@Input() autocomplateOptions: string[] | null = [];
 
+	/*
+    entity objects (package names) that are already loaded, to prevent duplicated loading
+  */
+	@Input() loadedEntities$!: Observable<string[]>;
+
 	private readonly errorHandlerService = inject(ErrorHandlerService);
 	private readonly unsubscribe$ = new Subject<void>();
 
 	/* Form control to allow user search packages  */
-	readonly addPackage: FormControl<string> = new FormControl('', {
-		nonNullable: true,
-	});
+	addPackage!: FormControl<string>;
 
 	/* errors that may occur when searching for a package name */
 	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
@@ -54,6 +57,10 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	};
 
 	ngOnInit(): void {
+		this.addPackage = new FormControl('', {
+			nonNullable: true,
+			asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.loadedEntities$),
+		});
 		this.addPackage.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe((value) => this.onChange(value));
 	}
 

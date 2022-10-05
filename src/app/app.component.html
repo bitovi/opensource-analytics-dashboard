@@ -24,6 +24,7 @@
 			<app-autocomplete
 				[autocomplateOptions]="autocompleteOptions$ | async"
 				[formControl]="addPackage"
+				[loadedEntities$]="packageNames.observable$"
 			></app-autocomplete>
 
 			<!-- add button -->

@@ -69,7 +69,6 @@ export class AppComponent implements OnDestroy {
 	});
 
 	readonly addPackage: FormControl<string> = new FormControl('', {
-		asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.packageNames.observable$),
 		nonNullable: true,
 	});
 

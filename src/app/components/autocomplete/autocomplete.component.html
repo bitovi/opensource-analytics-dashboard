@@ -2,7 +2,7 @@
 	<mat-label>npm package name</mat-label>
 	<input matInput [formControl]="addPackage" [matAutocomplete]="auto" />
 	<mat-hint>Ex: 'canjs'</mat-hint>
-	<mat-error appErrorHandler [errors$]="addPackage.errors | toObservable" [handleErrors]="packageErrorsHandler">
+	<mat-error appErrorHandler [errors$]="addPackage.errors| toObservable" [handleErrors]="packageErrorsHandler">
 	</mat-error>
 
 	<!-- display options -->
