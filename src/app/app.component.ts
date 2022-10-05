@@ -26,8 +26,8 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import { ChartData, DateRange, RegistryData } from './models';
-import { ApiService, DataService, DateService, ErrorHandlerService, StorageService } from './services';
+import { ChartData, DateFormat, DateRange, HARDCODED_PACKAGE_NAMES, RegistryData, StorageId } from './models';
+import { ApiService, DataService, DateService, ErrorHandlerService, ParamsService, StorageService } from './services';
 
 type RegistryError = { error?: { error?: string }; message?: string };
 
@@ -45,6 +45,7 @@ export class AppComponent implements OnInit, OnDestroy {
 	private readonly errorHandlerService = inject(ErrorHandlerService);
 	private readonly dataService = inject(DataService);
 	private readonly apiService = inject(ApiService);
+	private readonly paramsService = inject(ParamsService);
 	private readonly matSnackBar = inject(MatSnackBar);
 	private readonly locale = inject(LOCALE_ID);
 
@@ -58,9 +59,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
 	readonly chartData$: Observable<ChartData>;
 
-	readonly packageNames: ArrayObservable<string> = new ArrayObservable(this.getCachedPackageNames('package-names'));
+	readonly packageNames: ArrayObservable<string> = new ArrayObservable(this.getDefaultPackageNames());
 	readonly autocompletePackageNames: ArrayObservable<string> = new ArrayObservable(
-		this.getCachedPackageNames('autocomplete-package-names')
+		this.getCachedPackageNames(StorageId.PACKAGE_NAMES).sort()
 	);
 
 	readonly dateRangeFormControl: FormControl<DateRange> = new FormControl(this.getInitialDateRange(), {
@@ -81,7 +82,7 @@ export class AppComponent implements OnInit, OnDestroy {
 			.pipe(
 				tap((packageNames) => {
 					this.onPackageNamesChanged(packageNames);
-					this.setPackageNamesInParams(packageNames);
+					this.paramsService.setPackageNames(packageNames);
 				}),
 				takeUntil(this.unsubscribe$)
 			)
@@ -90,9 +91,10 @@ export class AppComponent implements OnInit, OnDestroy {
 		this.autocompletePackageNames.observable$
 			.pipe(
 				tap((autocompletePackageNames) => {
-					// cache autocomplete package names
-					this.storageService.setItem('autocomplete-package-names', autocompletePackageNames);
-				})
+					// Cache autocomplete package names
+					this.storageService.setItem(StorageId.PACKAGE_NAMES, autocompletePackageNames);
+				}),
+				takeUntil(this.unsubscribe$)
 			)
 			.subscribe();
 
@@ -101,6 +103,16 @@ export class AppComponent implements OnInit, OnDestroy {
 			// Ignore any values where the end is before the start
 			filter(([start, end]) => isEqual(end, start) || isAfter(end, start))
 		);
+
+		selectedDates$
+			.pipe(
+				tap((dateRange) => {
+					// Store the current date range in the query params
+					this.paramsService.setDateRange(dateRange);
+				}),
+				takeUntil(this.unsubscribe$)
+			)
+			.subscribe();
 
 		const suggestions$ = this.addPackage.valueChanges.pipe(
 			debounceTime(200),
@@ -151,7 +163,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		// Populate chart
 		this.chartData$ = selectedApiDatas$.pipe(
 			withLatestFrom(selectedDates$),
-			map(([apiDatas, [start, end]]) => this.getChartData(apiDatas, start, end))
+			map(([apiDatas, dateRange]) => this.getChartData(apiDatas, dateRange))
 		);
 
 		// Testing API call
@@ -183,36 +195,45 @@ export class AppComponent implements OnInit, OnDestroy {
 			.subscribe();
 	}
 
+	/**
+	 * Get initial list of active packages that should populate the chart
+	 *
+	 * List of packages should never be empty
+	 */
 	getDefaultPackageNames(): string[] {
-		const packageNames = this.getPackageNamesFromParams().filter((packageName) => !!packageName);
+		// Check query params for list of packages first
+		const packageNamesFromQueryParams = this.paramsService.getPackageNames();
 
-		return (
-			packageNames.length
-				? packageNames
-				: [
-						'@bitovi/eslint-config',
-						'@bitovi/react-numerics',
-						'@bitovi/use-simple-reducer',
-						'ngx-feature-flag-router',
-						'react-to-webcomponent',
-				  ]
-		).sort();
+		if (packageNamesFromQueryParams.length) {
+			return packageNamesFromQueryParams.sort();
+		}
+
+		// Fallback to storage / cache
+		const cachedPackages = this.getCachedPackageNames(StorageId.ACTIVE_PACKAGE_NAMES);
+
+		if (cachedPackages.length) {
+			return cachedPackages.sort();
+		}
+
+		// Fallback to list of bitovi open source package names
+		return [...HARDCODED_PACKAGE_NAMES].sort();
 	}
 
-	getCachedPackageNames(key: string): string[] {
-		const packageNames = this.getDefaultPackageNames();
-
+	/**
+	 * Get list of packages for the autocomplete or for `app-package-list` from storage / cache
+	 */
+	getCachedPackageNames(storageId: StorageId): string[] {
 		try {
-			const cache = JSON.parse(this.storageService.getItem(key) ?? '[]');
+			const cache = JSON.parse(this.storageService.getItem(storageId) ?? '[]');
 
 			if (cache?.length) {
-				return [...new Set([...packageNames, ...cache])].sort();
+				return cache;
 			}
 		} catch (error) {
 			console.error(error);
 		}
 
-		return packageNames;
+		return [];
 	}
 
 	removePackageName(packageName: string): void {
@@ -226,8 +247,8 @@ export class AppComponent implements OnInit, OnDestroy {
 		this.autocompletePackageNames.set([...new Set([...packageNames, ...this.autocompletePackageNames.getValue()])]);
 		this.autocompletePackageNames.sort();
 
-		// cache package names
-		this.storageService.setItem('package-names', packageNames);
+		// Cache package names
+		this.storageService.setItem(StorageId.ACTIVE_PACKAGE_NAMES, packageNames);
 	}
 
 	getAutocompleteOptions(source: string[], skip: string[], query: string): string[] {
@@ -245,7 +266,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
+	getChartData(apiDatas: RegistryData[], dateRange: DateRange): ChartData {
 		const columns: Column[] = [
 			{ type: 'string', label: 'Date' },
 			...apiDatas.map(({ packageName, total }) => ({
@@ -254,7 +275,7 @@ export class AppComponent implements OnInit, OnDestroy {
 			})),
 		];
 
-		const dates = this.dateService.getDateRange(start, end);
+		const dates = this.dateService.getDates(dateRange);
 		const rows = this.dateService.getAggregatedReigstryData(apiDatas, dates);
 
 		const options = {
@@ -278,8 +299,8 @@ export class AppComponent implements OnInit, OnDestroy {
 				this.dataService
 					.getRegistry(
 						packageName,
-						this.dateService.getFormattedDateString(start),
-						this.dateService.getFormattedDateString(end)
+						this.dateService.getDateString(start, DateFormat.YEAR_MONTH_DAY),
+						this.dateService.getDateString(end, DateFormat.YEAR_MONTH_DAY)
 					)
 					.pipe(
 						catchError((error: unknown) => {
@@ -310,7 +331,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		return 'Unexpected error';
 	}
 
-	displayErrorMessage(error: unknown) {
+	displayErrorMessage(error: unknown): void {
 		const message = this.getErrorMessage(error as RegistryError);
 		const estimatedDuration = 2000 + message.length * 100;
 
@@ -321,24 +342,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 	clearCache(): void {
 		this.storageService.clearAllStorage();
-		this.setPackageNamesInParams([]);
-	}
-
-	getPackageNamesFromParams(): string[] {
-		try {
-			const params = new URLSearchParams(window.location.search);
-
-			return params.get('p')?.split(',') ?? [];
-		} catch (error) {
-			console.error(error);
-			return [];
-		}
-	}
-
-	setPackageNamesInParams(packageNames: string[]): void {
-		let url = window.location.href.split('?')[0];
-		url += `?p=${packageNames}`;
-		window.history.replaceState({}, document.title, url);
+		this.paramsService.setPackageNames([]);
 	}
 
 	/**
@@ -346,6 +350,12 @@ export class AppComponent implements OnInit, OnDestroy {
 	 */
 	getInitialDateRange(): [Date, Date] {
 		const currentDate = startOfDay(new Date());
+
+		const dateRangeParams = this.paramsService.getDateRange();
+
+		if (dateRangeParams) {
+			return dateRangeParams;
+		}
 
 		return [subDays(currentDate, 8), subDays(currentDate, 1)];
 	}
