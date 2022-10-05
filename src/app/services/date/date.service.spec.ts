@@ -34,13 +34,13 @@ describe('DateService', () => {
 	});
 
 	// When running tests with node 14, Array.prototype.at doesn't exist
-	// Running the tests with node 16 resolves this issue when testing `getDateRange()`
-	describe('getDateRange()', () => {
+	// Running the tests with node 16 resolves this issue when testing `getDates()`
+	describe('getDates()', () => {
 		it('should return an array of dates from `start` to `end` (inclusive)', () => {
 			const start = new Date(2013, 5 - 1, 28);
 			const end = new Date(2013, 6 - 1, 2);
 
-			const range = service.getDateRange(start, end);
+			const range = service.getDates([start, end]);
 
 			expect(range.length).toBe(6);
 			expect(range[0]).toEqual(start);
@@ -57,7 +57,7 @@ describe('DateService', () => {
 			const start = new Date(2014, 4 - 1, 22);
 			const end = new Date(2014, 7 - 1, 10);
 
-			const range = service.getDateRange(start, end);
+			const range = service.getDates([start, end]);
 			const last = range[range.length - 1];
 			expect(isEqual(last, end)).toBe(true);
 		});
@@ -65,7 +65,7 @@ describe('DateService', () => {
 		it('should have one element that is equal with `start` and `end` if `start` and `end` are equal', () => {
 			const start = new Date(2014, 5 - 1, 12);
 			const end = new Date(2014, 5 - 1, 12);
-			const range = service.getDateRange(start, end);
+			const range = service.getDates([start, end]);
 			const last = range[range.length - 1];
 
 			expect(isEqual(start, end)).toBe(true);
@@ -76,7 +76,49 @@ describe('DateService', () => {
 		it('should throw if `end` is before `start`', () => {
 			const start = new Date(2011, 5 - 1, 14);
 			const end = new Date(1999, 5 - 1, 14);
-			expect(() => service.getDateRange(start, end)).toThrowError('Unexpected getDateRange end mismatch');
+			expect(() => service.getDates([start, end])).toThrowError('Unexpected getDates end mismatch');
+		});
+	});
+
+	describe('isValidDate()', () => {
+		it('should return true if argument is a Date with a valid value', () => {
+			expect(service.isValidDate(new Date(1990, 9, 9))).toBe(true);
+		});
+
+		it('should return false if argument is a Date with a invalid value', () => {
+			expect(service.isValidDate(new Date(''))).toBe(false);
+		});
+
+		it('should return false if argument is a NOT a Date instance', () => {
+			expect(service.isValidDate(1)).toBe(false);
+		});
+	});
+
+	describe('isValidDateRange()', () => {
+		it("should return false is argument isn't an Array", () => {
+			expect(service.isValidDateRange(new Date(2013, 4, 5))).toBe(false);
+		});
+
+		it("should return false is argument doesn't have length 2", () => {
+			expect(service.isValidDateRange([new Date(1)])).toBe(false);
+			expect(service.isValidDateRange([new Date(1), new Date(2), new Date(3)])).toBe(false);
+		});
+
+		it('should return false if either dates are not valid dates', () => {
+			expect(service.isValidDateRange([new Date(''), new Date(9)])).toBe(false);
+			expect(service.isValidDateRange([new Date(9), 9])).toBe(false);
+		});
+
+		it('should return true if dates are equal', () => {
+			expect(service.isValidDateRange([new Date(10), new Date(10)])).toBe(true);
+		});
+
+		it('should return true if start is before end', () => {
+			expect(service.isValidDateRange([new Date(5), new Date(10)])).toBe(true);
+		});
+
+		it('should return false if start is after end', () => {
+			expect(service.isValidDateRange([new Date(55), new Date(10)])).toBe(false);
 		});
 	});
 });

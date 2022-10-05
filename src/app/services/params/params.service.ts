@@ -70,17 +70,19 @@ export class ParamsService {
 	getDateRange(): DateRange | null {
 		const dateRangeParams = this.getParam(QueryParams.DATE_RANGE)?.split(',') ?? [];
 
-		// Ensure that there's exactly 2 values for the date range
-		if (dateRangeParams.length !== 2) {
-			return null;
-		}
-
 		const [start, end] = dateRangeParams;
 
-		return [
+		const dateRange = [
 			this.dateService.getDate(start, DateFormat.YEAR_MONTH_DAY),
 			this.dateService.getDate(end, DateFormat.YEAR_MONTH_DAY),
 		];
+
+		// Ensure that there's exactly 2 values for the date range
+		if (!this.dateService.isValidDateRange(dateRange)) {
+			return null;
+		}
+
+		return dateRange;
 	}
 
 	/**

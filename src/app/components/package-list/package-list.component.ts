@@ -1,15 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { RegistryData } from '../../models';
+import { RegistryData, POSSIBLE_SELECT_KEYDOWNS, SelectKeydown } from '../../models';
 import { takeUntilDestroy } from '../../operators';
-
-enum SelectKeydown {
-	SPACE = 'Space',
-	SPACE_2 = ' ',
-	ENTER = 'Enter',
-}
-
-const POSSIBLE_KEYDOWNS = [SelectKeydown.ENTER, SelectKeydown.SPACE, SelectKeydown.SPACE_2];
 
 @Component({
 	selector: 'app-package-list',
@@ -72,7 +64,7 @@ export class PackageListComponent implements OnInit, ControlValueAccessor {
 	}
 
 	keydownIsSelect(event: KeyboardEvent): boolean {
-		return POSSIBLE_KEYDOWNS.includes((event.key ?? event.code) as SelectKeydown);
+		return POSSIBLE_SELECT_KEYDOWNS.includes((event.key ?? event.code) as SelectKeydown);
 	}
 
 	handleSelectAsClick(event: KeyboardEvent): void {

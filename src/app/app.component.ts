@@ -163,7 +163,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		// Populate chart
 		this.chartData$ = selectedApiDatas$.pipe(
 			withLatestFrom(selectedDates$),
-			map(([apiDatas, [start, end]]) => this.getChartData(apiDatas, start, end))
+			map(([apiDatas, dateRange]) => this.getChartData(apiDatas, dateRange))
 		);
 
 		// Testing API call
@@ -266,7 +266,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	getChartData(apiDatas: RegistryData[], start: Date, end: Date): ChartData {
+	getChartData(apiDatas: RegistryData[], dateRange: DateRange): ChartData {
 		const columns: Column[] = [
 			{ type: 'string', label: 'Date' },
 			...apiDatas.map(({ packageName, total }) => ({
@@ -275,7 +275,7 @@ export class AppComponent implements OnInit, OnDestroy {
 			})),
 		];
 
-		const dates = this.dateService.getDateRange(start, end);
+		const dates = this.dateService.getDates(dateRange);
 		const rows = this.dateService.getAggregatedReigstryData(apiDatas, dates);
 
 		const options = {
