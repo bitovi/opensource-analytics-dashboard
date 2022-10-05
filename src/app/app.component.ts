@@ -44,12 +44,7 @@ export class AppComponent implements OnDestroy {
 	private readonly matSnackBar = inject(MatSnackBar);
 	private readonly locale = inject(LOCALE_ID);
 
-	readonly minDate = new Date(2015, 0, 1);
-	readonly maxDate = new Date();
-
 	private readonly unsubscribe$ = new Subject<void>();
-
-	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
 
 	readonly apiDatas$: Observable<RegistryData[]>;
 
