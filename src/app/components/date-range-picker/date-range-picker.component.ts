@@ -10,7 +10,7 @@ import {
 } from '@angular/forms';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { DateRange } from '../../models';
-import { ErrorHandlerService } from '../../services';
+import { DateService, ErrorHandlerService } from '../../services';
 
 @Component({
 	selector: 'app-date-range-picker',
@@ -31,6 +31,7 @@ import { ErrorHandlerService } from '../../services';
 	],
 })
 export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy {
+	private readonly dateService = inject(DateService);
 	private readonly errorHandlerService = inject(ErrorHandlerService);
 
 	// inner FormGroup used to manage ControlValueAccessor value
@@ -115,7 +116,7 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 		// Clear start and end FormControl's value when trying to set
 		// date range to something that isn't iterable to avoid spreading
 		// values to `start` and `end` FormControls
-		if (!Array.isArray(dateRange)) {
+		if (!this.dateService.isValidDateRange(dateRange)) {
 			this.dateRangeFormGroup.setValue({
 				start: null,
 				end: null,
@@ -126,7 +127,12 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 		const [start, end] = dateRange;
 
 		// Validation on start and end themselves are handled by their FormControls.
-		this.dateRangeFormGroup.setValue({ start, end });
+		this.dateRangeFormGroup.setValue(
+			{ start, end },
+			{
+				emitEvent: false,
+			}
+		);
 	}
 
 	/**
