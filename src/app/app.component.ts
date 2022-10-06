@@ -126,10 +126,10 @@ export class AppComponent implements OnDestroy {
 			// Partial npm package name to filter options
 			this.addPackage.valueChanges.pipe(startWith('')),
 		]).pipe(
-			map(([suggestions, alreadyLoadedPackageName, query]) =>
+			map(([suggestions, alreadyLoadedPackageNames, query]) =>
 				this.getAutocompleteOptions(
 					[...new Set([...(this.autocompletePackageNames.getValue() ?? []), ...suggestions])],
-					alreadyLoadedPackageName,
+					alreadyLoadedPackageNames,
 					query
 				)
 			)
@@ -200,9 +200,7 @@ export class AppComponent implements OnDestroy {
 	}
 
 	removePackageName(packageName: string): void {
-		const loadedPackageNames = this.packageNames.getValue();
-		const newValue = loadedPackageNames.filter((value) => value !== packageName);
-		this.packageNames.set(newValue);
+		this.packageNames.removeValue(packageName);
 	}
 
 	onPackageNamesChanged(packageNames: string[]) {
