@@ -331,7 +331,6 @@ export class AppComponent implements OnDestroy {
 	 *                Filters out from source only packages that match query
 	 * @returns npm packages that will be displayed on the select
 	 */
-
 	private getAutocompleteOptions(source: string[], skip: string[], query: string): string[] {
 		const particalPackageNameSlug = query.toLowerCase();
 		const packageNameSlugs = skip.map((packageName) => packageName.toLowerCase());
