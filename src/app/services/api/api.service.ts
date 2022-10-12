@@ -16,7 +16,8 @@ import {
 	providedIn: 'root',
 })
 export class ApiService {
-	private readonly NPM_REGISTRY_ENDPOINT = `https://api.npmjs.org`;
+	private readonly NPMJS_REGISTRY_ENDPOINT = `https://api.npmjs.org`;
+	private readonly NPM_REGISTRY_ENDPOINT = `https://api.npms.io`;
 	private readonly GITHUB_ENDPOINT = `https://api.github.com/repos`;
 	constructor(private readonly httpClient: HttpClient) {}
 
@@ -67,13 +68,13 @@ export class ApiService {
 	 */
 	getDownloadsPoint(packageName: string, start: string, end: string): Observable<number> {
 		return this.httpClient
-			.get<DownloadsPoint>(`${this.NPM_REGISTRY_ENDPOINT}/downloads/point/${start}:${end}/${packageName}`)
+			.get<DownloadsPoint>(`${this.NPMJS_REGISTRY_ENDPOINT}/downloads/point/${start}:${end}/${packageName}`)
 			.pipe(map((res) => res.downloads));
 	}
 
 	getDownloadsRange(packageName: string, start: string, end: string): Observable<DownloadsRangeData[]> {
 		return this.httpClient
-			.get<DownloadsRange>(`${this.NPM_REGISTRY_ENDPOINT}/downloads/range/${start}:${end}/${packageName}`)
+			.get<DownloadsRange>(`${this.NPMJS_REGISTRY_ENDPOINT}/downloads/range/${start}:${end}/${packageName}`)
 			.pipe(map((res) => res.downloads));
 	}
 
