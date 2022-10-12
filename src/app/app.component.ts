@@ -1,6 +1,6 @@
 import { Component, inject, LOCALE_ID, OnDestroy } from '@angular/core';
 
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Column } from 'angular-google-charts';
 import { isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
@@ -28,6 +28,7 @@ import {
 	ChartData,
 	DateFormat,
 	DateRange,
+	DateRangeDropdown,
 	DATE_RANGE_DROPDOWN_DATA,
 	HARDCODED_PACKAGE_NAMES,
 	RegistryData,
@@ -68,9 +69,15 @@ export class AppComponent implements OnDestroy {
 		this.getCachedPackageNames(StorageId.PACKAGE_NAMES).sort()
 	);
 
-	readonly dateRangeFormControl: FormControl<DateRange> = new FormControl(this.getInitialDateRange(), {
-		nonNullable: true,
+	readonly dateRangeFormGroup = new FormGroup({
+		dateRangeFormControl: new FormControl(this.getInitialDateRange(), {
+			nonNullable: true,
+		}),
+		dateRangeDropdownFormControl: new FormControl<DateRangeDropdown | null>(null),
 	});
+	// readonly dateRangeFormControl: FormControl<DateRange> = new FormControl(this.getInitialDateRange(), {
+	// 	nonNullable: true,
+	// });
 
 	readonly addPackage: FormControl<string> = new FormControl('', {
 		nonNullable: true,
@@ -87,6 +94,40 @@ export class AppComponent implements OnDestroy {
 	readonly autocompleteOptions$!: Observable<string[]>;
 
 	constructor() {
+		/*
+        Problem:
+        dateRangeFormGroup.controls.dateRangeFormControl emits value even if emitEvent == false
+
+        if possible to solve, then rework: const selectedDates$ = this.dateRangeFormGroup into
+        merge([]) but take value only from the dateRangeFormControl
+
+
+      */
+		// changing date range - reset dateRangeDropdownFormControl
+		this.dateRangeFormGroup.controls.dateRangeDropdownFormControl.valueChanges
+			.pipe(takeUntil(this.unsubscribe$))
+			.subscribe((value) => {
+				if (value) {
+					const dateRange = this.dateService.getDateRangeByDropdown(value);
+					console.log('dateRangedateRange', value);
+					this.dateRangeFormGroup.controls.dateRangeFormControl.patchValue(dateRange, {
+						onlySelf: true,
+						emitEvent: false,
+					});
+				}
+			});
+
+		// changing date range - reset dateRangeDropdownFormControl
+		this.dateRangeFormGroup.controls.dateRangeFormControl.valueChanges
+			.pipe(takeUntil(this.unsubscribe$))
+			.subscribe((value) => {
+				console.log('dateRangeFormControl', value);
+				this.dateRangeFormGroup.controls.dateRangeDropdownFormControl.patchValue(null, {
+					onlySelf: true,
+					emitEvent: false,
+				});
+			});
+
 		this.packageNames.observable$
 			.pipe(
 				tap((packageNames) => {
@@ -108,8 +149,8 @@ export class AppComponent implements OnDestroy {
 			)
 			.subscribe();
 
-		const selectedDates$ = this.dateRangeFormControl.valueChanges.pipe(
-			startWith(this.dateRangeFormControl.value),
+		const selectedDates$ = this.dateRangeFormGroup.controls.dateRangeFormControl.valueChanges.pipe(
+			startWith(this.dateRangeFormGroup.controls.dateRangeFormControl.value),
 			// Ignore any values where the end is before the start
 			filter(([start, end]) => isEqual(end, start) || isAfter(end, start))
 		);

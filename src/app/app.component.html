@@ -1,24 +1,23 @@
 <div class="flex-row margin-row">
-	<form class="flex-1" onsubmit="return false">
-		<div class="date-wrapper">
+	<div class="flex-1">
+		<form class="date-wrapper" [formGroup]="dateRangeFormGroup" onsubmit="return false">
 			<!-- date picker -->
-			<app-date-range-picker [formControl]="dateRangeFormControl"></app-date-range-picker>
+			<app-date-range-picker formControlName="dateRangeFormControl"></app-date-range-picker>
 
 			<span>or</span>
 
 			<!-- date dropdown -->
-			<app-date-range-dropdown appDateRangeDropdown [formControl]="dateRangeFormControl"></app-date-range-dropdown>
-			<!-- <div class="date-wrapper-dropdown">
+			<div class="date-wrapper-dropdown">
 				<div><strong>Downloads</strong> in past</div>
 				<mat-form-field appearance="fill">
 					<mat-label>Select date range</mat-label>
-					<mat-select appDateRangeDropdown [formControl]="dateRangeFormControl">
+					<mat-select formControlName="dateRangeDropdownFormControl">
 						<mat-option *ngFor="let date of DATE_RANGE_DROPDOWN_DATA" [value]="date"> {{date.name}} </mat-option>
 					</mat-select>
 				</mat-form-field>
-			</div> -->
-		</div>
-	</form>
+			</div>
+		</form>
+	</div>
 
 	<div>
 		<button class="clear-cache-button" mat-stroked-button (click)="clearCache()">Clear cache</button>

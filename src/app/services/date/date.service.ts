@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { addDays, differenceInDays, format, isBefore, isEqual, isValid, parse } from 'date-fns';
-import { DateFormat, DateRange, RegistryData } from '../../models';
+import { DateFormat, DateRange, DateRangeDropdown, DateRangeTimeline, RegistryData } from '../../models';
 
 @Injectable({
 	providedIn: 'root',
@@ -85,12 +85,37 @@ export class DateService {
 		const days = Array.from({ length: diff }, (_, i) => i + 1);
 
 		const dates = [start, ...days.map((additionalDays) => addDays(start, additionalDays))];
-
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		if (!isEqual(dates.at(-1)!, end)) {
+			console.error({ dates, end });
 			throw new Error('Unexpected getDates end mismatch');
 		}
 
 		return dates;
+	}
+
+	/**
+	 *
+	 * @param dateRangeDropdown value from DATE_RANGE_DROPDOWN_DATA
+	 * @returns A converted value from DATE_RANGE_DROPDOWN_DATA to a DateRange that
+	 * reference the [start, end] dates
+	 *
+	 * Used to receive errors from this.getDates() when not working with midnight dates
+	 */
+	getDateRangeByDropdown(dateRangeDropdown: DateRangeDropdown): DateRange {
+		const pastDate = new Date();
+		pastDate.setHours(0, 0, 0, 0); // today midnight
+
+		const today = new Date();
+		today.setHours(0, 0, 0, 0); // today midnight
+
+		if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.YEARS) {
+			pastDate.setFullYear(pastDate.getFullYear() - dateRangeDropdown.rangeValue);
+		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.MONTHS) {
+			pastDate.setMonth(pastDate.getMonth() - dateRangeDropdown.rangeValue);
+		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.WEEKS) {
+			pastDate.setDate(pastDate.getDate() - dateRangeDropdown.rangeValue * 7);
+		}
+		return [pastDate, today];
 	}
 }

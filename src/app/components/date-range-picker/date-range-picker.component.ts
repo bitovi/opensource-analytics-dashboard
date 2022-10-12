@@ -117,10 +117,15 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 		// date range to something that isn't iterable to avoid spreading
 		// values to `start` and `end` FormControls
 		if (!this.dateService.isValidDateRange(dateRange)) {
-			this.dateRangeFormGroup.setValue({
-				start: null,
-				end: null,
-			});
+			this.dateRangeFormGroup.setValue(
+				{
+					start: null,
+					end: null,
+				},
+				{
+					emitEvent: false,
+				}
+			);
 			return;
 		}
 
