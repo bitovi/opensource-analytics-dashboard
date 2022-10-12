@@ -3,7 +3,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DateRangeDropdownComponent } from './../../components/date-range-dropdown/date-range-dropdown.component';
 
 import { Subject, takeUntil } from 'rxjs';
-import { DateRange, DateRangeDropdown } from '../../models';
+import { DateRange, DateRangeDropdown, DateRangeTimeline } from '../../models';
 
 @Directive({
 	selector: '[appDateRangeDropdown]',
@@ -70,11 +70,11 @@ export class DateRangeDropdownDirective implements OnInit, OnDestroy, ControlVal
 
 	private getDateRange(dateRangeDropdown: DateRangeDropdown): DateRange {
 		const pastDate = new Date();
-		if (dateRangeDropdown.rangeTimeline === 'years') {
+		if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.YEARS) {
 			pastDate.setFullYear(pastDate.getFullYear() - dateRangeDropdown.rangeValue);
-		} else if (dateRangeDropdown.rangeTimeline === 'months') {
+		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.MONTHS) {
 			pastDate.setMonth(pastDate.getMonth() - dateRangeDropdown.rangeValue);
-		} else if (dateRangeDropdown.rangeTimeline === 'weeks') {
+		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.WEEKS) {
 			pastDate.setDate(pastDate.getDate() - dateRangeDropdown.rangeValue * 7);
 		}
 		return [pastDate, new Date()];
