@@ -21,7 +21,7 @@ export interface DateRangeDropdown {
 }
 
 /* constant used to display data in DateRangeDropdownComponent */
-export const DATE_RANGE_DROPDOWN_DATA: DateRangeDropdown[] = [
+export const DATE_RANGE_DROPDOWN_DATA = [
 	{ name: '1 week', rangeValue: 1, rangeTimeline: DateRangeTimeline.WEEKS },
 	{ name: '2 weeks', rangeValue: 2, rangeTimeline: DateRangeTimeline.WEEKS },
 	{ name: '1 month', rangeValue: 1, rangeTimeline: DateRangeTimeline.MONTHS },
@@ -29,4 +29,4 @@ export const DATE_RANGE_DROPDOWN_DATA: DateRangeDropdown[] = [
 	{ name: '1 year', rangeValue: 1, rangeTimeline: DateRangeTimeline.YEARS },
 	{ name: '2 years', rangeValue: 2, rangeTimeline: DateRangeTimeline.YEARS },
 	{ name: '5 years', rangeValue: 5, rangeTimeline: DateRangeTimeline.YEARS },
-];
+] as const;

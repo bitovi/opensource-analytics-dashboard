@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { addDays, differenceInDays, format, isBefore, isEqual, isValid, parse } from 'date-fns';
+import { addDays, differenceInDays, endOfDay, format, isBefore, isEqual, isValid, parse } from 'date-fns';
 import { DateFormat, DateRange, DateRangeDropdown, DateRangeTimeline, RegistryData } from '../../models';
 
 @Injectable({
@@ -103,17 +103,17 @@ export class DateService {
 	 * Used to receive errors from this.getDates() when not working with midnight dates
 	 */
 	getDateRangeByDropdown(dateRangeDropdown: DateRangeDropdown): DateRange {
-		const pastDate = new Date();
-		pastDate.setHours(0, 0, 0, 0); // today midnight
-
-		const today = new Date();
-		today.setHours(0, 0, 0, 0); // today midnight
+		const pastDate = endOfDay(new Date()); // today midnight
+		const today = endOfDay(new Date()); // today midnight
 
 		if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.YEARS) {
+			// substract years
 			pastDate.setFullYear(pastDate.getFullYear() - dateRangeDropdown.rangeValue);
 		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.MONTHS) {
+			// substract months
 			pastDate.setMonth(pastDate.getMonth() - dateRangeDropdown.rangeValue);
 		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.WEEKS) {
+			// substract weeks
 			pastDate.setDate(pastDate.getDate() - dateRangeDropdown.rangeValue * 7);
 		}
 		return [pastDate, today];

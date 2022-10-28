@@ -7,15 +7,7 @@
 			<span>or</span>
 
 			<!-- date dropdown -->
-			<div class="date-wrapper-dropdown">
-				<div><strong>Downloads</strong> in past</div>
-				<mat-form-field appearance="fill">
-					<mat-label>Select date range</mat-label>
-					<mat-select formControlName="dateRangeDropdownFormControl">
-						<mat-option *ngFor="let date of DATE_RANGE_DROPDOWN_DATA" [value]="date"> {{date.name}} </mat-option>
-					</mat-select>
-				</mat-form-field>
-			</div>
+			<app-date-range-dropdown formControlName="dateRangeDropdownFormControl"></app-date-range-dropdown>
 		</form>
 	</div>
 

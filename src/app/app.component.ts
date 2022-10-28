@@ -24,16 +24,7 @@ import {
 import { formatNumber } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayObservable } from './classes';
-import {
-	ChartData,
-	DateFormat,
-	DateRange,
-	DateRangeDropdown,
-	DATE_RANGE_DROPDOWN_DATA,
-	HARDCODED_PACKAGE_NAMES,
-	RegistryData,
-	StorageId,
-} from './models';
+import { ChartData, DateFormat, DateRange, HARDCODED_PACKAGE_NAMES, RegistryData, StorageId } from './models';
 import { ApiService, DataService, DateService, ErrorHandlerService, ParamsService, StorageService } from './services';
 
 type RegistryError = { error?: { error?: string }; message?: string };
@@ -73,11 +64,8 @@ export class AppComponent implements OnDestroy {
 		dateRangeFormControl: new FormControl(this.getInitialDateRange(), {
 			nonNullable: true,
 		}),
-		dateRangeDropdownFormControl: new FormControl<DateRangeDropdown | null>(null),
+		dateRangeDropdownFormControl: new FormControl<DateRange | null>(null),
 	});
-	// readonly dateRangeFormControl: FormControl<DateRange> = new FormControl(this.getInitialDateRange(), {
-	// 	nonNullable: true,
-	// });
 
 	readonly addPackage: FormControl<string> = new FormControl('', {
 		nonNullable: true,
@@ -87,8 +75,6 @@ export class AppComponent implements OnDestroy {
 	readonly selectedPackageNames = new FormControl<string[]>(this.packageNames.getValue(), {
 		nonNullable: true,
 	});
-
-	DATE_RANGE_DROPDOWN_DATA = DATE_RANGE_DROPDOWN_DATA;
 
 	/* Observale that will display loaded packages from NPM */
 	readonly autocompleteOptions$!: Observable<string[]>;
@@ -108,9 +94,7 @@ export class AppComponent implements OnDestroy {
 			.pipe(takeUntil(this.unsubscribe$))
 			.subscribe((value) => {
 				if (value) {
-					const dateRange = this.dateService.getDateRangeByDropdown(value);
-					console.log('dateRangedateRange', value);
-					this.dateRangeFormGroup.controls.dateRangeFormControl.patchValue(dateRange, {
+					this.dateRangeFormGroup.controls.dateRangeFormControl.patchValue(value, {
 						onlySelf: true,
 						emitEvent: false,
 					});
@@ -120,8 +104,7 @@ export class AppComponent implements OnDestroy {
 		// changing date range - reset dateRangeDropdownFormControl
 		this.dateRangeFormGroup.controls.dateRangeFormControl.valueChanges
 			.pipe(takeUntil(this.unsubscribe$))
-			.subscribe((value) => {
-				console.log('dateRangeFormControl', value);
+			.subscribe(() => {
 				this.dateRangeFormGroup.controls.dateRangeDropdownFormControl.patchValue(null, {
 					onlySelf: true,
 					emitEvent: false,
