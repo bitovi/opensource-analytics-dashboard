@@ -1,5 +1,17 @@
 import { Injectable } from '@angular/core';
-import { addDays, differenceInDays, endOfDay, format, isBefore, isEqual, isValid, parse, startOfDay } from 'date-fns';
+import {
+	addDays,
+	differenceInDays,
+	format,
+	isBefore,
+	isEqual,
+	isValid,
+	parse,
+	startOfDay,
+	subMonths,
+	subWeeks,
+	subYears,
+} from 'date-fns';
 import { DateFormat, DateRange, DateRangeDropdown, DateRangeTimeline, RegistryData } from '../../models';
 
 @Injectable({
@@ -83,7 +95,7 @@ export class DateService {
 	 * and the last value is the last value of `DateRange`
 	 */
 	getDates(dateRange: DateRange): Date[] {
-		const [start, end] = dateRange.map((d) => startOfDay(d));
+		const [start, end] = dateRange;
 
 		const diff = differenceInDays(end, start);
 
@@ -108,19 +120,18 @@ export class DateService {
 	 * Used to receive errors from this.getDates() when not working with midnight dates
 	 */
 	getDateRangeByDropdown(dateRangeDropdown: DateRangeDropdown): DateRange {
-		const pastDate = endOfDay(new Date()); // today midnight
-		const today = endOfDay(new Date()); // today midnight
+		const today = startOfDay(new Date()); // today midnight
 
 		if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.YEARS) {
 			// substract years
-			pastDate.setFullYear(pastDate.getFullYear() - dateRangeDropdown.rangeValue);
+			return [subYears(startOfDay(new Date()), dateRangeDropdown.rangeValue), today];
 		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.MONTHS) {
 			// substract months
-			pastDate.setMonth(pastDate.getMonth() - dateRangeDropdown.rangeValue);
+			return [subMonths(startOfDay(new Date()), dateRangeDropdown.rangeValue), today];
 		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.WEEKS) {
 			// substract weeks
-			pastDate.setDate(pastDate.getDate() - dateRangeDropdown.rangeValue * 7);
+			return [subWeeks(startOfDay(new Date()), dateRangeDropdown.rangeValue), today];
 		}
-		return [pastDate, today];
+		throw new Error('Unexpected getDateRangeByDropdown DateRangeTimeline value');
 	}
 }
