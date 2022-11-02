@@ -22,15 +22,14 @@ export class DateService {
 
 	// TODO: Implement agreegating apiDatas by: DAY, WEEK, MONTH
 	getAggregatedReigstryData(apiDatas: RegistryData[], dates: Date[]): (string | number)[][] {
-		// may happen that dates.length is more than apiDatas[0].range.length
-		const minimumRangeLength = apiDatas.reduce(
-			(acc, curr) => (acc > curr.range.length ? curr.range.length : acc),
-			1000000
-		);
-
-		// MM/dd vs MM/dd/yy
-		const rows = dates.slice(-minimumRangeLength).map((date, i) => {
-			return [format(date, 'MM/dd/yy'), ...apiDatas.map((apiData) => apiData.range[i].downloads)];
+		const rows = dates.map((date) => {
+			// create matching format with registryData.range[N].dat
+			const correctDateFormat = format(date, 'yyyy-MM-dd');
+			// from API response for each library find downloads for the corresponsing day (correctDateFormat)
+			const existingDate = apiDatas.map(
+				(registryData) => registryData.range.find((d) => d.day === correctDateFormat)?.downloads ?? 0
+			);
+			return [format(date, 'MM/dd/yy'), ...existingDate];
 		});
 
 		return rows;
