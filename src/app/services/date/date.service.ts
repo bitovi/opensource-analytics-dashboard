@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { addDays, differenceInDays, endOfDay, format, isBefore, isEqual, isValid, parse } from 'date-fns';
+import { addDays, differenceInDays, endOfDay, format, isBefore, isEqual, isValid, parse, startOfDay } from 'date-fns';
 import { DateFormat, DateRange, DateRangeDropdown, DateRangeTimeline, RegistryData } from '../../models';
 
 @Injectable({
@@ -83,7 +83,7 @@ export class DateService {
 	 * and the last value is the last value of `DateRange`
 	 */
 	getDates(dateRange: DateRange): Date[] {
-		const [start, end] = dateRange;
+		const [start, end] = dateRange.map((d) => startOfDay(d));
 
 		const diff = differenceInDays(end, start);
 
