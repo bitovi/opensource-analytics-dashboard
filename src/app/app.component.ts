@@ -10,6 +10,7 @@ import {
 	filter,
 	forkJoin,
 	map,
+	merge,
 	Observable,
 	of,
 	shareReplay,
@@ -94,7 +95,10 @@ export class AppComponent implements OnDestroy {
 			.pipe(takeUntil(this.unsubscribe$))
 			.subscribe((value) => {
 				if (value) {
-					this.dateRangeFormGroup.controls.dateRangeFormControl.patchValue(value);
+					this.dateRangeFormGroup.controls.dateRangeFormControl.patchValue(value, {
+						onlySelf: true,
+						emitEvent: false,
+					});
 				}
 			});
 
@@ -129,8 +133,13 @@ export class AppComponent implements OnDestroy {
 			)
 			.subscribe();
 
-		const selectedDates$ = this.dateRangeFormGroup.controls.dateRangeFormControl.valueChanges.pipe(
+		const selectedDates$ = merge(
+			this.dateRangeFormGroup.controls.dateRangeFormControl.valueChanges,
+			this.dateRangeFormGroup.controls.dateRangeDropdownFormControl.valueChanges
+		).pipe(
 			startWith(this.dateRangeFormGroup.controls.dateRangeFormControl.value),
+			filter((dateRange): dateRange is DateRange => !!dateRange),
+
 			// Ignore any values where the end is before the start
 			filter(([start, end]) => isEqual(end, start) || isAfter(end, start))
 		);
@@ -381,7 +390,7 @@ export class AppComponent implements OnDestroy {
 	/**
 	 * Initialze date range with a week before the current date
 	 */
-	getInitialDateRange(): [Date, Date] {
+	getInitialDateRange(): DateRange {
 		const currentDate = startOfDay(new Date());
 
 		const dateRangeParams = this.paramsService.getDateRange();

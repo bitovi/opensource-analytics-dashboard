@@ -47,10 +47,9 @@ export class DateRangeDropdownComponent implements OnInit, OnDestroy, ControlVal
 	/**
 	 * Set Component's ControlValueAccessor value
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	writeValue(dateRange?: DateRange | null): void {
-		console.log('dateRange', dateRange);
-		// uncomment if you want to set the form control to null
-		//this.dateRangeDropdownFormControl.patchValue(null, { onlySelf: true, emitEvent: false });
+		this.dateRangeDropdownFormControl.patchValue(null, { onlySelf: true, emitEvent: false });
 	}
 
 	/**

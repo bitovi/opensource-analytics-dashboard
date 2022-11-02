@@ -44,6 +44,14 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 	readonly startDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('Start Date');
 	readonly endDateErrorsHandler = this.errorHandlerService.getDatepickerErrorsHandler('End Date');
 
+	/**
+	 * mat-date-input does not support
+	 * change events emitted despite using emitEvents false
+	 * https://github.com/angular/components/issues/20218
+	 *
+	 */
+	private skipEmit = false;
+
 	// onChange callback that will be overridden using `registerOnChange`
 	onChange: (dateRange?: DateRange | null) => void = () => {
 		/** empty */
@@ -76,7 +84,7 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 		this.dateRangeFormGroup.valueChanges
 			.pipe(
 				tap(({ start, end }) => {
-					if (!this.dateRangeFormGroup.valid) {
+					if (!this.dateRangeFormGroup.valid || this.skipEmit) {
 						return;
 					}
 
@@ -113,6 +121,7 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 	 * Set Component's ControlValueAccessor value
 	 */
 	writeValue(dateRange?: DateRange | null): void {
+		this.skipEmit = true;
 		// Clear start and end FormControl's value when trying to set
 		// date range to something that isn't iterable to avoid spreading
 		// values to `start` and `end` FormControls
@@ -123,6 +132,7 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 					end: null,
 				},
 				{
+					onlySelf: true,
 					emitEvent: false,
 				}
 			);
@@ -135,9 +145,14 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 		this.dateRangeFormGroup.setValue(
 			{ start, end },
 			{
+				onlySelf: true,
 				emitEvent: false,
 			}
 		);
+
+		setTimeout(() => {
+			this.skipEmit = false;
+		});
 	}
 
 	/**
