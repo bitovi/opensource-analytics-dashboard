@@ -94,10 +94,7 @@ export class AppComponent implements OnDestroy {
 			.pipe(takeUntil(this.unsubscribe$))
 			.subscribe((value) => {
 				if (value) {
-					this.dateRangeFormGroup.controls.dateRangeFormControl.patchValue(value, {
-						onlySelf: true,
-						emitEvent: false,
-					});
+					this.dateRangeFormGroup.controls.dateRangeFormControl.patchValue(value);
 				}
 			});
 
