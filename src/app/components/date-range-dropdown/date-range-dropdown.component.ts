@@ -46,6 +46,8 @@ export class DateRangeDropdownComponent implements OnInit, OnDestroy, ControlVal
 
 	/**
 	 * Set Component's ControlValueAccessor value
+	 * TODO: implement writeValue so that from the [start, end] date we will
+	 * TODO: calculate the correct value from DATE_RANGE_DROPDOWN_DATA
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	writeValue(dateRange?: DateRange | null): void {
