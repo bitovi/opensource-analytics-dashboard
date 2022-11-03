@@ -81,16 +81,7 @@ export class AppComponent implements OnDestroy {
 	readonly autocompleteOptions$!: Observable<string[]>;
 
 	constructor() {
-		/*
-        Problem:
-        dateRangeFormGroup.controls.dateRangeFormControl emits value even if emitEvent == false
-
-        if possible to solve, then rework: const selectedDates$ = this.dateRangeFormGroup into
-        merge([]) but take value only from the dateRangeFormControl
-
-
-      */
-		// changing date range - reset dateRangeDropdownFormControl
+		// changing date dropdown - set dateRangeFormControl start and end date
 		this.dateRangeFormGroup.controls.dateRangeDropdownFormControl.valueChanges
 			.pipe(takeUntil(this.unsubscribe$))
 			.subscribe((value) => {

@@ -18,7 +18,7 @@ import { DateService } from './../../services';
 	],
 })
 export class DateRangeDropdownComponent implements OnInit, OnDestroy, ControlValueAccessor {
-	// inner FormGroup used to manage ControlValueAccessor value
+	// inner FormControl used to manage ControlValueAccessor value
 	readonly dateRangeDropdownFormControl = new FormControl<DateRangeDropdown | null>(null, {});
 	private readonly destroyer$ = new Subject<void>();
 	private readonly dateService = inject(DateService);

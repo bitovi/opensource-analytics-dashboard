@@ -35,7 +35,7 @@ export class DateService {
 	// TODO: Implement agreegating apiDatas by: DAY, WEEK, MONTH
 	getAggregatedReigstryData(apiDatas: RegistryData[], dates: Date[]): (string | number)[][] {
 		const rows = dates.map((date) => {
-			// create matching format with registryData.range[N].dat
+			// create matching format with registryData.range[N].day
 			const correctDateFormat = format(date, 'yyyy-MM-dd');
 			// from API response for each library find downloads for the corresponsing day (correctDateFormat)
 			const existingDate = apiDatas.map(
@@ -129,8 +129,9 @@ export class DateService {
 			// substract months
 			return [subMonths(startOfDay(new Date()), dateRangeDropdown.rangeValue), today];
 		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.WEEKS) {
-			// substract weeks
-			return [subWeeks(startOfDay(new Date()), dateRangeDropdown.rangeValue), today];
+			// substract weeks and add plus one day, because we were showing one day more than the subscracted weeks
+			const pastDate = addDays(subWeeks(startOfDay(new Date()), dateRangeDropdown.rangeValue), 1);
+			return [pastDate, today];
 		}
 		throw new Error('Unexpected getDateRangeByDropdown DateRangeTimeline value');
 	}

@@ -48,7 +48,6 @@ export class DateRangePickerComponent implements ControlValueAccessor, OnDestroy
 	 * mat-date-input does not support
 	 * change events emitted despite using emitEvents false
 	 * https://github.com/angular/components/issues/20218
-	 *
 	 */
 	private skipEmit = false;
 
