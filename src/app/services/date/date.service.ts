@@ -1,6 +1,18 @@
 import { Injectable } from '@angular/core';
-import { addDays, differenceInDays, format, isBefore, isEqual, isValid, parse } from 'date-fns';
-import { DateFormat, DateRange, RegistryData } from '../../models';
+import {
+	addDays,
+	differenceInDays,
+	format,
+	isBefore,
+	isEqual,
+	isValid,
+	parse,
+	startOfDay,
+	subMonths,
+	subWeeks,
+	subYears,
+} from 'date-fns';
+import { DateFormat, DateRange, DateRangeDropdown, DateRangeTimeline, RegistryData } from '../../models';
 
 @Injectable({
 	providedIn: 'root',
@@ -22,9 +34,14 @@ export class DateService {
 
 	// TODO: Implement agreegating apiDatas by: DAY, WEEK, MONTH
 	getAggregatedReigstryData(apiDatas: RegistryData[], dates: Date[]): (string | number)[][] {
-		// MM/dd vs MM/dd/yy
-		const rows = dates.map((date, i) => {
-			return [format(date, 'MM/dd/yy'), ...apiDatas.map((apiData) => apiData.range[i].downloads)];
+		const rows = dates.map((date) => {
+			// create matching format with registryData.range[N].day
+			const correctDateFormat = format(date, 'yyyy-MM-dd');
+			// from API response for each library find downloads for the corresponsing day (correctDateFormat)
+			const existingDate = apiDatas.map(
+				(registryData) => registryData.range.find((d) => d.day === correctDateFormat)?.downloads ?? 0
+			);
+			return [format(date, 'MM/dd/yy'), ...existingDate];
 		});
 
 		return rows;
@@ -85,12 +102,37 @@ export class DateService {
 		const days = Array.from({ length: diff }, (_, i) => i + 1);
 
 		const dates = [start, ...days.map((additionalDays) => addDays(start, additionalDays))];
-
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		if (!isEqual(dates.at(-1)!, end)) {
+			console.error({ dates, end });
 			throw new Error('Unexpected getDates end mismatch');
 		}
 
 		return dates;
+	}
+
+	/**
+	 *
+	 * @param dateRangeDropdown value from DATE_RANGE_DROPDOWN_DATA
+	 * @returns A converted value from DATE_RANGE_DROPDOWN_DATA to a DateRange that
+	 * reference the [start, end] dates
+	 *
+	 * Used to receive errors from this.getDates() when not working with midnight dates
+	 */
+	getDateRangeByDropdown(dateRangeDropdown: DateRangeDropdown): DateRange {
+		const today = startOfDay(new Date()); // today midnight
+
+		if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.YEARS) {
+			// substract years
+			return [subYears(startOfDay(new Date()), dateRangeDropdown.rangeValue), today];
+		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.MONTHS) {
+			// substract months
+			return [subMonths(startOfDay(new Date()), dateRangeDropdown.rangeValue), today];
+		} else if (dateRangeDropdown.rangeTimeline === DateRangeTimeline.WEEKS) {
+			// substract weeks and add plus one day, because we were showing one day more than the subscracted weeks
+			const pastDate = addDays(subWeeks(startOfDay(new Date()), dateRangeDropdown.rangeValue), 1);
+			return [pastDate, today];
+		}
+		throw new Error('Unexpected getDateRangeByDropdown DateRangeTimeline value');
 	}
 }

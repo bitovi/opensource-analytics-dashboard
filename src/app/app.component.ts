@@ -1,6 +1,6 @@
 import { Component, inject, LOCALE_ID, OnDestroy } from '@angular/core';
 
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Column } from 'angular-google-charts';
 import { isAfter, isEqual, startOfDay, subDays } from 'date-fns';
 import {
@@ -10,6 +10,7 @@ import {
 	filter,
 	forkJoin,
 	map,
+	merge,
 	Observable,
 	of,
 	shareReplay,
@@ -60,8 +61,11 @@ export class AppComponent implements OnDestroy {
 		this.getCachedPackageNames(StorageId.PACKAGE_NAMES).sort()
 	);
 
-	readonly dateRangeFormControl: FormControl<DateRange> = new FormControl(this.getInitialDateRange(), {
-		nonNullable: true,
+	readonly dateRangeFormGroup = new FormGroup({
+		dateRangeFormControl: new FormControl(this.getInitialDateRange(), {
+			nonNullable: true,
+		}),
+		dateRangeDropdownFormControl: new FormControl<DateRange | null>(null),
 	});
 
 	readonly addPackage: FormControl<string> = new FormControl('', {
@@ -77,6 +81,28 @@ export class AppComponent implements OnDestroy {
 	readonly autocompleteOptions$!: Observable<string[]>;
 
 	constructor() {
+		// changing date dropdown - set dateRangeFormControl start and end date
+		this.dateRangeFormGroup.controls.dateRangeDropdownFormControl.valueChanges
+			.pipe(takeUntil(this.unsubscribe$))
+			.subscribe((value) => {
+				if (value) {
+					this.dateRangeFormGroup.controls.dateRangeFormControl.patchValue(value, {
+						onlySelf: true,
+						emitEvent: false,
+					});
+				}
+			});
+
+		// changing date range - reset dateRangeDropdownFormControl
+		this.dateRangeFormGroup.controls.dateRangeFormControl.valueChanges
+			.pipe(takeUntil(this.unsubscribe$))
+			.subscribe(() => {
+				this.dateRangeFormGroup.controls.dateRangeDropdownFormControl.patchValue(null, {
+					onlySelf: true,
+					emitEvent: false,
+				});
+			});
+
 		this.packageNames.observable$
 			.pipe(
 				tap((packageNames) => {
@@ -98,8 +124,13 @@ export class AppComponent implements OnDestroy {
 			)
 			.subscribe();
 
-		const selectedDates$ = this.dateRangeFormControl.valueChanges.pipe(
-			startWith(this.dateRangeFormControl.value),
+		const selectedDates$ = merge(
+			this.dateRangeFormGroup.controls.dateRangeFormControl.valueChanges,
+			this.dateRangeFormGroup.controls.dateRangeDropdownFormControl.valueChanges
+		).pipe(
+			startWith(this.dateRangeFormGroup.controls.dateRangeFormControl.value),
+			filter((dateRange): dateRange is DateRange => !!dateRange),
+
 			// Ignore any values where the end is before the start
 			filter(([start, end]) => isEqual(end, start) || isAfter(end, start))
 		);
@@ -350,7 +381,7 @@ export class AppComponent implements OnDestroy {
 	/**
 	 * Initialze date range with a week before the current date
 	 */
-	getInitialDateRange(): [Date, Date] {
+	getInitialDateRange(): DateRange {
 		const currentDate = startOfDay(new Date());
 
 		const dateRangeParams = this.paramsService.getDateRange();

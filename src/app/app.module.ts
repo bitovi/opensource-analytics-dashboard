@@ -14,9 +14,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { GoogleChartsModule } from 'angular-google-charts';
 
+import { MatSelectModule } from '@angular/material/select';
 import { AppComponent } from './app.component';
 import { AutocompleteComponent } from './components/autocomplete/autocomplete.component';
 import { ChartComponent } from './components/chart/chart.component';
+import { DateRangeDropdownComponent } from './components/date-range-dropdown/date-range-dropdown.component';
 import { DateRangePickerComponent } from './components/date-range-picker/date-range-picker.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { PackageListComponent } from './components/package-list/package-list.component';
@@ -33,6 +35,7 @@ import { ToObservablePipe } from './pipes';
 		AutocompleteComponent,
 		ChartComponent,
 		DateRangePickerComponent,
+		DateRangeDropdownComponent,
 	],
 	imports: [
 		BrowserModule,
@@ -48,6 +51,7 @@ import { ToObservablePipe } from './pipes';
 		MatIconModule,
 		MatSnackBarModule,
 		MatRippleModule,
+		MatSelectModule,
 		GoogleChartsModule.forRoot({ version: '51' }),
 	],
 	providers: [],
