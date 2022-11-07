@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { catchError, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
+	ApiEndpoints,
 	DownloadsPoint,
 	DownloadsRange,
 	DownloadsRangeData,
@@ -11,13 +12,6 @@ import {
 	GithubRepositoryOverview,
 	Suggestion,
 } from '../../models';
-
-/** API Endpoints */
-export enum ENDPOINTS {
-	NPMJS_REGISTRY = 'https://api.npmjs.org',
-	NPM_REGISTRY = 'https://api.npms.io',
-	GITHUB = 'https://api.github.repos',
-}
 
 @Injectable({
 	providedIn: 'root',
@@ -34,7 +28,7 @@ export class ApiService {
 	 */
 	getGithubPackageContributors(repositoryName: string): Observable<GithubRepositoryContributor[]> {
 		return this.httpClient
-			.get<GithubRepositoryContributor[]>(`${ENDPOINTS.GITHUB}/${repositoryName}/contributors`)
+			.get<GithubRepositoryContributor[]>(`${ApiEndpoints.GITHUB}/${repositoryName}/contributors`)
 			.pipe(
 				catchError((error: unknown) => {
 					console.error(error);
@@ -52,7 +46,7 @@ export class ApiService {
 	 * @returns languages that the github repository is written
 	 */
 	getGithubPackageLanguages(repositoryName: string): Observable<GithubRepositoryLanguages> {
-		return this.httpClient.get<GithubRepositoryLanguages>(`${ENDPOINTS.GITHUB}/${repositoryName}/languages`);
+		return this.httpClient.get<GithubRepositoryLanguages>(`${ApiEndpoints.GITHUB}/${repositoryName}/languages`);
 	}
 
 	/**
@@ -63,7 +57,7 @@ export class ApiService {
 	 * @returns overview of some github repository
 	 */
 	getGithubPackageOverview(repositoryName: string): Observable<GithubRepositoryOverview> {
-		return this.httpClient.get<GithubRepositoryOverview>(`${ENDPOINTS.GITHUB}/${repositoryName}`);
+		return this.httpClient.get<GithubRepositoryOverview>(`${ApiEndpoints.GITHUB}/${repositoryName}`);
 	}
 
 	/**
@@ -76,7 +70,7 @@ export class ApiService {
 	 */
 	getDownloadsPoint(packageName: string, start: string, end: string): Observable<number> {
 		return this.httpClient
-			.get<DownloadsPoint>(`${ENDPOINTS.NPMJS_REGISTRY}/downloads/point/${start}:${end}/${packageName}`)
+			.get<DownloadsPoint>(`${ApiEndpoints.NPMJS_REGISTRY}/downloads/point/${start}:${end}/${packageName}`)
 			.pipe(map((res) => res.downloads));
 	}
 
@@ -90,7 +84,7 @@ export class ApiService {
 	 */
 	getDownloadsRange(packageName: string, start: string, end: string): Observable<DownloadsRangeData[]> {
 		return this.httpClient
-			.get<DownloadsRange>(`${ENDPOINTS.NPMJS_REGISTRY}/downloads/range/${start}:${end}/${packageName}`)
+			.get<DownloadsRange>(`${ApiEndpoints.NPMJS_REGISTRY}/downloads/range/${start}:${end}/${packageName}`)
 			.pipe(map((res) => res.downloads));
 	}
 
@@ -102,7 +96,7 @@ export class ApiService {
 	 */
 	getSuggestions(query: string): Observable<string[]> {
 		return this.httpClient
-			.get<Suggestion[]>(`${ENDPOINTS.NPM_REGISTRY}/v2/search/suggestions`, { params: { q: query } })
+			.get<Suggestion[]>(`${ApiEndpoints.NPM_REGISTRY}/v2/search/suggestions`, { params: { q: query } })
 			.pipe(
 				map((suggestions) => suggestions.map((suggestion) => suggestion.package.name)),
 				catchError((error: unknown) => {

@@ -2,14 +2,15 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { TestBed } from '@angular/core/testing';
 
 import {
+	ApiEndpoints,
 	DownloadsPoint,
 	DownloadsRange,
 	GithubRepositoryContributor,
 	GithubRepositoryLanguages,
 	GithubRepositoryOverview,
 	Suggestion,
-} from 'src/app/models';
-import { ApiService, ENDPOINTS } from './api.service';
+} from '../../models';
+import { ApiService } from './api.service';
 
 describe('ApiService', () => {
 	let service: ApiService;
@@ -58,7 +59,7 @@ describe('ApiService', () => {
 			});
 
 			// Expect correct endpoint to be hit
-			const mockReq = httpMock.expectOne(`${ENDPOINTS.GITHUB}/name/contributors`);
+			const mockReq = httpMock.expectOne(`${ApiEndpoints.GITHUB}/name/contributors`);
 			// Make sure GET method is used
 			expect(mockReq.request.method).toBe('GET');
 			mockReq.flush(mockResponse);
@@ -69,7 +70,7 @@ describe('ApiService', () => {
 				expect(resp).toStrictEqual([]);
 			});
 
-			const mockReq = httpMock.expectOne(`${ENDPOINTS.GITHUB}/name/contributors`);
+			const mockReq = httpMock.expectOne(`${ApiEndpoints.GITHUB}/name/contributors`);
 			mockReq.flush('error', { status: 404, statusText: 'Error' });
 		});
 	});
@@ -88,7 +89,7 @@ describe('ApiService', () => {
 			});
 
 			// Expect correct endpoint to be hit
-			const mockReq = httpMock.expectOne(`${ENDPOINTS.GITHUB}/${repoName}/languages`);
+			const mockReq = httpMock.expectOne(`${ApiEndpoints.GITHUB}/${repoName}/languages`);
 			// Make sure GET method is used
 			expect(mockReq.request.method).toBe('GET');
 			mockReq.flush(mockResponse);
@@ -114,7 +115,7 @@ describe('ApiService', () => {
 			});
 
 			// Expect correct endpoint to be hit
-			const mockReq = httpMock.expectOne(`${ENDPOINTS.GITHUB}/${repoName}`);
+			const mockReq = httpMock.expectOne(`${ApiEndpoints.GITHUB}/${repoName}`);
 			// Make sure GET method is used
 			expect(mockReq.request.method).toBe('GET');
 			mockReq.flush(mockResponse);
@@ -137,7 +138,7 @@ describe('ApiService', () => {
 
 			// Expect correct endpoint to be hit
 			const mockReq = httpMock.expectOne(
-				`${ENDPOINTS.NPMJS_REGISTRY}/downloads/point/${startDate}:${endDate}/${packageName}`
+				`${ApiEndpoints.NPMJS_REGISTRY}/downloads/point/${startDate}:${endDate}/${packageName}`
 			);
 			// Make sure GET method is used
 			expect(mockReq.request.method).toBe('GET');
@@ -164,7 +165,7 @@ describe('ApiService', () => {
 
 			// Expect correct endpoint to be hit
 			const mockReq = httpMock.expectOne(
-				`${ENDPOINTS.NPMJS_REGISTRY}/downloads/range/${startDate}:${endDate}/${packageName}`
+				`${ApiEndpoints.NPMJS_REGISTRY}/downloads/range/${startDate}:${endDate}/${packageName}`
 			);
 			// Make sure GET method is used
 			expect(mockReq.request.method).toBe('GET');
@@ -202,7 +203,7 @@ describe('ApiService', () => {
 			});
 
 			// Expect correct endpoint to be hit
-			const mockReq = httpMock.expectOne(`${ENDPOINTS.NPM_REGISTRY}/v2/search/suggestions?q=${query}`);
+			const mockReq = httpMock.expectOne(`${ApiEndpoints.NPM_REGISTRY}/v2/search/suggestions?q=${query}`);
 			// Ensure query is passed
 			expect(mockReq.request.params.get('q')).toBe(query);
 			// Make sure GET method is used
@@ -217,7 +218,7 @@ describe('ApiService', () => {
 				expect(resp).toStrictEqual([]);
 			});
 
-			const mockReq = httpMock.expectOne(`${ENDPOINTS.NPM_REGISTRY}/v2/search/suggestions?q=${query}`);
+			const mockReq = httpMock.expectOne(`${ApiEndpoints.NPM_REGISTRY}/v2/search/suggestions?q=${query}`);
 			mockReq.flush('error', { status: 404, statusText: 'Error' });
 		});
 	});
