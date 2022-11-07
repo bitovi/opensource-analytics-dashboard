@@ -27,11 +27,10 @@ export class ApiService {
 
 	/**
 	 * Get GitHub contributors for package
+	 * example: https://api.github.com/repos/vuejs/pinia/contributors
 	 *
 	 * @param repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
 	 * @return top contributors for a github repository
-	 *
-	 * example: https://api.github.com/repos/vuejs/pinia/contributors
 	 */
 	getGithubPackageContributors(repositoryName: string): Observable<GithubRepositoryContributor[]> {
 		return this.httpClient
@@ -46,7 +45,7 @@ export class ApiService {
 	}
 
 	/**
-	 * Get programming languages for GitHub package
+	 * Get programming language use for GitHub package
 	 * example: https://api.github.com/repos/vuejs/pinia/languages
 	 *
 	 * @param repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
