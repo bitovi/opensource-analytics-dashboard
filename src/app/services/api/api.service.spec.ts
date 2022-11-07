@@ -1,7 +1,13 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { GithubRepositoryContributor, GithubRepositoryLanguages, GithubRepositoryOverview } from 'src/app/models';
+import {
+	DownloadsPoint,
+	DownloadsRange,
+	GithubRepositoryContributor,
+	GithubRepositoryLanguages,
+	GithubRepositoryOverview,
+} from 'src/app/models';
 import { ApiService, ENDPOINTS } from './api.service';
 
 describe('ApiService', () => {
@@ -108,6 +114,57 @@ describe('ApiService', () => {
 
 			// Expect correct endpoint to be hit
 			const mockReq = httpMock.expectOne(`${ENDPOINTS.GITHUB}/${repoName}`);
+			// Make sure GET method is used
+			expect(mockReq.request.method).toBe('GET');
+			mockReq.flush(mockResponse);
+		});
+	});
+
+	describe('getDownloadsPoint()', () => {
+		it('should GET total downloads of package within range from NPMJS', () => {
+			const mockResponse: DownloadsPoint = {
+				downloads: 42,
+			};
+
+			const packageName = 'amazon-package';
+			const startDate = '2021-10-24';
+			const endDate = '2022-03-12';
+
+			service.getDownloadsPoint(packageName, startDate, endDate).subscribe((downloadCount) => {
+				expect(downloadCount).toStrictEqual(mockResponse.downloads);
+			});
+
+			// Expect correct endpoint to be hit
+			const mockReq = httpMock.expectOne(
+				`${ENDPOINTS.NPMJS_REGISTRY}/downloads/point/${startDate}:${endDate}/${packageName}`
+			);
+			// Make sure GET method is used
+			expect(mockReq.request.method).toBe('GET');
+			mockReq.flush(mockResponse);
+		});
+	});
+
+	describe('getDownloadsRange()', () => {
+		it('should GET download info for package within range from NPMJS', () => {
+			const mockResponse: DownloadsRange = {
+				downloads: [
+					{ day: '2021-10-24', downloads: 4 },
+					{ day: '2021-10-25', downloads: 10 },
+				],
+			};
+
+			const packageName = 'amazon-package';
+			const startDate = '2021-10-24';
+			const endDate = '2022-03-12';
+
+			service.getDownloadsRange(packageName, startDate, endDate).subscribe((range) => {
+				expect(range).toStrictEqual(mockResponse.downloads);
+			});
+
+			// Expect correct endpoint to be hit
+			const mockReq = httpMock.expectOne(
+				`${ENDPOINTS.NPMJS_REGISTRY}/downloads/range/${startDate}:${endDate}/${packageName}`
+			);
 			// Make sure GET method is used
 			expect(mockReq.request.method).toBe('GET');
 			mockReq.flush(mockResponse);
