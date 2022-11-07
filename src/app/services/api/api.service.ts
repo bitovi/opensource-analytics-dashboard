@@ -26,11 +26,11 @@ export class ApiService {
 	constructor(private readonly httpClient: HttpClient) {}
 
 	/**
-	 * Get GitHub contributors for package
+	 * Get GitHub contributors for package; return empty array on server error
 	 * example: https://api.github.com/repos/vuejs/pinia/contributors
 	 *
 	 * @param repositoryName name of the repository: angular/angular-cli , vuejs/vuex
-	 * @return top contributors for a github repository
+	 * @returns top contributors for a github repository
 	 */
 	getGithubPackageContributors(repositoryName: string): Observable<GithubRepositoryContributor[]> {
 		return this.httpClient
@@ -49,7 +49,7 @@ export class ApiService {
 	 * example: https://api.github.com/repos/vuejs/pinia/languages
 	 *
 	 * @param repositoryName name of the repository: angular/angular-cli , vuejs/vuex
-	 * @return languages that the github repository is written
+	 * @returns languages that the github repository is written
 	 */
 	getGithubPackageLanguages(repositoryName: string): Observable<GithubRepositoryLanguages> {
 		return this.httpClient.get<GithubRepositoryLanguages>(`${ENDPOINTS.GITHUB}/${repositoryName}/languages`);
@@ -60,7 +60,7 @@ export class ApiService {
 	 * example: https://api.github.com/repos/angular/angular-cli
 	 *
 	 * @param repositoryName name of the repository: angular/angular-cli , vuejs/vuex
-	 * @return overview of some github repository
+	 * @returns overview of some github repository
 	 */
 	getGithubPackageOverview(repositoryName: string): Observable<GithubRepositoryOverview> {
 		return this.httpClient.get<GithubRepositoryOverview>(`${ENDPOINTS.GITHUB}/${repositoryName}`);
@@ -80,12 +80,26 @@ export class ApiService {
 			.pipe(map((res) => res.downloads));
 	}
 
+	/**
+	 * Get total downloads of NPM package for each day in given interval of 'start' and 'end' dates
+	 *
+	 * @param packageName name of package
+	 * @param start download range start date (YYYY-MM-DD)
+	 * @param end download range end date (YYYY-MM-DD)
+	 * @returns array of download range data objects for given range
+	 */
 	getDownloadsRange(packageName: string, start: string, end: string): Observable<DownloadsRangeData[]> {
 		return this.httpClient
 			.get<DownloadsRange>(`${ENDPOINTS.NPMJS_REGISTRY}/downloads/range/${start}:${end}/${packageName}`)
 			.pipe(map((res) => res.downloads));
 	}
 
+	/**
+	 * Get package names from search suggestions for a query from NPM
+	 *
+	 * @param query search query string
+	 * @returns array of package names, or empty array on failure
+	 */
 	getSuggestions(query: string): Observable<string[]> {
 		return this.httpClient
 			.get<Suggestion[]>(`${ENDPOINTS.NPM_REGISTRY}/v2/search/suggestions`, { params: { q: query } })

@@ -7,6 +7,7 @@ import {
 	GithubRepositoryContributor,
 	GithubRepositoryLanguages,
 	GithubRepositoryOverview,
+	Suggestion,
 } from 'src/app/models';
 import { ApiService, ENDPOINTS } from './api.service';
 
@@ -168,6 +169,56 @@ describe('ApiService', () => {
 			// Make sure GET method is used
 			expect(mockReq.request.method).toBe('GET');
 			mockReq.flush(mockResponse);
+		});
+	});
+
+	describe('getSuggestions()', () => {
+		it('should GET search suggestion package names from NPM', () => {
+			const mockResponse: Suggestion[] = [
+				{
+					package: {
+						name: 'usps',
+						version: '1.0.0',
+						links: {
+							repository: 'https://localhost/usps',
+						},
+					},
+				},
+				{
+					package: {
+						name: 'ups',
+						version: '1.0.0',
+						links: {
+							repository: 'https://localhost/ups',
+						},
+					},
+				},
+			];
+
+			const query = 'name';
+
+			service.getSuggestions(query).subscribe((suggestions) => {
+				expect(suggestions).toStrictEqual(mockResponse.map((r) => r.package.name));
+			});
+
+			// Expect correct endpoint to be hit
+			const mockReq = httpMock.expectOne(`${ENDPOINTS.NPM_REGISTRY}/v2/search/suggestions?q=${query}`);
+			// Ensure query is passed
+			expect(mockReq.request.params.get('q')).toBe(query);
+			// Make sure GET method is used
+			expect(mockReq.request.method).toBe('GET');
+			mockReq.flush(mockResponse);
+		});
+
+		it('should return an empty array on failure', () => {
+			const query = 'name';
+
+			service.getSuggestions(query).subscribe((resp) => {
+				expect(resp).toStrictEqual([]);
+			});
+
+			const mockReq = httpMock.expectOne(`${ENDPOINTS.NPM_REGISTRY}/v2/search/suggestions?q=${query}`);
+			mockReq.flush('error', { status: 404, statusText: 'Error' });
 		});
 	});
 });
