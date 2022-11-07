@@ -1,7 +1,7 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { GithubRepositoryContributor, GithubRepositoryLanguages, GithubRepositoryOverview } from 'src/app/models';
 
+import { GithubRepositoryContributor, GithubRepositoryLanguages, GithubRepositoryOverview } from 'src/app/models';
 import { ApiService, ENDPOINTS } from './api.service';
 
 describe('ApiService', () => {
@@ -56,6 +56,15 @@ describe('ApiService', () => {
 			expect(mockReq.request.method).toBe('GET');
 			mockReq.flush(mockResponse);
 		});
+
+		it('should return an empty array on failure', () => {
+			service.getGithubPackageContributors('name').subscribe((resp) => {
+				expect(resp).toStrictEqual([]);
+			});
+
+			const mockReq = httpMock.expectOne(`${ENDPOINTS.GITHUB}/name/contributors`);
+			mockReq.flush('error', { status: 404, statusText: 'Error' });
+		});
 	});
 
 	describe('getGithubPackageLanguages()', () => {
@@ -89,7 +98,7 @@ describe('ApiService', () => {
 				blobs_url: 'http://localhost/blobs',
 				branches_url: 'http://localhost/branches',
 				clone_url: 'http://localhost/clone',
-			} as unknown as GithubRepositoryOverview;
+			} as GithubRepositoryOverview;
 
 			const repoName = 'robert';
 
