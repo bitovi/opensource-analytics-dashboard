@@ -29,7 +29,7 @@ export class ApiService {
 	 * Get GitHub contributors for package
 	 * example: https://api.github.com/repos/vuejs/pinia/contributors
 	 *
-	 * @param repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @param repositoryName name of the repository: angular/angular-cli , vuejs/vuex
 	 * @return top contributors for a github repository
 	 */
 	getGithubPackageContributors(repositoryName: string): Observable<GithubRepositoryContributor[]> {
@@ -48,7 +48,7 @@ export class ApiService {
 	 * Get programming language use for GitHub package
 	 * example: https://api.github.com/repos/vuejs/pinia/languages
 	 *
-	 * @param repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @param repositoryName name of the repository: angular/angular-cli , vuejs/vuex
 	 * @return languages that the github repository is written
 	 */
 	getGithubPackageLanguages(repositoryName: string): Observable<GithubRepositoryLanguages> {
@@ -59,7 +59,7 @@ export class ApiService {
 	 * Get GitHub Package Overview
 	 * example: https://api.github.com/repos/angular/angular-cli
 	 *
-	 * @param repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @param repositoryName name of the repository: angular/angular-cli , vuejs/vuex
 	 * @return overview of some github repository
 	 */
 	getGithubPackageOverview(repositoryName: string): Observable<GithubRepositoryOverview> {
@@ -69,6 +69,10 @@ export class ApiService {
 	/**
 	 * Get the total downloads of some NPM package in the interval of 'start' and 'end' date
 	 * source: https://github.com/npm/registry/blob/master/docs/download-counts.md#point-values
+	 *
+	 * @param packageName name of repository
+	 * @param start download range start date (YYYY-MM-DD)
+	 * @param end download range end date (YYYY-MM-DD)
 	 */
 	getDownloadsPoint(packageName: string, start: string, end: string): Observable<number> {
 		return this.httpClient
