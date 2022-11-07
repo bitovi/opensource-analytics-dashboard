@@ -12,25 +12,30 @@ import {
 	Suggestion,
 } from '../../models';
 
+/** API Endpoints */
+export enum ENDPOINTS {
+	NPMJS_REGISTRY = 'https://api.npmjs.org',
+	NPM_REGISTRY = 'https://api.npms.io',
+	GITHUB = 'https://api.github.repos',
+}
+
 @Injectable({
 	providedIn: 'root',
 })
 export class ApiService {
-	private readonly NPMJS_REGISTRY_ENDPOINT = `https://api.npmjs.org`;
-	private readonly NPM_REGISTRY_ENDPOINT = `https://api.npms.io`;
-	private readonly GITHUB_ENDPOINT = `https://api.github.com/repos`;
 	constructor(private readonly httpClient: HttpClient) {}
 
 	/**
-	 * @Returns top contributors for a github repository
+	 * Get GitHub contributors for package
 	 *
-	 * @repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @param repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @return top contributors for a github repository
 	 *
 	 * example: https://api.github.com/repos/vuejs/pinia/contributors
 	 */
 	getGithubPackageContributors(repositoryName: string): Observable<GithubRepositoryContributor[]> {
 		return this.httpClient
-			.get<GithubRepositoryContributor[]>(`${this.GITHUB_ENDPOINT}/${repositoryName}/contributors`)
+			.get<GithubRepositoryContributor[]>(`${ENDPOINTS.GITHUB}/${repositoryName}/contributors`)
 			.pipe(
 				catchError((error: unknown) => {
 					console.error(error);
@@ -41,46 +46,46 @@ export class ApiService {
 	}
 
 	/**
-	 * @Returns languages that the github repository is written
-	 *
-	 * @repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
-	 *
+	 * Get programming languages for GitHub package
 	 * example: https://api.github.com/repos/vuejs/pinia/languages
+	 *
+	 * @param repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @return languages that the github repository is written
 	 */
 	getGithubPackageLanguages(repositoryName: string): Observable<GithubRepositoryLanguages> {
-		return this.httpClient.get<GithubRepositoryLanguages>(`${this.GITHUB_ENDPOINT}/${repositoryName}/languages`);
+		return this.httpClient.get<GithubRepositoryLanguages>(`${ENDPOINTS.GITHUB}/${repositoryName}/languages`);
 	}
 
 	/**
-	 * @Returns overview of some github repository
-	 *
-	 * @repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
-	 *
+	 * Get GitHub Package Overview
 	 * example: https://api.github.com/repos/angular/angular-cli
+	 *
+	 * @param repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @return overview of some github repository
 	 */
 	getGithubPackageOverview(repositoryName: string): Observable<GithubRepositoryOverview> {
-		return this.httpClient.get<GithubRepositoryOverview>(`${this.GITHUB_ENDPOINT}/${repositoryName}`);
+		return this.httpClient.get<GithubRepositoryOverview>(`${ENDPOINTS.GITHUB}/${repositoryName}`);
 	}
 
 	/**
-	 * @Returns the total downloads of some NPM package in the interval of 'start' and 'end' date
+	 * Get the total downloads of some NPM package in the interval of 'start' and 'end' date
 	 * source: https://github.com/npm/registry/blob/master/docs/download-counts.md#point-values
 	 */
 	getDownloadsPoint(packageName: string, start: string, end: string): Observable<number> {
 		return this.httpClient
-			.get<DownloadsPoint>(`${this.NPMJS_REGISTRY_ENDPOINT}/downloads/point/${start}:${end}/${packageName}`)
+			.get<DownloadsPoint>(`${ENDPOINTS.NPMJS_REGISTRY}/downloads/point/${start}:${end}/${packageName}`)
 			.pipe(map((res) => res.downloads));
 	}
 
 	getDownloadsRange(packageName: string, start: string, end: string): Observable<DownloadsRangeData[]> {
 		return this.httpClient
-			.get<DownloadsRange>(`${this.NPMJS_REGISTRY_ENDPOINT}/downloads/range/${start}:${end}/${packageName}`)
+			.get<DownloadsRange>(`${ENDPOINTS.NPMJS_REGISTRY}/downloads/range/${start}:${end}/${packageName}`)
 			.pipe(map((res) => res.downloads));
 	}
 
 	getSuggestions(query: string): Observable<string[]> {
 		return this.httpClient
-			.get<Suggestion[]>(`${this.NPM_REGISTRY_ENDPOINT}/v2/search/suggestions`, { params: { q: query } })
+			.get<Suggestion[]>(`${ENDPOINTS.NPM_REGISTRY}/v2/search/suggestions`, { params: { q: query } })
 			.pipe(
 				map((suggestions) => suggestions.map((suggestion) => suggestion.package.name)),
 				catchError((error: unknown) => {
