@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, forwardRef, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	EventEmitter,
+	forwardRef,
+	inject,
+	Input,
+	OnDestroy,
+	OnInit,
+	Output,
+} from '@angular/core';
 import {
 	ControlValueAccessor,
 	FormControl,
@@ -7,6 +17,7 @@ import {
 	ValidationErrors,
 	Validators,
 } from '@angular/forms';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { ErrorHandlerService } from '../../services';
 
@@ -29,6 +40,11 @@ import { ErrorHandlerService } from '../../services';
 	],
 })
 export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAccessor, Validators {
+	/**
+	 * Emites selected package name from the autocomplete by the user
+	 */
+	@Output() selectedPackage: EventEmitter<string> = new EventEmitter<string>();
+
 	/*
     package names that should be displayed as options in the select
   */
@@ -67,6 +83,11 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	ngOnDestroy(): void {
 		this.unsubscribe$.next();
 		this.unsubscribe$.complete();
+	}
+
+	onOptionSelected(event: MatAutocompleteSelectedEvent): void {
+		const packageName = event.option.value;
+		this.selectedPackage.emit(packageName);
 	}
 
 	writeValue(value?: string): void {

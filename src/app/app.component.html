@@ -30,21 +30,11 @@
 		<form onsubmit="return false">
 			<!-- auto complete -->
 			<app-autocomplete
+				(selectedPackage)="onPackageNameSubmit()"
 				[autocomplateOptions]="autocompleteOptions$ | async"
 				[formControl]="addPackage"
 				[loadedEntities$]="packageNames.observable$"
 			></app-autocomplete>
-
-			<!-- add button -->
-			<button
-				mat-raised-button
-				type="submit"
-				color="primary"
-				[disabled]="!addPackage.value || addPackage.invalid"
-				(click)="onPackageNameSubmit()"
-			>
-				Add
-			</button>
 		</form>
 
 		<!-- list of selected libraries -->

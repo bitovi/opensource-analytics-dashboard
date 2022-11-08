@@ -6,7 +6,7 @@
 	</mat-error>
 
 	<!-- display options -->
-	<mat-autocomplete #auto="matAutocomplete">
+	<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
 		<mat-option
 			*ngFor="let option of autocomplateOptions"
 			[value]="option"
