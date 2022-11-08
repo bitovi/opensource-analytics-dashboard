@@ -98,9 +98,11 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	writeValue(value?: string): void {
 		this.addPackage.setValue(value ?? '');
 	}
+
 	registerOnChange(fn: (value: string) => void): void {
 		this.onChange = fn;
 	}
+
 	registerOnTouched(fn: (value: void) => void): void {
 		this.onTouched = fn;
 	}
