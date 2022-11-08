@@ -93,13 +93,13 @@ describe('AutocompleteComponent', () => {
 		expect(component).toBeTruthy();
 	});
 
-	describe('Test: providers', () => {
+	describe('autocompleteComponentFn()', () => {
 		it('should return AutocompleteComponent', () => {
 			expect(autocompleteComponentFn()).toBe(AutocompleteComponent);
 		});
 	});
 
-	describe('Test: ngOnInit()', () => {
+	describe('ngOnInit()', () => {
 		it('should create a form control for addPackage', () => {
 			expect(component.addPackage).toBeDefined();
 			expect(component.addPackage.value).toEqual('');
@@ -115,7 +115,7 @@ describe('AutocompleteComponent', () => {
 		});
 	});
 
-	describe('Test: ngOnDestroy()', () => {
+	describe('ngOnDestroy()', () => {
 		it('should complete unsubscribe$ subject', () => {
 			expect(component['unsubscribe$']).toBeDefined();
 
@@ -128,7 +128,7 @@ describe('AutocompleteComponent', () => {
 		});
 	});
 
-	describe('Test: onOptionSelected()', () => {
+	describe('onOptionSelected()', () => {
 		it('should notify parent about the selected package name', () => {
 			const mockPackageName = 'Angular';
 
@@ -148,7 +148,7 @@ describe('AutocompleteComponent', () => {
 		});
 	});
 
-	describe('Test: writeValue()', () => {
+	describe('writeValue()', () => {
 		it('should set value for addPackage formControl', () => {
 			const mockInput = 'Angular';
 
@@ -160,7 +160,7 @@ describe('AutocompleteComponent', () => {
 		});
 	});
 
-	describe('Test: registerOnChange()', () => {
+	describe('registerOnChange()', () => {
 		it('should add function to onChange', () => {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const mockFn = (value: string) => {
@@ -171,7 +171,7 @@ describe('AutocompleteComponent', () => {
 		});
 	});
 
-	describe('Test: registerOnTouched()', () => {
+	describe('registerOnTouched()', () => {
 		it('should add function to onTouched', () => {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const mockFn = (value: void) => {
@@ -182,7 +182,7 @@ describe('AutocompleteComponent', () => {
 		});
 	});
 
-	describe('Test: validate()', () => {
+	describe('validate()', () => {
 		it('should return error if addPackage is invalid', () => {
 			const mockErrors = () => ({} as ValidationErrors);
 
