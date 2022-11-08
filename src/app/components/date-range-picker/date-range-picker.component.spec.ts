@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatDateRangeInput } from '@angular/material/datepicker';
 import { ErrorHandlerDirective } from '../../directives';
 import { ToObservablePipe } from '../../pipes';
@@ -76,5 +76,60 @@ describe('DateRangePickerComponent', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	describe('getDateRangeFormGroup()', () => {
+		it('should return a new FormGroup with null start and end values', () => {
+			const group = component.getDateRangeFormGroup();
+			// Ensure 'start' control exists
+			expect(group.get('start')).toBeTruthy();
+			// Ensure 'end' control exists
+			expect(group.get('end')).toBeTruthy();
+			// Ensure 'start' has a null value
+			expect(group.get('start')?.value).toBeNull();
+			// Ensure 'end' has a null value
+			expect(group.get('start')?.value).toBeNull();
+			// Ensure 'start' is required
+			expect(group.get('start')?.hasValidator(Validators.required)).toBe(true);
+			// Ensure 'end' is required
+			expect(group.get('end')?.hasValidator(Validators.required)).toBe(true);
+		});
+	});
+
+	describe('matDateRangePickerValidators', () => {
+		const sampleErrors: ValidationErrors = { notEnoughMoo: true };
+		it('should return null when no nested errors are found', () => {
+			component.dateRangeFormGroup.setErrors(null);
+			component.dateRangeFormGroup.controls.start.setErrors(null);
+			component.dateRangeFormGroup.controls.end.setErrors(null);
+			expect(component.matDateRangePickerValidators()).toBeNull();
+		});
+		it('should return form group errors when present', () => {
+			component.dateRangeFormGroup.setErrors(sampleErrors);
+			expect(component.matDateRangePickerValidators()).toStrictEqual(sampleErrors);
+		});
+		it('should return start control errors when present and form group errors are not', () => {
+			component.dateRangeFormGroup.setErrors(null);
+			component.dateRangeFormGroup.controls.start.setErrors(sampleErrors);
+			expect(component.matDateRangePickerValidators()).toStrictEqual(sampleErrors);
+		});
+		it('should return end control errors when present and start control and form group errors are not', () => {
+			component.dateRangeFormGroup.setErrors(null);
+			component.dateRangeFormGroup.controls.start.setErrors(null);
+			component.dateRangeFormGroup.controls.end.setErrors(sampleErrors);
+			expect(component.matDateRangePickerValidators()).toStrictEqual(sampleErrors);
+		});
+	});
+
+	describe('validate()', () => {
+		it('should return result of matDateRangePickerValidators()', () => {
+			const spy = jest.spyOn(component, 'matDateRangePickerValidators').mockImplementationOnce(() => null);
+			const result = component.validate();
+
+			// Make sure result matches mock return value
+			expect(result).toBeNull();
+			// Make sure matDateRangePickerValidators was called
+			expect(spy).toHaveBeenCalledTimes(1);
+		});
 	});
 });
