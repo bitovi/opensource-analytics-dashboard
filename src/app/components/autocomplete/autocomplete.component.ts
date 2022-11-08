@@ -21,6 +21,8 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { ErrorHandlerService } from '../../services';
 
+export const autocompleteComponentFn = () => AutocompleteComponent;
+
 @Component({
 	selector: 'app-autocomplete',
 	templateUrl: './autocomplete.component.html',
@@ -29,12 +31,12 @@ import { ErrorHandlerService } from '../../services';
 	providers: [
 		{
 			provide: NG_VALUE_ACCESSOR,
-			useExisting: forwardRef(() => AutocompleteComponent),
+			useExisting: forwardRef(autocompleteComponentFn),
 			multi: true,
 		},
 		{
 			provide: NG_VALIDATORS,
-			useExisting: forwardRef(() => AutocompleteComponent),
+			useExisting: forwardRef(autocompleteComponentFn),
 			multi: true,
 		},
 	],

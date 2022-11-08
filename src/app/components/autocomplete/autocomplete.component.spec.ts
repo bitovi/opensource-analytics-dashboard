@@ -1,14 +1,13 @@
 import { Component, Directive, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NG_VALIDATORS, NG_VALUE_ACCESSOR, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
+import { ReactiveFormsModule, ValidationErrors } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { of } from 'rxjs';
 
 import { ErrorHandlerDirective } from './../../directives';
 import { ToObservablePipe } from './../../pipes';
 import { ErrorHandlerService } from './../../services/error-handler';
-
-import { AutocompleteComponent } from './autocomplete.component';
+import { AutocompleteComponent, autocompleteComponentFn } from './autocomplete.component';
 
 @Component({
 	selector: 'mat-label',
@@ -52,7 +51,6 @@ describe('AutocompleteComponent', () => {
 	let errorHandlerServiceMock: ErrorHandlerService;
 
 	const noDuplicatesValidatorFn = () => of({} as ValidationErrors);
-	const componentFn = () => AutocompleteComponent;
 
 	beforeEach(async () => {
 		errorHandlerServiceMock = {
@@ -75,11 +73,7 @@ describe('AutocompleteComponent', () => {
 				MatAutocomplete, // Required for #auto="matAutocomplete" directive
 			],
 			imports: [ReactiveFormsModule],
-			providers: [
-				{ provide: ErrorHandlerService, useValue: errorHandlerServiceMock },
-				{ provide: NG_VALUE_ACCESSOR, useExisting: componentFn, multi: true },
-				{ provide: NG_VALIDATORS, useExisting: componentFn, multi: true },
-			],
+			providers: [{ provide: ErrorHandlerService, useValue: errorHandlerServiceMock }],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(AutocompleteComponent);
@@ -101,7 +95,7 @@ describe('AutocompleteComponent', () => {
 
 	describe('Test: providers', () => {
 		it('should return AutocompleteComponent', () => {
-			expect(componentFn()).toBe(AutocompleteComponent);
+			expect(autocompleteComponentFn()).toBe(AutocompleteComponent);
 		});
 	});
 
