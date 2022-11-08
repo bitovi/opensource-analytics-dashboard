@@ -78,6 +78,45 @@ describe('DateRangePickerComponent', () => {
 		expect(component).toBeTruthy();
 	});
 
+	describe('when dateRangeFormGroup value changes', () => {
+		// beforeEach(() => {
+		// 	component['skipEmit'] = false;
+		// });
+		it('should NOT call onChange if group is invalid', () => {
+			const onChangeSpy = jest.spyOn(component, 'onChange');
+			jest.spyOn(component.dateRangeFormGroup, 'valid', 'get').mockReturnValueOnce(false);
+			component.dateRangeFormGroup.setValue({ start: new Date(), end: new Date() });
+			expect(onChangeSpy).not.toHaveBeenCalled();
+		});
+		it('should NOT call onChange if skipEmit is true', () => {
+			const onChangeSpy = jest.spyOn(component, 'onChange');
+			component['skipEmit'] = true;
+			component.dateRangeFormGroup.setValue({ start: new Date(), end: new Date() });
+			expect(onChangeSpy).not.toHaveBeenCalled();
+		});
+		it('should NOT call onChange if start or end values are falsy', () => {
+			const onChangeSpy = jest.spyOn(component, 'onChange');
+
+			component.dateRangeFormGroup.setValue({ start: null, end: null });
+			expect(onChangeSpy).not.toHaveBeenCalled();
+
+			component.dateRangeFormGroup.setValue({ start: null, end: new Date() });
+			expect(onChangeSpy).not.toHaveBeenCalled();
+
+			component.dateRangeFormGroup.setValue({ start: new Date(), end: null });
+			expect(onChangeSpy).not.toHaveBeenCalled();
+		});
+		it('should call onChange if group is valid and start and end are truthy', () => {
+			const onChangeSpy = jest.spyOn(component, 'onChange');
+
+			const startDate = new Date('2021-10-31');
+			const endDate = new Date('2021-12-25');
+
+			component.dateRangeFormGroup.setValue({ start: startDate, end: endDate });
+			expect(onChangeSpy).toHaveBeenCalledWith([startDate, endDate]);
+		});
+	});
+
 	describe('getDateRangeFormGroup()', () => {
 		it('should return a new FormGroup with null start and end values', () => {
 			const group = component.getDateRangeFormGroup();
