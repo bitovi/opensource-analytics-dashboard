@@ -7,12 +7,6 @@
 
 	<!-- display options -->
 	<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-		<mat-option
-			*ngFor="let option of autocomplateOptions"
-			[value]="option"
-			(onSelectionChange)="onSelectionChange(option)"
-		>
-			{{ option }}
-		</mat-option>
+		<mat-option *ngFor="let option of autocomplateOptions" [value]="option"> {{ option }} </mat-option>
 	</mat-autocomplete>
 </mat-form-field>

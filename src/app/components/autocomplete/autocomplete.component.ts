@@ -87,6 +87,11 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 
 	onOptionSelected(event: MatAutocompleteSelectedEvent): void {
 		const packageName = event.option.value;
+
+		// save package name to parent's form control
+		this.onChange(packageName);
+
+		// emit to parent that a package has been chosen
 		this.selectedPackage.emit(packageName);
 	}
 
@@ -98,10 +103,6 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	}
 	registerOnTouched(fn: (value: void) => void): void {
 		this.onTouched = fn;
-	}
-
-	onSelectionChange(value: string): void {
-		this.onChange(value);
 	}
 
 	validate(): ValidationErrors | null {
