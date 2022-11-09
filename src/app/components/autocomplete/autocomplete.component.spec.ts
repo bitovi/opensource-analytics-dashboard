@@ -136,7 +136,7 @@ describe('AutocompleteComponent', () => {
 			const input = 'Angular';
 			component.autocomplateOptions = [input, 'Test2'];
 
-			component.onChooseFirstOption();
+			component.onEnterKey();
 
 			expect(emitSpy).toHaveBeenCalled();
 			expect(onChangeSpy).toHaveBeenCalledWith(input);
@@ -148,7 +148,7 @@ describe('AutocompleteComponent', () => {
 
 			component.autocomplateOptions = [];
 
-			component.onChooseFirstOption();
+			component.onEnterKey();
 
 			expect(emitSpy).toHaveBeenCalled();
 			expect(onChangeSpy).not.toHaveBeenCalled();

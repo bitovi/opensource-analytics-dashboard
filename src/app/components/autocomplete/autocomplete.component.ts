@@ -89,7 +89,7 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	/**
 	 * On enter click, select first element from the autocomplete dropdown if exists
 	 */
-	onChooseFirstOption() {
+	onEnterKey() {
 		const value = this.autocomplateOptions?.[0];
 
 		if (value) {
