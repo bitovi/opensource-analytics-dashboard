@@ -222,4 +222,20 @@ describe('DateRangePickerComponent', () => {
 			expect(spy).toHaveBeenCalledTimes(1);
 		});
 	});
+
+	describe('registerOnChange()', () => {
+		it('should assign onChange to given function', () => {
+			const fn = jest.fn();
+			component.registerOnChange(fn);
+			expect(component.onChange).toEqual(fn);
+		});
+	});
+
+	describe('registerOnTouched()', () => {
+		it('should assign onTouched to given function', () => {
+			const fn = jest.fn();
+			component.registerOnTouched(fn);
+			expect(component.onTouched).toEqual(fn);
+		});
+	});
 });
