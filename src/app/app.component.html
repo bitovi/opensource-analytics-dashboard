@@ -30,7 +30,7 @@
 		<form onsubmit="return false">
 			<!-- auto complete -->
 			<app-autocomplete
-				(selectedPackage)="onPackageNameSubmit()"
+				(selectedOption)="onPackageNameSubmit()"
 				[autocomplateOptions]="autocompleteOptions$ | async"
 				[formControl]="addPackage"
 				[loadedEntities$]="packageNames.observable$"

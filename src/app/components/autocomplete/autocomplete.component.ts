@@ -17,7 +17,6 @@ import {
 	ValidationErrors,
 	Validators,
 } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { ErrorHandlerService } from '../../services';
 
@@ -43,9 +42,9 @@ export const autocompleteComponentFn = () => AutocompleteComponent;
 })
 export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAccessor, Validators {
 	/**
-	 * Emites selected package name from the autocomplete by the user
+	 * Emites selected option from the autocomplete by the user
 	 */
-	@Output() selectedPackage: EventEmitter<string> = new EventEmitter<string>();
+	@Output() selectedOption: EventEmitter<void> = new EventEmitter<void>();
 
 	/*
     package names that should be displayed as options in the select
@@ -61,7 +60,7 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	private readonly unsubscribe$ = new Subject<void>();
 
 	/* Form control to allow user search packages  */
-	addPackage!: FormControl<string>;
+	addOption!: FormControl<string>;
 
 	/* errors that may occur when searching for a package name */
 	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
@@ -75,11 +74,11 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	};
 
 	ngOnInit(): void {
-		this.addPackage = new FormControl('', {
+		this.addOption = new FormControl('', {
 			nonNullable: true,
 			asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.loadedEntities$),
 		});
-		this.addPackage.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe((value) => this.onChange(value));
+		this.addOption.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe((value) => this.onChange(value));
 	}
 
 	ngOnDestroy(): void {
@@ -87,18 +86,23 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 		this.unsubscribe$.complete();
 	}
 
-	onOptionSelected(event: MatAutocompleteSelectedEvent): void {
-		const packageName = event.option.value;
+	/**
+	 * On enter click, select first element from the autocomplete dropdown if exists
+	 */
+	onChooseFirstOption() {
+		const value = this.autocomplateOptions?.[0];
 
-		// save package name to parent's form control
-		this.onChange(packageName);
+		if (value) {
+			// save package name to parent's form control
+			this.onChange(value);
+		}
 
 		// emit to parent that a package has been chosen
-		this.selectedPackage.emit(packageName);
+		this.selectedOption.emit();
 	}
 
 	writeValue(value?: string): void {
-		this.addPackage.setValue(value ?? '');
+		this.addOption.setValue(value ?? '');
 	}
 
 	registerOnChange(fn: (value: string) => void): void {
@@ -110,8 +114,8 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	}
 
 	validate(): ValidationErrors | null {
-		if (this.addPackage.errors) {
-			return this.addPackage.errors;
+		if (this.addOption.errors) {
+			return this.addOption.errors;
 		}
 		return null;
 	}

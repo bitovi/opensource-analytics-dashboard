@@ -1,7 +1,7 @@
 import { Component, Directive, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule, ValidationErrors } from '@angular/forms';
-import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatAutocomplete } from '@angular/material/autocomplete';
 import { of } from 'rxjs';
 
 import { ErrorHandlerDirective } from './../../directives';
@@ -101,16 +101,16 @@ describe('AutocompleteComponent', () => {
 
 	describe('ngOnInit()', () => {
 		it('should create a form control for addPackage', () => {
-			expect(component.addPackage).toBeDefined();
-			expect(component.addPackage.value).toEqual('');
+			expect(component.addOption).toBeDefined();
+			expect(component.addOption.value).toEqual('');
 
-			expect(component.addPackage.asyncValidator).toBeTruthy();
-			expect(component.addPackage.hasAsyncValidator(noDuplicatesValidatorFn)).toBe(true);
+			expect(component.addOption.asyncValidator).toBeTruthy();
+			expect(component.addOption.hasAsyncValidator(noDuplicatesValidatorFn)).toBe(true);
 		});
 
 		it('should subscribe on form control value change', () => {
 			expect(component.onChange).not.toHaveBeenCalled();
-			component.addPackage.patchValue('test');
+			component.addOption.patchValue('test');
 			expect(component.onChange).toHaveBeenCalledWith('test');
 		});
 	});
@@ -128,23 +128,30 @@ describe('AutocompleteComponent', () => {
 		});
 	});
 
-	describe('onOptionSelected()', () => {
-		it('should notify parent about the selected package name', () => {
-			const mockPackageName = 'Angular';
-
-			const mockInput: MatAutocompleteSelectedEvent = {
-				option: {
-					value: mockPackageName,
-				},
-			} as MatAutocompleteSelectedEvent;
-
-			const emitSpy = jest.spyOn(component.selectedPackage, 'emit');
+	describe('onChooseFirstOption()', () => {
+		it('should select the first element in matAutocomplete.options', () => {
+			const emitSpy = jest.spyOn(component.selectedOption, 'emit');
 			const onChangeSpy = jest.spyOn(component, 'onChange');
 
-			component.onOptionSelected(mockInput);
+			const input = 'Angular';
+			component.autocomplateOptions = [input, 'Test2'];
 
-			expect(onChangeSpy).toHaveBeenCalledWith(mockPackageName);
-			expect(emitSpy).toHaveBeenCalledWith(mockPackageName);
+			component.onChooseFirstOption();
+
+			expect(emitSpy).toHaveBeenCalled();
+			expect(onChangeSpy).toHaveBeenCalledWith(input);
+		});
+
+		it('should not notify parent by onChange if there is not value in autocomplateOptions', () => {
+			const emitSpy = jest.spyOn(component.selectedOption, 'emit');
+			const onChangeSpy = jest.spyOn(component, 'onChange');
+
+			component.autocomplateOptions = [];
+
+			component.onChooseFirstOption();
+
+			expect(emitSpy).toHaveBeenCalled();
+			expect(onChangeSpy).not.toHaveBeenCalled();
 		});
 	});
 
@@ -152,11 +159,11 @@ describe('AutocompleteComponent', () => {
 		it('should set value for addPackage formControl', () => {
 			const mockInput = 'Angular';
 
-			expect(component.addPackage.value).toEqual('');
+			expect(component.addOption.value).toEqual('');
 			component.writeValue(mockInput);
-			expect(component.addPackage.value).toEqual(mockInput);
+			expect(component.addOption.value).toEqual(mockInput);
 			component.writeValue(undefined);
-			expect(component.addPackage.value).toEqual('');
+			expect(component.addOption.value).toEqual('');
 		});
 	});
 
@@ -186,16 +193,16 @@ describe('AutocompleteComponent', () => {
 		it('should return error if addPackage is invalid', () => {
 			const mockErrors = () => ({} as ValidationErrors);
 
-			component.addPackage.setErrors(mockErrors);
+			component.addOption.setErrors(mockErrors);
 
-			expect(component.addPackage.errors).toBe(mockErrors);
+			expect(component.addOption.errors).toBe(mockErrors);
 			expect(component.validate()).toBe(mockErrors);
 		});
 
 		it('should return null if addPackage is valid', () => {
-			component.addPackage.setErrors(null);
+			component.addOption.setErrors(null);
 
-			expect(component.addPackage.errors).toBe(null);
+			expect(component.addOption.errors).toBe(null);
 			expect(component.validate()).toBe(null);
 		});
 	});

@@ -1,12 +1,12 @@
 <mat-form-field appearance="outline">
 	<mat-label>npm package name</mat-label>
-	<input matInput [formControl]="addPackage" [matAutocomplete]="auto" />
+	<input matInput [formControl]="addOption" [matAutocomplete]="auto" (keyup.enter)="onChooseFirstOption()" />
 	<mat-hint>Ex: 'canjs'</mat-hint>
-	<mat-error appErrorHandler [errors$]="addPackage.errors| toObservable" [handleErrors]="packageErrorsHandler">
+	<mat-error appErrorHandler [errors$]="addOption.errors| toObservable" [handleErrors]="packageErrorsHandler">
 	</mat-error>
 
 	<!-- display options -->
-	<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+	<mat-autocomplete #auto="matAutocomplete">
 		<mat-option *ngFor="let option of autocomplateOptions" [value]="option"> {{ option }} </mat-option>
 	</mat-autocomplete>
 </mat-form-field>
