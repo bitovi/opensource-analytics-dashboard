@@ -1,11 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatDateRangeInput } from '@angular/material/datepicker';
+import { DateService } from '../../services';
 import { ErrorHandlerDirective } from '../../directives';
 import { ToObservablePipe } from '../../pipes';
 
 import { DateRangePickerComponent } from './date-range-picker.component';
+import { DateRange } from 'src/app/models';
 
 @Component({
 	selector: 'mat-label',
@@ -158,6 +160,55 @@ describe('DateRangePickerComponent', () => {
 			component.dateRangeFormGroup.controls.end.setErrors(sampleErrors);
 			expect(component.matDateRangePickerValidators()).toStrictEqual(sampleErrors);
 		});
+	});
+
+	describe('writeValue()', () => {
+		it('should set skipEmit to true', () => {
+			component['skipEmit'] = false;
+			component.writeValue(null);
+			expect(component['skipEmit']).toBe(true);
+		});
+		it('should set dateRange to null values when dateRange is invalid', () => {
+			const dateService = TestBed.inject(DateService);
+			jest.spyOn(dateService, 'isValidDateRange').mockReturnValue(false);
+
+			const setValueSpy = jest.spyOn(component.dateRangeFormGroup, 'setValue').mockImplementation(() => ({}));
+			const nullValue = { start: null, end: null };
+
+			component.writeValue(null);
+			expect(setValueSpy).toHaveBeenCalledWith(nullValue, { onlySelf: true, emitEvent: false });
+		});
+		it('should write date range to dateRangeFormGroup when valid', () => {
+			const dateService = TestBed.inject(DateService);
+			jest.spyOn(dateService, 'isValidDateRange').mockReturnValue(true);
+
+			const setValueSpy = jest.spyOn(component.dateRangeFormGroup, 'setValue').mockImplementation(() => ({}));
+			const dateRange: DateRange = [new Date('2021-10-01'), new Date('2021-11-01')];
+
+			component.writeValue(dateRange);
+
+			expect(setValueSpy).toBeCalledWith(
+				{ start: dateRange[0], end: dateRange[1] },
+				{ onlySelf: true, emitEvent: false }
+			);
+		});
+		it('should reset skipEmit to false with setTimeout', fakeAsync(() => {
+			const dateService = TestBed.inject(DateService);
+			jest.spyOn(dateService, 'isValidDateRange').mockReturnValue(true);
+			jest.spyOn(component.dateRangeFormGroup, 'setValue').mockImplementation(() => ({}));
+
+			const dateRange: DateRange = [new Date('2021-10-01'), new Date('2021-11-01')];
+
+			component.writeValue(dateRange);
+
+			// Wait some time for the timeout
+			tick(500);
+			// Use fixture to wait until we're stable
+			fixture.detectChanges();
+			fixture.whenStable().then(() => {
+				expect(component['skipEmit']).toBe(false);
+			});
+		}));
 	});
 
 	describe('validate()', () => {
