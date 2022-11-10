@@ -128,7 +128,7 @@ describe('AutocompleteComponent', () => {
 		});
 	});
 
-	describe('onChooseFirstOption()', () => {
+	describe('onEnterKey()', () => {
 		it('should select the first element in matAutocomplete.options', () => {
 			const emitSpy = jest.spyOn(component.selectedOption, 'emit');
 			const onChangeSpy = jest.spyOn(component, 'onChange');

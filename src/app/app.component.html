@@ -30,8 +30,9 @@
 		<form onsubmit="return false">
 			<!-- auto complete -->
 			<app-autocomplete
+				*ngIf="autocompleteOptions$ | async as autocompleteOptions"
 				(selectedOption)="onPackageNameSubmit()"
-				[autocomplateOptions]="autocompleteOptions$ | async"
+				[autocomplateOptions]="autocompleteOptions"
 				[formControl]="addPackage"
 				[loadedEntities$]="packageNames.observable$"
 			></app-autocomplete>

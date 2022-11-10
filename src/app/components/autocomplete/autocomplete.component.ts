@@ -49,7 +49,7 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	/*
     package names that should be displayed as options in the select
   */
-	@Input() autocomplateOptions: string[] | null = [];
+	@Input() autocomplateOptions: string[] = [];
 
 	/*
     entity objects (package names) that are already loaded, to prevent duplicated loading
@@ -90,7 +90,7 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	 * On enter click, select first element from the autocomplete dropdown if exists
 	 */
 	onEnterKey() {
-		const value = this.autocomplateOptions?.[0];
+		const value = this.autocomplateOptions.at(0);
 
 		if (value) {
 			// save package name to parent's form control
