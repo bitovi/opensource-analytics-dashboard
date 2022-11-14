@@ -32,6 +32,7 @@ $dark-theme: mat.define-dark-theme(
 	)
 );
 
+/// Handy mixin to call the various theme mixins we need for the base theme
 @mixin build-theme($theme) {
 	// Emit theme-dependent styles for common features used across multiple components.
 	@include mat.core-theme($theme);
@@ -41,6 +42,8 @@ $dark-theme: mat.define-dark-theme(
 	@include mat.list-theme($theme);
 }
 
+// Include definitions for base theme and light mode colors
+
 @include build-theme($light-theme);
 body {
   --text-color: #424242;
@@ -48,11 +51,13 @@ body {
   --bg-accent-color: #f2f2f2;
 }
 
+// Handle dark mode
 @media (prefers-color-scheme: dark) {
 	body {
 		--text-color: #f2f2f2;
     --bg-accent-color: #222222;
     --bg-color: black;
 	}
+  // Redefine theme colors when in dark mode to use dark theme
 	@include mat.all-component-colors($dark-theme);
 }
