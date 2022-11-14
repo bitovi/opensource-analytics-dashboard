@@ -1,0 +1,61 @@
+@use '@angular/material' as mat;
+
+// Usage:
+// define-palette(color, normal-shade, lighter-shade, darker-shade, text-shade)
+
+// ==[Light Theme]==
+$light-primary: mat.define-palette(mat.$blue-palette, 500);
+$light-accent: mat.define-palette(mat.$red-palette, 700);
+// The "warn" palette is optional and defaults to red if not specified.
+$light-warn: mat.define-palette(mat.$orange-palette);
+
+$light-theme: mat.define-light-theme(
+	(
+		color: (
+			primary: $light-primary,
+			accent: $light-accent,
+			warn: $light-warn,
+		),
+	)
+);
+
+// ==[Dark Theme]==
+$dark-primary: mat.define-palette(mat.$blue-palette, 200);
+$dark-accent: mat.define-palette(mat.$red-palette, 200, 100, 400);
+
+$dark-theme: mat.define-dark-theme(
+	(
+		color: (
+			primary: $dark-primary,
+			accent: $dark-accent,
+		),
+	)
+);
+
+@mixin build-theme($theme) {
+	// Emit theme-dependent styles for common features used across multiple components.
+	@include mat.core-theme($theme);
+	@include mat.button-theme($theme);
+	@include mat.select-theme($theme);
+	@include mat.form-field-theme($theme);
+	@include mat.list-theme($theme);
+}
+
+@include build-theme($light-theme);
+body {
+  --text-color: #424242;
+  --bg-color: #f2f2f2;
+  --bg-base-color: white;
+	color: var(--text-color);
+	background-color: var(--bg-color);
+	background-image: linear-gradient(var(--bg-base-color), var(--bg-color));
+}
+
+@media (prefers-color-scheme: dark) {
+	body {
+		--text-color: #f2f2f2;
+    --bg-color: #020202;
+    --bg-base-color: black;
+	}
+	@include mat.all-component-colors($dark-theme);
+}
