@@ -6,7 +6,7 @@ import { DateService } from '../../services';
 import { ErrorHandlerDirective } from '../../directives';
 import { ToObservablePipe } from '../../pipes';
 
-import { DateRangePickerComponent } from './date-range-picker.component';
+import { DateRangePickerComponent, dateRangePickerComponentFn } from './date-range-picker.component';
 import { DateRange } from 'src/app/models';
 
 @Component({
@@ -76,8 +76,18 @@ describe('DateRangePickerComponent', () => {
 		fixture.detectChanges();
 	});
 
+	describe('dateRangePickerComponentFn()', () => {
+		it('should return DateRangePickerComponent', () => {
+			expect(dateRangePickerComponentFn()).toEqual(DateRangePickerComponent);
+		});
+	});
+
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('should have a minDate of 1/1/2015', () => {
+		expect(component.minDate).toStrictEqual(new Date(2015, 0, 1));
 	});
 
 	describe('when dateRangeFormGroup value changes', () => {
