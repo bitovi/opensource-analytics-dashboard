@@ -91,9 +91,6 @@ describe('DateRangePickerComponent', () => {
 	});
 
 	describe('when dateRangeFormGroup value changes', () => {
-		// beforeEach(() => {
-		// 	component['skipEmit'] = false;
-		// });
 		it('should NOT call onChange if group is invalid', () => {
 			const onChangeSpy = jest.spyOn(component, 'onChange');
 			jest.spyOn(component.dateRangeFormGroup, 'valid', 'get').mockReturnValueOnce(false);
