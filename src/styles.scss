@@ -9,6 +9,11 @@ body {
 	margin: 0;
 	padding: 0;
 	font-family: Roboto, 'Helvetica Neue', sans-serif;
+  // See theme.scss for variable declarations
+  color: var(--text-color);
+	background-color: var(--bg-color);
+	background-image: linear-gradient(var(--bg-accent-color), var(--bg-color));
+  background-repeat: no-repeat;
 }
 
 .margin-row {

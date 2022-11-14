@@ -44,18 +44,15 @@ $dark-theme: mat.define-dark-theme(
 @include build-theme($light-theme);
 body {
   --text-color: #424242;
-  --bg-color: #f2f2f2;
-  --bg-base-color: white;
-	color: var(--text-color);
-	background-color: var(--bg-color);
-	background-image: linear-gradient(var(--bg-base-color), var(--bg-color));
+  --bg-color: white;
+  --bg-accent-color: #f2f2f2;
 }
 
 @media (prefers-color-scheme: dark) {
 	body {
 		--text-color: #f2f2f2;
-    --bg-color: #020202;
-    --bg-base-color: black;
+    --bg-accent-color: #222222;
+    --bg-color: black;
 	}
 	@include mat.all-component-colors($dark-theme);
 }
