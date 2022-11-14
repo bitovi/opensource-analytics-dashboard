@@ -29,11 +29,6 @@ form {
 	flex-wrap: wrap;
 	align-items: center;
 	gap: $padding * 0.25;
-
-	button {
-		// button doesn't naturally align with input because of its mat-hint/mat-error
-		margin-bottom: 3px;
-	}
 }
 
 .clear-cache-button:not(:focus):not(:hover) {

@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, forwardRef, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	EventEmitter,
+	forwardRef,
+	inject,
+	Input,
+	OnDestroy,
+	OnInit,
+	Output,
+} from '@angular/core';
 import {
 	ControlValueAccessor,
 	FormControl,
@@ -10,6 +20,8 @@ import {
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { ErrorHandlerService } from '../../services';
 
+export const autocompleteComponentFn = () => AutocompleteComponent;
+
 @Component({
 	selector: 'app-autocomplete',
 	templateUrl: './autocomplete.component.html',
@@ -18,21 +30,26 @@ import { ErrorHandlerService } from '../../services';
 	providers: [
 		{
 			provide: NG_VALUE_ACCESSOR,
-			useExisting: forwardRef(() => AutocompleteComponent),
+			useExisting: forwardRef(autocompleteComponentFn),
 			multi: true,
 		},
 		{
 			provide: NG_VALIDATORS,
-			useExisting: forwardRef(() => AutocompleteComponent),
+			useExisting: forwardRef(autocompleteComponentFn),
 			multi: true,
 		},
 	],
 })
 export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAccessor, Validators {
+	/**
+	 * Emites selected option from the autocomplete by the user
+	 */
+	@Output() selectedOption: EventEmitter<void> = new EventEmitter<void>();
+
 	/*
     package names that should be displayed as options in the select
   */
-	@Input() autocomplateOptions: string[] | null = [];
+	@Input() autocomplateOptions: string[] = [];
 
 	/*
     entity objects (package names) that are already loaded, to prevent duplicated loading
@@ -43,7 +60,7 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	private readonly unsubscribe$ = new Subject<void>();
 
 	/* Form control to allow user search packages  */
-	addPackage!: FormControl<string>;
+	addOption!: FormControl<string>;
 
 	/* errors that may occur when searching for a package name */
 	readonly packageErrorsHandler = this.errorHandlerService.getInputErrorsHandler('package name');
@@ -57,11 +74,11 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 	};
 
 	ngOnInit(): void {
-		this.addPackage = new FormControl('', {
+		this.addOption = new FormControl('', {
 			nonNullable: true,
 			asyncValidators: this.errorHandlerService.noDuplicatesValidator(this.loadedEntities$),
 		});
-		this.addPackage.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe((value) => this.onChange(value));
+		this.addOption.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe((value) => this.onChange(value));
 	}
 
 	ngOnDestroy(): void {
@@ -69,23 +86,36 @@ export class AutocompleteComponent implements OnInit, OnDestroy, ControlValueAcc
 		this.unsubscribe$.complete();
 	}
 
-	writeValue(value?: string): void {
-		this.addPackage.setValue(value ?? '');
+	/**
+	 * On enter click, select first element from the autocomplete dropdown if exists
+	 */
+	onEnterKey() {
+		const value = this.autocomplateOptions.at(0);
+
+		if (value) {
+			// save package name to parent's form control
+			this.onChange(value);
+		}
+
+		// emit to parent that a package has been chosen
+		this.selectedOption.emit();
 	}
+
+	writeValue(value?: string): void {
+		this.addOption.setValue(value ?? '');
+	}
+
 	registerOnChange(fn: (value: string) => void): void {
 		this.onChange = fn;
 	}
+
 	registerOnTouched(fn: (value: void) => void): void {
 		this.onTouched = fn;
 	}
 
-	onSelectionChange(value: string): void {
-		this.onChange(value);
-	}
-
 	validate(): ValidationErrors | null {
-		if (this.addPackage.errors) {
-			return this.addPackage.errors;
+		if (this.addOption.errors) {
+			return this.addOption.errors;
 		}
 		return null;
 	}
