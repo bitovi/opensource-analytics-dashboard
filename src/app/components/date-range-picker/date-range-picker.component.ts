@@ -12,6 +12,8 @@ import { Subject, takeUntil, tap } from 'rxjs';
 import { DateRange } from '../../models';
 import { DateService, ErrorHandlerService } from '../../services';
 
+export const dateRangePickerComponentFn = () => DateRangePickerComponent;
+
 @Component({
 	selector: 'app-date-range-picker',
 	templateUrl: './date-range-picker.component.html',
@@ -20,12 +22,12 @@ import { DateService, ErrorHandlerService } from '../../services';
 	providers: [
 		{
 			provide: NG_VALIDATORS,
-			useExisting: forwardRef(() => DateRangePickerComponent),
+			useExisting: forwardRef(dateRangePickerComponentFn),
 			multi: true,
 		},
 		{
 			provide: NG_VALUE_ACCESSOR,
-			useExisting: forwardRef(() => DateRangePickerComponent),
+			useExisting: forwardRef(dateRangePickerComponentFn),
 			multi: true,
 		},
 	],

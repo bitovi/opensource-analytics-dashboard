@@ -30,21 +30,12 @@
 		<form onsubmit="return false">
 			<!-- auto complete -->
 			<app-autocomplete
-				[autocomplateOptions]="autocompleteOptions$ | async"
+				*ngIf="autocompleteOptions$ | async as autocompleteOptions"
+				(selectedOption)="onPackageNameSubmit()"
+				[autocomplateOptions]="autocompleteOptions"
 				[formControl]="addPackage"
 				[loadedEntities$]="packageNames.observable$"
 			></app-autocomplete>
-
-			<!-- add button -->
-			<button
-				mat-raised-button
-				type="submit"
-				color="primary"
-				[disabled]="!addPackage.value || addPackage.invalid"
-				(click)="onPackageNameSubmit()"
-			>
-				Add
-			</button>
 		</form>
 
 		<!-- list of selected libraries -->
