@@ -48,15 +48,17 @@ $dark-theme: mat.define-dark-theme(
 body {
   --text-color: #424242;
   --bg-color: white;
-  --bg-accent-color: #f2f2f2;
+  --bg-accent-color: #fafafa;
+  --container-color: rgba(0,0,0,0.2);
 }
 
 // Handle dark mode
 @media (prefers-color-scheme: dark) {
 	body {
-		--text-color: #f2f2f2;
+		--text-color: #fafafa;
     --bg-accent-color: #222222;
     --bg-color: black;
+    --container-color: rgba(255,255,255,0.2);
 	}
   // Redefine theme colors when in dark mode to use dark theme
 	@include mat.all-component-colors($dark-theme);
