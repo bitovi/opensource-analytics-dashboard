@@ -1,6 +1,6 @@
 <mat-form-field appearance="outline">
 	<mat-label>npm package name</mat-label>
-	<input matInput [formControl]="addOption" [matAutocomplete]="auto" (keyup.enter)="onChooseFirstOption()" />
+	<input matInput [formControl]="addOption" [matAutocomplete]="auto" (keyup.enter)="onEnterKey()" />
 	<mat-hint>Ex: 'canjs'</mat-hint>
 	<mat-error appErrorHandler [errors$]="addOption.errors| toObservable" [handleErrors]="packageErrorsHandler">
 	</mat-error>
