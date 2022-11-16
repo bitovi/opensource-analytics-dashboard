@@ -29,7 +29,10 @@ describe('ChartComponentComponent', () => {
 		component.chartData = {
 			rows: [],
 			columns: [],
-			options: [],
+			options: {
+				chart: {},
+				height: 5,
+			},
 		};
 		fixture.detectChanges();
 	});

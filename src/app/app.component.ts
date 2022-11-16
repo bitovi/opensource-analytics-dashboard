@@ -185,7 +185,41 @@ export class AppComponent implements OnDestroy {
 		// Populate chart
 		this.chartData$ = selectedApiDatas$.pipe(
 			withLatestFrom(selectedDates$),
-			map(([apiDatas, dateRange]) => this.getChartData(apiDatas, dateRange))
+			map(([apiDatas, dateRange]) => this.getChartData(apiDatas, dateRange)),
+			// Apply theming to chart
+			map((data) => ({
+				...data,
+				options: {
+					...data.options,
+					axes: {
+						all: {
+							style: {
+								label: {
+									fillColor: 'var(--text-color)',
+									opacity: 1,
+								},
+								text: {
+									fillColor: 'var(--text-color)',
+									opacity: 1,
+								},
+							},
+						},
+					},
+					chart: {
+						...data.options.chart,
+						style: {
+							background: {
+								fillColor: 'transparent',
+								fillOpacity: 1,
+							},
+							text: {
+								fillColor: 'var(--text-color)',
+								fillOpacity: 1,
+							},
+						},
+					},
+				},
+			}))
 		);
 	}
 

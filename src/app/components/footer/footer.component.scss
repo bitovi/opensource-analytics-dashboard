@@ -4,8 +4,8 @@
 	display: block;
 
 	a {
-		color: $blue;
-		fill: $blue;
+		color: var(--primary-color);
+		fill: var(--primary-color);
 		text-decoration: none;
 
 		span {
@@ -16,6 +16,6 @@
 		}
 	}
 
-	background: $footer-background-color;
+	background: var(--bg-accent-color);
 	margin-top: auto;
 }

@@ -1,0 +1,81 @@
+@use '@angular/material' as mat;
+
+// Usage:
+// define-palette(color, normal-shade, lighter-shade, darker-shade, text-shade)
+
+// ==[Light Theme]==
+$light-primary: mat.define-palette(mat.$blue-palette, 500);
+$light-accent: mat.define-palette(mat.$red-palette, 700);
+// The "warn" palette is optional and defaults to red if not specified.
+$light-warn: mat.define-palette(mat.$orange-palette);
+
+$light-theme: mat.define-light-theme(
+	(
+		color: (
+			primary: $light-primary,
+			accent: $light-accent,
+			warn: $light-warn,
+		),
+	)
+);
+
+// ==[Dark Theme]==
+$dark-primary: mat.define-palette(mat.$blue-palette, 200);
+$dark-accent: mat.define-palette(mat.$red-palette, 200, 100, 400);
+$dark-warn: mat.define-palette(mat.$orange-palette, 200, 100, 400);
+
+$dark-theme: mat.define-dark-theme(
+	(
+		color: (
+			primary: $dark-primary,
+			accent: $dark-accent,
+			warn: $dark-warn,
+		),
+	)
+);
+
+/// Handy mixin to call the various theme mixins we need for the base theme
+@mixin build-theme($theme) {
+	// Emit theme-dependent styles for common features used across multiple components.
+	@include mat.core-theme($theme);
+	@include mat.button-theme($theme);
+	@include mat.select-theme($theme);
+	@include mat.form-field-theme($theme);
+	@include mat.list-theme($theme);
+}
+
+// Include definitions for base theme and light mode colors
+
+@include build-theme($light-theme);
+body {
+	--text-color: #424242;
+	// Primary theme color
+	--primary-color: #{mat.get-color-from-palette($light-primary)};
+	// Page background
+	--bg-color: white;
+	// Accent background
+	--bg-accent-color: #f2f2f2;
+	// Card surface
+	--bg-surface-color: var(--bg-color);
+	// Card border color
+	--container-color: rgba(0, 0, 0, 0.2);
+}
+
+// Handle dark mode
+@media (prefers-color-scheme: dark) {
+	body {
+		--text-color: #fafafa;
+		// primary theme color
+		--primary-color: #{mat.get-color-from-palette($dark-primary)};
+		// Page background
+		--bg-color: #121212;
+		// Accent background
+		--bg-accent-color: rgba(255, 255, 255, 0.1);
+		// Card surface
+		--bg-surface-color: var(--bg-accent-color);
+		// Card border color
+		--container-color: transparent;
+	}
+	// Redefine theme colors when in dark mode to use dark theme
+	@include mat.all-component-colors($dark-theme);
+}
