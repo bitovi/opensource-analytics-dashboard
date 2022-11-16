@@ -22,12 +22,14 @@ $light-theme: mat.define-light-theme(
 // ==[Dark Theme]==
 $dark-primary: mat.define-palette(mat.$blue-palette, 200);
 $dark-accent: mat.define-palette(mat.$red-palette, 200, 100, 400);
+$dark-warn: mat.define-palette(mat.$orange-palette, 200, 100, 400);
 
 $dark-theme: mat.define-dark-theme(
 	(
 		color: (
 			primary: $dark-primary,
 			accent: $dark-accent,
+			warn: $dark-warn,
 		),
 	)
 );
