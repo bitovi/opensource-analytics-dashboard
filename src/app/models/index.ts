@@ -2,7 +2,7 @@ export * from './api-endpoints.model';
 export * from './chart-data.model';
 export * from './date-format.model';
 export * from './date-range.model';
-export * from './hardcoded-package-names';
+export * from './hardcoded-package-names.model';
 export * from './query-params.model';
 export * from './storage-id.model';
 export * from './github-repository-contributors.model';
