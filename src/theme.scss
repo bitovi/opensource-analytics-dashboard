@@ -47,32 +47,32 @@ $dark-theme: mat.define-dark-theme(
 @include build-theme($light-theme);
 body {
 	--text-color: #424242;
-  // Primary theme color
-  --primary-color: #{mat.get-color-from-palette($light-primary)};
-  // Page background
+	// Primary theme color
+	--primary-color: #{mat.get-color-from-palette($light-primary)};
+	// Page background
 	--bg-color: white;
-  // Accent background
+	// Accent background
 	--bg-accent-color: #f2f2f2;
-  // Card surface
+	// Card surface
 	--bg-surface-color: var(--bg-color);
-  // Card border color
-	--container-color: var(--bg-accent-color);
+	// Card border color
+	--container-color: rgba(0, 0, 0, 0.2);
 }
 
 // Handle dark mode
 @media (prefers-color-scheme: dark) {
 	body {
 		--text-color: #fafafa;
-    // primary theme color
-    --primary-color: #{mat.get-color-from-palette($dark-primary)};
-    // Page background
+		// primary theme color
+		--primary-color: #{mat.get-color-from-palette($dark-primary)};
+		// Page background
 		--bg-color: #121212;
-    // Accent background
+		// Accent background
 		--bg-accent-color: rgba(255, 255, 255, 0.1);
-    // Card surface
+		// Card surface
 		--bg-surface-color: var(--bg-accent-color);
-    // Card border color
-		--container-color: var(--bg-accent-color);
+		// Card border color
+		--container-color: transparent;
 	}
 	// Redefine theme colors when in dark mode to use dark theme
 	@include mat.all-component-colors($dark-theme);
