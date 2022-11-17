@@ -15,7 +15,7 @@ import { AutocompleteComponent, autocompleteComponentFn } from './autocomplete.c
 class MockMatLabelComponent {}
 
 @Directive({
-	selector: 'matInput',
+	selector: '[matInput]',
 })
 class MockMatInputDirective {
 	@Input()
@@ -68,9 +68,9 @@ describe('AutocompleteComponent', () => {
 				MockMatErrorComponent,
 				MockMatFormFieldComponent,
 				MockMatLabelComponent,
-				MockMatInputDirective,
 				MockMatOptionComponent,
 				MatAutocomplete, // Required for #auto="matAutocomplete" directive
+				MockMatInputDirective,
 			],
 			imports: [ReactiveFormsModule],
 			providers: [{ provide: ErrorHandlerService, useValue: errorHandlerServiceMock }],

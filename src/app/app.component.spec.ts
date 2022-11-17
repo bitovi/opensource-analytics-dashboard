@@ -15,11 +15,22 @@ class MockPackageListComponent {}
 })
 class MockDateRangePickerComponent {}
 
+@Component({
+	selector: 'app-date-range-dropdown',
+})
+class MockDateRangeDropdownComponent {}
+
 describe('AppComponent', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule],
-			declarations: [AppComponent, ToObservablePipe, MockPackageListComponent, MockDateRangePickerComponent],
+			declarations: [
+				AppComponent,
+				ToObservablePipe,
+				MockPackageListComponent,
+				MockDateRangePickerComponent,
+				MockDateRangeDropdownComponent,
+			],
 			providers: [
 				{
 					provide: MatSnackBar,

@@ -66,6 +66,10 @@ describe('ApiService', () => {
 		});
 
 		it('should return an empty array on failure', () => {
+			jest.spyOn(console, 'error').mockImplementationOnce(() => {
+				/** silence error */
+			});
+
 			service.getGithubPackageContributors('name').subscribe((resp) => {
 				expect(resp).toStrictEqual([]);
 			});
@@ -212,6 +216,10 @@ describe('ApiService', () => {
 		});
 
 		it('should return an empty array on failure', () => {
+			jest.spyOn(console, 'error').mockImplementationOnce(() => {
+				/** silence error */
+			});
+
 			const query = 'name';
 
 			service.getSuggestions(query).subscribe((resp) => {
