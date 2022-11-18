@@ -74,6 +74,10 @@ describe('DateService', () => {
 		});
 
 		it('should throw if `end` is before `start`', () => {
+			jest.spyOn(console, 'error').mockImplementationOnce(() => {
+				/** silence error */
+			});
+
 			const start = new Date(2011, 5 - 1, 14);
 			const end = new Date(1999, 5 - 1, 14);
 			expect(() => service.getDates([start, end])).toThrowError('Unexpected getDates end mismatch');
