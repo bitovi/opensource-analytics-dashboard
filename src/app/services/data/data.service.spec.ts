@@ -1,10 +1,11 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { format } from 'date-fns';
+import { StorageType } from '../storage';
 
 import { DataService } from './data.service';
 
-describe('NpmRegistryService', () => {
+describe('DataService', () => {
 	let service: DataService;
 
 	beforeEach(async () => {
@@ -35,6 +36,17 @@ describe('NpmRegistryService', () => {
 			const start = 'start';
 			const end = 'end';
 			expect(service.getQuerySlug(packageName, start, end)).toEqual(`${packageName}__${start}__${end}`);
+		});
+	});
+
+	describe('getCacheStorageType()', () => {
+		it('should return SERVICE_STORAGE if isToday returns true for endDate', () => {
+			jest.spyOn(service, 'isToday').mockReturnValueOnce(true);
+			expect(service.getCacheStorageType('fake-value')).toEqual(StorageType.SERVICE_STORAGE);
+		});
+		it('should return undefined if isToday returns false for endDate', () => {
+			jest.spyOn(service, 'isToday').mockReturnValueOnce(false);
+			expect(service.getCacheStorageType('fake-value')).toEqual(undefined);
 		});
 	});
 });
