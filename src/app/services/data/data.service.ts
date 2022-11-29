@@ -13,6 +13,12 @@ export class DataService {
 
 	constructor(private apiService: ApiService) {}
 
+	/**
+	 * Check if a date string matches today's date
+	 *
+	 * @param date Date string
+	 * @returns True if given date string matches todays date
+	 */
 	isToday(date: string): boolean {
 		return date === format(new Date(), 'yyyy-MM-dd');
 	}
@@ -25,6 +31,14 @@ export class DataService {
 		return undefined; // Use default
 	}
 
+	/**
+	 * Builds a query slug string from paramaters
+	 *
+	 * @param packageName Package name
+	 * @param start Start date
+	 * @param end End date
+	 * @returns Query slug containing package name and start and end dates
+	 */
 	getQuerySlug(packageName: string, start: string, end: string): string {
 		return `${packageName}__${start}__${end}`;
 	}
@@ -68,9 +82,10 @@ export class DataService {
 	}
 
 	/**
-	 * @Returns data about a github repository package
+	 * Make multiple API requests to load information about a github repository
 	 *
-	 * @repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @param repositoryName name of the repository: angular/angular-cli , vuejs/vuex
+	 * @returns data about a github repository package
 	 */
 	getGithubRepositoryData(repositoryName: string): Observable<GithubRepositoryData> {
 		// TODO implement caching
