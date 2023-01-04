@@ -43,6 +43,14 @@ export class DataService {
 		return `${packageName}__${start}__${end}`;
 	}
 
+	/**
+	 * Attempt to read cached data for package and date range from storage service
+	 *
+	 * @param packageName Package name
+	 * @param start Start date (yyyy-MM-dd)
+	 * @param end End date (yyyy-MM-dd)
+	 * @returns Cache object or null if not found or invalid
+	 */
 	getCache(packageName: string, start: string, end: string): unknown | null {
 		const cacheStorageType = this.getCacheStorageType(end);
 
