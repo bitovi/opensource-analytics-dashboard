@@ -67,6 +67,14 @@ export class DataService {
 		return null;
 	}
 
+	/**
+	 * Uses storageService to save registry data for a package over a given time range
+	 *
+	 * @param value Registry data for package
+	 * @param packageName Package name
+	 * @param start data range start date (yyyy-MM-dd)
+	 * @param end  data range end date (yyyy-MM-dd)
+	 */
 	setCache(value: RegistryData, packageName: string, start: string, end: string): void {
 		const cacheStorageType = this.getCacheStorageType(end);
 

@@ -1,6 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { format } from 'date-fns';
+import { RegistryData } from 'src/app/models';
 import { StorageService, StorageType } from '../storage';
 
 import { DataService } from './data.service';
@@ -76,6 +77,28 @@ describe('DataService', () => {
 				jest.spyOn(storageService, 'getItem').mockReturnValue(null);
 				expect(service.getCache('package', 'start', 'end')).toBeNull();
 			});
+		});
+	});
+
+	describe('setCache()', () => {
+		const testRegistryData: RegistryData = {
+			packageName: 'test-package',
+			range: [],
+			total: 3,
+		};
+		it('should get storage type using getCacheStorageType()', () => {
+			const getCacheStorageTypeSpy = jest.spyOn(service, 'getCacheStorageType').mockReturnValue(undefined);
+			service.setCache(testRegistryData, 'package', 'start', 'end');
+			expect(getCacheStorageTypeSpy).toHaveBeenCalledWith('end');
+		});
+		it('should store data using storageService.setItem()', () => {
+			const cacheKey = 'package__start__end';
+			jest.spyOn(service, 'getQuerySlug').mockReturnValue(cacheKey);
+			jest.spyOn(service, 'getCacheStorageType').mockReturnValue(StorageType.SERVICE_STORAGE);
+			const setItemSpy = jest.spyOn(storageService, 'setItem');
+
+			service.setCache(testRegistryData, 'package', 'start', 'end');
+			expect(setItemSpy).toHaveBeenCalledWith(cacheKey, testRegistryData, StorageType.SERVICE_STORAGE);
 		});
 	});
 });
