@@ -81,6 +81,15 @@ export class DataService {
 		this.storageService.setItem(this.getQuerySlug(packageName, start, end), value, cacheStorageType);
 	}
 
+	/**
+	 * Gets registry info for package over range from cache, if present,
+	 * else retrieves data via API calls and caches it before returning
+	 *
+	 * @param packageName Package name
+	 * @param start data range start date (yyyy-MM-dd)
+	 * @param end  data range end date (yyyy-MM-dd)
+	 * @returns Package registry data
+	 */
 	getRegistry(packageName: string, start: string, end: string): Observable<RegistryData> {
 		const cache = this.getCache(packageName, start, end);
 

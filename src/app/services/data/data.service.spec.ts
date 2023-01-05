@@ -126,7 +126,7 @@ describe('DataService', () => {
 				});
 			});
 		});
-		describe('when registry data is NOT cached', () => {
+		describe('when registry data is NOT cached, returned observable', () => {
 			it('should call getDownloadsPoint API service method', (done) => {
 				const getDownloadsPointSpy = jest.spyOn(apiService, 'getDownloadsPoint').mockReturnValueOnce(of(0));
 				jest.spyOn(apiService, 'getDownloadsRange').mockReturnValueOnce(of([]));
@@ -161,6 +161,23 @@ describe('DataService', () => {
 				jest.spyOn(service, 'getCache').mockReturnValueOnce(null);
 				service.getRegistry('package', 'start', 'end').subscribe(() => {
 					expect(setCacheSpy).toHaveBeenCalledWith(registryData, 'package', 'start', 'end');
+					done();
+				});
+			});
+			it('should return registry data from combined API calls', (done) => {
+				const downloadsPoint = 4;
+				const downloadsRange = [{ day: 'today', downloads: -4 }];
+				const registryData: RegistryData = {
+					packageName: 'package',
+					range: downloadsRange,
+					total: downloadsPoint,
+				};
+				jest.spyOn(apiService, 'getDownloadsPoint').mockReturnValueOnce(of(downloadsPoint));
+				jest.spyOn(apiService, 'getDownloadsRange').mockReturnValueOnce(of(downloadsRange));
+				jest.spyOn(service, 'setCache').mockImplementation(() => ({}));
+				jest.spyOn(service, 'getCache').mockReturnValueOnce(null);
+				service.getRegistry('package', 'start', 'end').subscribe((data) => {
+					expect(data).toMatchObject(registryData);
 					done();
 				});
 			});
