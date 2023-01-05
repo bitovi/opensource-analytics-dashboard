@@ -86,8 +86,8 @@ export class DataService {
 	 * else retrieves data via API calls and caches it before returning
 	 *
 	 * @param packageName Package name
-	 * @param start data range start date (yyyy-MM-dd)
-	 * @param end  data range end date (yyyy-MM-dd)
+	 * @param start Data range start date (yyyy-MM-dd)
+	 * @param end Data range end date (yyyy-MM-dd)
 	 * @returns Package registry data
 	 */
 	getRegistry(packageName: string, start: string, end: string): Observable<RegistryData> {
@@ -109,8 +109,8 @@ export class DataService {
 	/**
 	 * Make multiple API requests to load information about a github repository
 	 *
-	 * @param repositoryName name of the repository: angular/angular-cli , vuejs/vuex
-	 * @returns data about a github repository package
+	 * @param repositoryName Name of the repository: angular/angular-cli , vuejs/vuex
+	 * @returns Data about a github repository package
 	 */
 	getGithubRepositoryData(repositoryName: string): Observable<GithubRepositoryData> {
 		// TODO implement caching
