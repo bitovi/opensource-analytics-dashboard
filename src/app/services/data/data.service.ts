@@ -13,6 +13,12 @@ export class DataService {
 
 	constructor(private apiService: ApiService) {}
 
+	/**
+	 * Check if a date string matches today's date
+	 *
+	 * @param date Date string
+	 * @returns True if given date string matches todays date
+	 */
 	isToday(date: string): boolean {
 		return date === format(new Date(), 'yyyy-MM-dd');
 	}
@@ -25,10 +31,26 @@ export class DataService {
 		return undefined; // Use default
 	}
 
+	/**
+	 * Builds a query slug string from paramaters
+	 *
+	 * @param packageName Package name
+	 * @param start Start date
+	 * @param end End date
+	 * @returns Query slug containing package name and start and end dates
+	 */
 	getQuerySlug(packageName: string, start: string, end: string): string {
 		return `${packageName}__${start}__${end}`;
 	}
 
+	/**
+	 * Attempt to read cached data for package and date range from storage service
+	 *
+	 * @param packageName Package name
+	 * @param start Start date (yyyy-MM-dd)
+	 * @param end End date (yyyy-MM-dd)
+	 * @returns Cache object or null if not found or invalid
+	 */
 	getCache(packageName: string, start: string, end: string): unknown | null {
 		const cacheStorageType = this.getCacheStorageType(end);
 
@@ -45,12 +67,29 @@ export class DataService {
 		return null;
 	}
 
+	/**
+	 * Uses storageService to save registry data for a package over a given time range
+	 *
+	 * @param value Registry data for package
+	 * @param packageName Package name
+	 * @param start data range start date (yyyy-MM-dd)
+	 * @param end  data range end date (yyyy-MM-dd)
+	 */
 	setCache(value: RegistryData, packageName: string, start: string, end: string): void {
 		const cacheStorageType = this.getCacheStorageType(end);
 
 		this.storageService.setItem(this.getQuerySlug(packageName, start, end), value, cacheStorageType);
 	}
 
+	/**
+	 * Gets registry info for package over range from cache, if present,
+	 * else retrieves data via API calls and caches it before returning
+	 *
+	 * @param packageName Package name
+	 * @param start Data range start date (yyyy-MM-dd)
+	 * @param end Data range end date (yyyy-MM-dd)
+	 * @returns Package registry data
+	 */
 	getRegistry(packageName: string, start: string, end: string): Observable<RegistryData> {
 		const cache = this.getCache(packageName, start, end);
 
@@ -68,9 +107,10 @@ export class DataService {
 	}
 
 	/**
-	 * @Returns data about a github repository package
+	 * Make multiple API requests to load information about a github repository
 	 *
-	 * @repositoryName - name of the repository: angular/angular-cli , vuejs/vuex
+	 * @param repositoryName Name of the repository: angular/angular-cli , vuejs/vuex
+	 * @returns Data about a github repository package
 	 */
 	getGithubRepositoryData(repositoryName: string): Observable<GithubRepositoryData> {
 		// TODO implement caching
